@@ -1,0 +1,73 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+
+  [data-reviz-root][data-mode="dark"],
+  [data-reviz-scope][data-mode="dark"] {
+    color-scheme: dark;
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    @apply bg-canvas text-ink font-sans antialiased;
+    font-feature-settings: "ss01", "cv01", "tnum" 0;
+  }
+
+  ::selection {
+    background: rgb(var(--rz-accent) / 0.22);
+  }
+
+  /* Refined, minimal scrollbars that match the theme. */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(var(--rz-border-strong)) transparent;
+  }
+  *::-webkit-scrollbar {
+    width: 9px;
+    height: 9px;
+  }
+  *::-webkit-scrollbar-thumb {
+    background: rgb(var(--rz-border-strong));
+    border-radius: 9999px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+  }
+  *::-webkit-scrollbar-thumb:hover {
+    background: rgb(var(--rz-ink-faint));
+    background-clip: content-box;
+  }
+}
+
+@layer utilities {
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+  /* Subtle dotted grid background used by the editor canvas + hero. */
+  .reviz-dotgrid {
+    background-image: radial-gradient(rgb(var(--rz-border-strong) / 0.5) 1px, transparent 1px);
+    background-size: 22px 22px;
+  }
+  .reviz-gridlines {
+    background-image:
+      linear-gradient(to right, rgb(var(--rz-border) / 0.6) 1px, transparent 1px),
+      linear-gradient(to bottom, rgb(var(--rz-border) / 0.6) 1px, transparent 1px);
+    background-size: 44px 44px;
+  }
+  .text-balance {
+    text-wrap: balance;
+  }
+  .mask-fade-b {
+    -webkit-mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
+    mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
+  }
+}
