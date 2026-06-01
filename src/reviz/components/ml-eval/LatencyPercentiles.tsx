@@ -1,0 +1,493 @@
+"use client";
+
+import { scaleLinear, scaleLog } from "d3-scale";
+import { area as d3Area, curveBasis } from "d3-shape";
+import { motion } from "framer-motion";
+import { useMemo, useState } from "react";
+import {
+  Figure,
+  FloatingTooltip,
+  Legend,
+  ResponsiveSvg,
+  TooltipRow,
+  VerticalFade,
+  clamp,
+  formatCompact,
+  mix,
+  uid,
+  useInView,
+  usePalette,
+  usePrefersReducedMotion,
+  useReplay,
+  withAlpha,
+  type LegendItem,
+  type RevizMeta,
+} from "@/reviz";
+
+/* ------------------------------------------------------------------ */
+
+interface LatencyGroup {
+  name: string;
+  p50: number;
+  p90: number;
+  p95: number;
+  p99: number;
+}
+
+const PCTS = [
+  { key: "p50", label: "p50" },
+  { key: "p90", label: "p90" },
+  { key: "p95", label: "p95" },
+  { key: "p99", label: "p99" },
+] as const;
+
+type PctKey = (typeof PCTS)[number]["key"];
+
+export interface LatencyPercentilesProps {
+  groups?: LatencyGroup[];
+  title?: string;
+  caption?: string;
+  source?: string;
+  unit?: string;
+  logScale?: boolean;
+  color?: string;
+  duration?: number;
+}
+
+/* ------------------------------------------------------------------ */
+
+/**
+ * Synthesize a smooth, heavy-tailed density that honors the given percentiles.
+ * We sample many "requests" by interpolating between the percentile anchors with
+ * a fixed seed, so the violin shape is deterministic per group yet looks organic.
+ */
+function densityFor(g: LatencyGroup, domainMax: number, log: boolean): { x: number; w: number }[] {
+  // Anchor points: (cumulative probability, latency). Tail stretches past p99.
+  const anchors: [number, number][] = [
+    [0.0, Math.max(g.p50 * 0.18, domainMax * 0.002)],
+    [0.5, g.p50],
+    [0.9, g.p90],
+    [0.95, g.p95],
+    [0.99, g.p99],
+    [1.0, g.p99 * 1.32],
+  ];
+  const tx = (v: number) => (log ? Math.log10(Math.max(v, 1e-6)) : v);
+  const bins = 64;
+  const lo = tx(anchors[0][1]);
+  const hi = tx(anchors[anchors.length - 1][1]);
+  const span = Math.max(hi - lo, 1e-6);
+  const counts = new Array(bins).fill(0);
+  // Walk the CDF and deposit probability mass into bins; smoother than sampling.
+  const steps = 2000;
+  for (let s = 0; s <= steps; s++) {
+    const q = s / steps;
+    // find bracketing anchors by cumulative probability
+    let a = anchors[0];
+    let b = anchors[anchors.length - 1];
+    for (let i = 0; i < anchors.length - 1; i++) {
+      if (q >= anchors[i][0] && q <= anchors[i + 1][0]) {
+        a = anchors[i];
+        b = anchors[i + 1];
+        break;
+      }
+    }
+    const t = b[0] === a[0] ? 0 : (q - a[0]) / (b[0] - a[0]);
+    const lat = a[1] + (b[1] - a[1]) * t;
+    const pos = (tx(lat) - lo) / span;
+    const bin = clamp(Math.floor(pos * (bins - 1)), 0, bins - 1);
+    counts[bin] += 1;
+  }
+  // light smoothing
+  const smooth = counts.map((_, i) => {
+    const a = counts[i - 1] ?? counts[i];
+    const c = counts[i + 1] ?? counts[i];
+    return (a + counts[i] * 2 + c) / 4;
+  });
+  const maxC = Math.max(1, ...smooth);
+  return smooth.map((c, i) => ({
+    x: anchors[0][1] + (anchors[anchors.length - 1][1] - anchors[0][1]) * (i / (bins - 1)),
+    w: c / maxC,
+  }));
+}
+
+export default function LatencyPercentiles({
+  groups = [
+    { name: "Cold start", p50: 5000, p90: 9200, p95: 11800, p99: 18400 },
+    { name: "Warm", p50: 1000, p90: 1300, p95: 1500, p99: 3200 },
+  ],
+  title = "",
+  caption = "",
+  source = "",
+  unit = "ms",
+  logScale = false,
+  color = "",
+  duration = 1000,
+}: LatencyPercentilesProps) {
+  const p = usePalette();
+  const reduced = usePrefersReducedMotion();
+  const [ref, inView] = useInView<HTMLDivElement>();
+  const { token, replay } = useReplay();
+  const [hover, setHover] = useState<{ gi: number; pk: PctKey; x: number; y: number } | null>(null);
+
+  const accent = color || p.accent;
+  const safeGroups = groups.length ? groups : [];
+
+  const domainMax = useMemo(
+    () => Math.max(1, ...safeGroups.map((g) => g.p99 * 1.34)),
+    [safeGroups],
+  );
+  const domainMin = useMemo(() => {
+    if (!logScale) return 0;
+    const mins = safeGroups.map((g) => g.p50 * 0.16);
+    return Math.max(1, Math.min(...(mins.length ? mins : [1])));
+  }, [safeGroups, logScale]);
+
+  const fmt = (v: number) => `${formatCompact(v)}${unit ? ` ${unit}` : ""}`;
+  const fmtTick = (v: number) => formatCompact(v);
+
+  const gradId = useMemo(() => uid("latfade"), []);
+  const legendItems: LegendItem[] = PCTS.map((pc, i) => ({
+    label: pc.label,
+    color: i === 0 ? accent : mixTone(accent, p, i),
+    shape: i === 3 ? "dashed" : "line",
+  }));
+
+  return (
+    <Figure variant="plain" align="center" title={title} caption={caption} source={source}>
+      <div ref={ref} className="group/figure relative">
+        <ResponsiveSvg
+          aspect={16 / 9}
+          margin={{ top: 18, right: 30, bottom: 40, left: 108 }}
+        >
+          {({ inner, margin }) => {
+            const x = logScale
+              ? scaleLog().domain([Math.max(1, domainMin), domainMax]).range([0, inner.width]).clamp(true)
+              : scaleLinear().domain([0, domainMax]).range([0, inner.width]).nice();
+
+            const rowH = inner.height / Math.max(1, safeGroups.length);
+            const violinH = Math.min(rowH * 0.62, 96);
+
+            const xTicks = logScale
+              ? (x as ReturnType<typeof scaleLog>).ticks(5)
+              : (x as ReturnType<typeof scaleLinear>).ticks(6);
+
+            return (
+              <g transform={`translate(${margin.left}, ${margin.top})`}>
+                <defs>
+                  <VerticalFade id={gradId} color={accent} from={0.26} to={0.04} />
+                </defs>
+
+                {/* vertical gridlines */}
+                {xTicks.map((t, i) => (
+                  <line
+                    key={`grid-${i}`}
+                    x1={x(t)}
+                    x2={x(t)}
+                    y1={0}
+                    y2={inner.height}
+                    stroke={p.grid}
+                    strokeWidth={1}
+                    strokeDasharray="2 5"
+                    shapeRendering="crispEdges"
+                  />
+                ))}
+
+                {/* x ticks (latency) */}
+                <g transform={`translate(0, ${inner.height})`}>
+                  {xTicks.map((t, i) => (
+                    <text
+                      key={`xt-${i}`}
+                      x={x(t)}
+                      y={18}
+                      textAnchor="middle"
+                      fill={p.inkFaint}
+                      className="font-mono"
+                      style={{ fontSize: 10.5, letterSpacing: "0.04em" }}
+                    >
+                      {fmtTick(t)}
+                    </text>
+                  ))}
+                  <text
+                    x={inner.width}
+                    y={32}
+                    textAnchor="end"
+                    fill={p.inkFaint}
+                    className="font-mono uppercase"
+                    style={{ fontSize: 9, letterSpacing: "0.14em" }}
+                  >
+                    latency{unit ? ` (${unit})` : ""}
+                  </text>
+                </g>
+
+                {safeGroups.map((g, gi) => {
+                  const cy = rowH * gi + rowH / 2;
+                  const density = densityFor(g, domainMax, logScale);
+                  const visible = density.filter((d) => d.x >= (logScale ? domainMin : 0));
+
+                  const violin = d3Area<{ x: number; w: number }>()
+                    .x((d) => x(Math.max(d.x, logScale ? domainMin : 0)))
+                    .y0((d) => cy - (d.w * violinH) / 2)
+                    .y1((d) => cy + (d.w * violinH) / 2)
+                    .curve(curveBasis);
+
+                  const violinPath = violin(visible) ?? "";
+                  const drawDelay = gi * 0.12;
+
+                  return (
+                    <g key={`${g.name}-${gi}`}>
+                      {/* group label */}
+                      <text
+                        x={-margin.left + 4}
+                        y={cy - 6}
+                        fill={p.ink}
+                        className="font-mono uppercase"
+                        style={{ fontSize: 11, letterSpacing: "0.06em" }}
+                      >
+                        {g.name}
+                      </text>
+                      <text
+                        x={-margin.left + 4}
+                        y={cy + 11}
+                        fill={p.inkFaint}
+                        className="font-mono"
+                        style={{ fontSize: 9.5, letterSpacing: "0.02em" }}
+                      >
+                        p50 {fmtTick(g.p50)}{unit ? ` ${unit}` : ""}
+                      </text>
+
+                      {/* baseline of the row */}
+                      <line
+                        x1={0}
+                        x2={inner.width}
+                        y1={cy}
+                        y2={cy}
+                        stroke={p.border}
+                        strokeWidth={1}
+                        shapeRendering="crispEdges"
+                      />
+
+                      {/* density / violin */}
+                      <motion.path
+                        d={violinPath}
+                        fill={`url(#${gradId})`}
+                        stroke={withAlpha(accent, 0.45)}
+                        strokeWidth={1}
+                        initial={reduced ? false : { opacity: 0, scaleY: 0.2 }}
+                        animate={
+                          inView
+                            ? { opacity: 1, scaleY: 1 }
+                            : reduced
+                              ? { opacity: 1, scaleY: 1 }
+                              : { opacity: 0, scaleY: 0.2 }
+                        }
+                        transition={{
+                          duration: duration / 1000,
+                          delay: drawDelay,
+                          ease: [0.22, 1, 0.36, 1],
+                        }}
+                        style={{ transformBox: "fill-box", transformOrigin: "center" }}
+                        key={`violin-${token}-${gi}`}
+                      />
+
+                      {/* percentile markers */}
+                      {PCTS.map((pc, pi) => {
+                        const v = g[pc.key];
+                        if (logScale && v < domainMin) return null;
+                        const px = x(Math.max(v, logScale ? domainMin : 0));
+                        const isP50 = pc.key === "p50";
+                        const isTail = pc.key === "p99";
+                        const tone = isP50 ? accent : mixTone(accent, p, pi);
+                        const half = violinH / 2 + 9;
+                        const active = hover?.gi === gi && hover?.pk === pc.key;
+                        const labelAbove = pi % 2 === 0;
+                        const markDelay = drawDelay + duration / 1000 + pi * 0.06;
+
+                        return (
+                          <motion.g
+                            key={pc.key}
+                            initial={reduced ? false : { opacity: 0 }}
+                            animate={inView || reduced ? { opacity: 1 } : { opacity: 0 }}
+                            transition={{ duration: 0.3, delay: markDelay }}
+                            style={{ cursor: "pointer" }}
+                            onMouseMove={(e) => {
+                              const r = (
+                                e.currentTarget.ownerSVGElement as SVGSVGElement
+                              ).getBoundingClientRect();
+                              setHover({
+                                gi,
+                                pk: pc.key,
+                                x: e.clientX - r.left,
+                                y: e.clientY - r.top,
+                              });
+                            }}
+                            onMouseLeave={() => setHover(null)}
+                          >
+                            {/* wide invisible hit target */}
+                            <rect
+                              x={px - 9}
+                              y={cy - half}
+                              width={18}
+                              height={half * 2}
+                              fill="transparent"
+                            />
+                            <line
+                              x1={px}
+                              x2={px}
+                              y1={cy - half}
+                              y2={cy + half}
+                              stroke={tone}
+                              strokeWidth={active ? 2.4 : isP50 ? 2 : 1.4}
+                              strokeDasharray={isTail ? "3 3" : undefined}
+                            />
+                            <circle
+                              cx={px}
+                              cy={cy}
+                              r={isP50 ? 3.4 : 2.6}
+                              fill={tone}
+                              stroke={p.surface}
+                              strokeWidth={1}
+                            />
+                            <text
+                              x={px}
+                              y={labelAbove ? cy - half - 5 : cy + half + 13}
+                              textAnchor="middle"
+                              fill={active ? p.ink : p.inkMuted}
+                              className="font-mono"
+                              style={{ fontSize: 9.5, letterSpacing: "0.04em" }}
+                            >
+                              {pc.label}
+                            </text>
+                          </motion.g>
+                        );
+                      })}
+                    </g>
+                  );
+                })}
+              </g>
+            );
+          }}
+        </ResponsiveSvg>
+
+        <FloatingTooltip x={hover?.x ?? 0} y={hover?.y ?? 0} visible={hover != null}>
+          {hover != null && safeGroups[hover.gi] && (
+            <>
+              <div className="mb-1 font-mono text-[10px] uppercase tracking-wide opacity-70">
+                {safeGroups[hover.gi].name} · {hover.pk}
+              </div>
+              <TooltipRow label="latency" value={fmt(safeGroups[hover.gi][hover.pk])} />
+              <TooltipRow
+                label="vs p50"
+                value={`${(safeGroups[hover.gi][hover.pk] / Math.max(1, safeGroups[hover.gi].p50)).toFixed(2)}×`}
+              />
+            </>
+          )}
+        </FloatingTooltip>
+
+        <div className="mt-3 flex items-center justify-between gap-4">
+          <Legend items={legendItems} align="left" />
+          <button
+            type="button"
+            onClick={replay}
+            className="font-mono text-[10px] uppercase tracking-label text-ink-faint opacity-0 transition-opacity hover:text-ink group-hover/figure:opacity-100"
+          >
+            replay
+          </button>
+        </div>
+      </div>
+    </Figure>
+  );
+}
+
+/** Blend accent toward the warn/bad tones as the percentile climbs into the tail. */
+function mixTone(accent: string, p: ReturnType<typeof usePalette>, pi: number): string {
+  if (pi <= 0) return accent;
+  if (pi === 1) return p.warn;
+  if (pi === 2) return mix(p.warn, p.bad, 0.5);
+  return p.bad;
+}
+
+/* ------------------------------------------------------------------ */
+
+export const meta: RevizMeta = {
+  id: "latency-percentiles",
+  name: "Latency Percentiles",
+  category: "ml-eval",
+  description:
+    "Latency distributions drawn as faint violins with p50/p90/p95/p99 marked as labeled ticks on a shared scale — see the long tail at a glance.",
+  tags: ["latency", "percentiles", "distribution", "tail", "p99", "violin", "performance"],
+  badges: ["animated", "interactive", "exportable", "themed", "responsive"],
+  exportName: "LatencyPercentiles",
+  sourcePath: "ml-eval/LatencyPercentiles",
+  aspect: 16 / 9,
+  controls: [
+    {
+      key: "groups",
+      label: "Groups",
+      type: "json",
+      group: "Data",
+      help: "Each group needs name, p50, p90, p95, p99.",
+      default: [
+        { name: "Cold start", p50: 5000, p90: 9200, p95: 11800, p99: 18400 },
+        { name: "Warm", p50: 1000, p90: 1300, p95: 1500, p99: 3200 },
+      ],
+    },
+    { key: "title", label: "Title", type: "text", group: "Labels", default: "" },
+    { key: "caption", label: "Caption", type: "text", group: "Labels", default: "" },
+    { key: "source", label: "Source", type: "text", group: "Labels", default: "" },
+    { key: "unit", label: "Unit", type: "text", group: "Labels", default: "ms" },
+    { key: "logScale", label: "Log scale", type: "boolean", group: "Layout", default: false },
+    { key: "color", label: "Accent color", type: "color", group: "Style", default: "" },
+    {
+      key: "duration",
+      label: "Animation (ms)",
+      type: "number",
+      group: "Animation",
+      default: 1000,
+      min: 0,
+      max: 2500,
+      step: 50,
+      unit: "ms",
+    },
+  ],
+  presets: [
+    {
+      id: "cold-vs-warm",
+      name: "Cold vs warm",
+      props: {
+        title: "Inference latency — cold start vs warm",
+        caption: "Cold starts pay a model-load tax; warm requests are p99-stable.",
+        groups: [
+          { name: "Cold start", p50: 5000, p90: 9200, p95: 11800, p99: 18400 },
+          { name: "Warm", p50: 1000, p90: 1300, p95: 1500, p99: 3200 },
+        ],
+      },
+    },
+    {
+      id: "log-tail",
+      name: "Log scale tail",
+      props: {
+        title: "Serving latency by tier (log scale)",
+        logScale: true,
+        unit: "ms",
+        groups: [
+          { name: "Edge cache", p50: 12, p90: 28, p95: 44, p99: 180 },
+          { name: "Region", p50: 80, p90: 160, p95: 240, p99: 920 },
+          { name: "Cold GPU", p50: 5000, p90: 9200, p95: 11800, p99: 18400 },
+        ],
+      },
+    },
+    {
+      id: "endpoints",
+      name: "API endpoints",
+      props: {
+        title: "Endpoint latency percentiles",
+        unit: "ms",
+        groups: [
+          { name: "/embed", p50: 42, p90: 88, p95: 120, p99: 310 },
+          { name: "/chat", p50: 680, p90: 1400, p95: 1900, p99: 4200 },
+          { name: "/rerank", p50: 120, p90: 240, p95: 330, p99: 880 },
+        ],
+      },
+    },
+  ],
+};
