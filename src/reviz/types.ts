@@ -150,6 +150,14 @@ export interface SelectControl extends ControlBase {
   options: { value: string; label: string }[];
 }
 
+/** A lucide icon name, edited via a searchable icon-grid dropdown. */
+export interface IconControl extends ControlBase {
+  type: "icon";
+  default: string;
+  /** Optional curated subset to choose from (lucide names). Defaults to a broad set. */
+  choices?: string[];
+}
+
 export interface ColorControl extends ControlBase {
   type: "color";
   default: string;
@@ -196,6 +204,7 @@ export type Control =
   | TextareaControl
   | BooleanControl
   | SelectControl
+  | IconControl
   | ColorControl
   | ColorArrayControl
   | CategoricalControl
