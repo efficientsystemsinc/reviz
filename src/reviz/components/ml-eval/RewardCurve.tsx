@@ -249,7 +249,7 @@ export default function RewardCurve({
 
   const legendItems: LegendItem[] = [
     { label: yLabel || "Total reward", color: totalColor, shape: "line" },
-    ...(showRaw ? [{ label: "raw", color: withAlpha(totalColor, 0.45), shape: "line" as const }] : []),
+    ...(showRaw ? [{ label: "raw", color: withAlpha(totalColor, 0.5), shape: "line" as const }] : []),
     ...(showBreakdown ? comps.map((c) => ({ label: c.name, color: c.color, shape: "square" as const })) : []),
   ];
 
@@ -319,8 +319,8 @@ export default function RewardCurve({
                       key={`cf-${i}`}
                       id={`${baseId}-stack-${i}`}
                       color={c.color}
-                      from={0.42}
-                      to={0.2}
+                      from={0.24}
+                      to={0.1}
                     />
                   ))}
                   <VerticalFade id={`${baseId}-band`} color={totalColor} from={0.16} to={0.03} />
@@ -362,8 +362,8 @@ export default function RewardCurve({
                           key={`stack-${comps[i].name}`}
                           d={stackArea(segs) ?? ""}
                           fill={`url(#${baseId}-stack-${i})`}
-                          stroke={withAlpha(comps[i].color, 0.8)}
-                          strokeWidth={1.25}
+                          stroke={withAlpha(comps[i].color, 0.55)}
+                          strokeWidth={1}
                           strokeLinejoin="round"
                         />
                       );
@@ -389,8 +389,8 @@ export default function RewardCurve({
                     key={`raw-${token}`}
                     d={lineGen(total.raw) ?? undefined}
                     fill="none"
-                    stroke={withAlpha(totalColor, 0.22)}
-                    strokeWidth={0.85}
+                    stroke={withAlpha(totalColor, 0.5)}
+                    strokeWidth={1.15}
                     strokeLinejoin="round"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: inView ? 1 : 0 }}

@@ -121,8 +121,9 @@ export default function SlopeChart({
             // collision-free y for each right label by greedily pushing labels
             // apart from top to bottom while keeping them near their endpoint.
             // The gap must clear the full value+delta block height (value at
-            // labelY, delta at labelY + 13) plus breathing room.
-            const RIGHT_LABEL_GAP = 34;
+            // labelY, delta at labelY + 13) plus generous breathing room so a
+            // tight cluster of close endpoints reads as cleanly separated rows.
+            const RIGHT_LABEL_GAP = 44;
             const rightLabelY = (() => {
               const order = rows
                 .map((d, i) => ({ i, yA: y(d.after) }))

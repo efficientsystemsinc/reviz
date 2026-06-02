@@ -228,22 +228,24 @@ export default function LogScaleBars({
                     {(() => {
                       const label = `${baselineLabel} · ${fmtValue(baseline, unit)}`;
                       // Estimate label width (mono ~5.7px/char at 9.5px incl. tracking).
-                      const labelW = label.length * 5.7 + 8;
-                      const labelY = baseY - 6;
+                      const labelW = label.length * 5.7 + 10;
+                      // Sit the label clearly ABOVE the dashed line so it never
+                      // crosses it; opaque plate guards against any bars behind.
+                      const labelY = baseY - 13;
                       return (
                         <>
-                          {/* canvas plate so the label reads over any crossing bars */}
+                          {/* opaque canvas plate so the label never reads through
+                              the dashed line or any crossing bars */}
                           <rect
                             x={inner.width - labelW}
-                            y={labelY - 9}
+                            y={labelY - 10}
                             width={labelW}
-                            height={13}
+                            height={15}
                             rx={2}
                             fill={p.canvas}
-                            opacity={0.92}
                           />
                           <text
-                            x={inner.width}
+                            x={inner.width - 4}
                             y={labelY}
                             textAnchor="end"
                             fill={p.accent}

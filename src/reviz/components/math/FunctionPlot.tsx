@@ -402,12 +402,14 @@ export default function FunctionPlot({
                   )}
                 </AnimatePresence>
 
-                {/* Axis labels. */}
+                {/* Axis labels — conventional centered/outside positions:
+                    x-label centered under the plot in the bottom margin,
+                    y-label rotated and centered in the left gutter. */}
                 {xLabel && (
                   <text
-                    x={inner.width}
-                    y={(yHasZero ? originY : inner.height) - 7}
-                    textAnchor="end"
+                    x={inner.width / 2}
+                    y={inner.height + margin.bottom - 6}
+                    textAnchor="middle"
                     fill={p.inkMuted}
                     style={{
                       fontFamily: "var(--font-mono)",
@@ -421,7 +423,7 @@ export default function FunctionPlot({
                 )}
                 {yLabel && (
                   <text
-                    transform={`translate(${-38}, ${inner.height / 2}) rotate(-90)`}
+                    transform={`translate(${-margin.left + 12}, ${inner.height / 2}) rotate(-90)`}
                     textAnchor="middle"
                     fill={p.inkMuted}
                     style={{

@@ -180,14 +180,14 @@ export default function FrameStrip({
             {/* Top overlay: frame index + timecode */}
             <div className="pointer-events-none absolute inset-x-0 top-0 flex items-center justify-between p-3">
               <span
-                className="rounded-md px-2 py-1 font-mono text-[10px] uppercase tracking-label backdrop-blur-sm"
-                style={{ background: withAlpha(p.ink, 0.62), color: p.canvas }}
+                className="rounded-md px-2 py-1 font-mono text-[11px] font-medium uppercase tracking-label"
+                style={{ background: p.ink, color: p.canvas }}
               >
                 Frame {String(active + 1).padStart(2, "0")} / {String(n).padStart(2, "0")}
               </span>
               <span
-                className="rounded-md px-2 py-1 font-mono text-[10px] tabular-nums backdrop-blur-sm"
-                style={{ background: withAlpha(p.ink, 0.62), color: p.canvas }}
+                className="rounded-md px-2 py-1 font-mono text-[11px] font-medium tabular-nums"
+                style={{ background: p.ink, color: p.canvas }}
               >
                 {hasTime ? `${fmtTime(heroTime)}` : `#${active + 1}`}
               </span>

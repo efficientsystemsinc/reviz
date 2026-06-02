@@ -246,13 +246,14 @@ export default function RadialTree({
   return (
     <Figure variant="plain" align="center" title={title} caption={caption} source={source}>
       <div ref={ref} className="relative">
-        <ResponsiveSvg aspect={1} margin={{ top: 16, right: 16, bottom: 16, left: 16 }}>
+        <ResponsiveSvg aspect={1} margin={{ top: 18, right: 30, bottom: 18, left: 30 }}>
           {({ inner, margin }) => {
             const cx = inner.width / 2;
             const cy = inner.height / 2;
 
-            // Leave a ring of headroom for leaf labels around the rim.
-            const labelPad = clamp(Math.min(inner.width, inner.height) * 0.14, 44, 96);
+            // Leave a ring of headroom for the horizontal rim labels, which extend
+            // outward from each leaf — wider than the old rotated text needed.
+            const labelPad = clamp(Math.min(inner.width, inner.height) * 0.18, 56, 112);
             const maxR = Math.max(10, Math.min(inner.width, inner.height) / 2 - labelPad);
             const radiusOf = (depth: number) => (maxDepth > 0 ? (depth / maxDepth) * maxR : 0);
 
@@ -350,12 +351,13 @@ export default function RadialTree({
                         : withAlpha(col, 0.14);
                     const nodeStroke = isRoot ? fill : col;
 
-                    // Rim labels for leaves; rotate to follow the radial angle and
-                    // flip on the left half so text stays upright.
+                    // Rim labels — kept horizontal (not radially rotated) so the
+                    // perimeter text stays easy to read. They anchor outward from
+                    // the node along the radial direction and sit on an opaque
+                    // canvas plate so links/circles never show through the glyphs.
                     const labelR = d.radius + r + 7;
                     const lp = polarToCartesian(cx, cy, labelR, d.angle);
                     const onLeft = d.angle > 180;
-                    const rot = d.angle - 90 + (onLeft ? 180 : 0);
                     const anchor = onLeft ? "end" : "start";
 
                     return (
@@ -427,48 +429,80 @@ export default function RadialTree({
                           </text>
                         )}
 
-                        {/* leaf rim labels — surface halo keeps them legible over edges */}
-                        {d.leaf && (
-                          <text
-                            transform={`translate(${lp.x},${lp.y}) rotate(${rot})`}
-                            textAnchor={anchor}
-                            dy="0.32em"
-                            fill={active ? col : p.ink}
-                            stroke={p.surface}
-                            strokeWidth={2.5}
-                            className="font-mono"
-                            style={{
-                              fontSize: 11,
-                              fontWeight: active ? 600 : 500,
-                              paintOrder: "stroke",
-                              strokeLinejoin: "round",
-                            }}
-                          >
-                            {truncate(d.node.name, 16)}
-                          </text>
-                        )}
+                        {/* leaf rim labels — horizontal, on an opaque canvas plate
+                            so edges and circles never bleed through the glyphs */}
+                        {d.leaf &&
+                          (() => {
+                            const txt = truncate(d.node.name, 16);
+                            const fs = 11.5;
+                            const w = txt.length * fs * 0.62 + 8;
+                            const h = fs + 6;
+                            const x0 = onLeft ? lp.x - w : lp.x;
+                            return (
+                              <>
+                                <rect
+                                  x={x0}
+                                  y={lp.y - h / 2}
+                                  width={w}
+                                  height={h}
+                                  rx={3}
+                                  fill={p.canvas}
+                                />
+                                <text
+                                  x={lp.x}
+                                  y={lp.y}
+                                  textAnchor={anchor}
+                                  dy="0.32em"
+                                  fill={active ? col : p.ink}
+                                  className="font-mono"
+                                  style={{
+                                    fontSize: fs,
+                                    fontWeight: active ? 600 : 500,
+                                  }}
+                                >
+                                  {txt}
+                                </text>
+                              </>
+                            );
+                          })()}
 
-                        {/* internal (non-root) node labels, set just outside */}
-                        {!d.leaf && !isRoot && (
-                          <text
-                            transform={`translate(${lp.x},${lp.y}) rotate(${rot})`}
-                            textAnchor={anchor}
-                            dy="0.32em"
-                            fill={active ? col : p.ink}
-                            stroke={p.surface}
-                            strokeWidth={3}
-                            className="font-mono uppercase tracking-label"
-                            style={{
-                              fontSize: 10,
-                              fontWeight: 600,
-                              letterSpacing: "0.04em",
-                              paintOrder: "stroke",
-                              strokeLinejoin: "round",
-                            }}
-                          >
-                            {truncate(d.node.name, 14)}
-                          </text>
-                        )}
+                        {/* internal (non-root) node labels — horizontal, on a plate */}
+                        {!d.leaf &&
+                          !isRoot &&
+                          (() => {
+                            const txt = truncate(d.node.name, 14);
+                            const fs = 11;
+                            const w = txt.length * fs * 0.7 + 8;
+                            const h = fs + 6;
+                            const x0 = onLeft ? lp.x - w : lp.x;
+                            return (
+                              <>
+                                <rect
+                                  x={x0}
+                                  y={lp.y - h / 2}
+                                  width={w}
+                                  height={h}
+                                  rx={3}
+                                  fill={p.canvas}
+                                />
+                                <text
+                                  x={lp.x}
+                                  y={lp.y}
+                                  textAnchor={anchor}
+                                  dy="0.32em"
+                                  fill={active ? col : p.ink}
+                                  className="font-mono uppercase tracking-label"
+                                  style={{
+                                    fontSize: fs,
+                                    fontWeight: 600,
+                                    letterSpacing: "0.04em",
+                                  }}
+                                >
+                                  {txt}
+                                </text>
+                              </>
+                            );
+                          })()}
                       </motion.g>
                     );
                   })}

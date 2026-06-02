@@ -318,13 +318,13 @@ export default function MediaCarousel({
                   type="button"
                   onClick={() => select(i, idx)}
                   className={cn(
-                    "inline-flex items-center gap-1.5 font-mono text-[12px] uppercase tracking-label outline-none transition-colors",
+                    "inline-flex items-center gap-1.5 font-mono text-[12.5px] uppercase tracking-label outline-none transition-colors",
                     isActive ? "text-ink" : "text-ink-muted hover:text-ink",
                   )}
                 >
                   <span
                     aria-hidden
-                    className="h-1.5 w-1.5 rounded-full transition-colors"
+                    className="h-2 w-2 rounded-full transition-colors"
                     style={{
                       backgroundColor: isActive
                         ? p.series[i % p.series.length]
@@ -456,15 +456,15 @@ function SyntheticFrame({
         <path
           d={path}
           fill="none"
-          stroke={withAlpha(accent, 0.55)}
-          strokeWidth={0.7}
+          stroke={accent}
+          strokeWidth={1.1}
           strokeLinecap="round"
+          strokeLinejoin="round"
           strokeDasharray="2.4 2"
         />
         {pts.map((d, i) => (
           <g key={i}>
-            <circle cx={d.x} cy={d.y} r={2.4} fill={withAlpha(accent, 0.14)} />
-            <circle cx={d.x} cy={d.y} r={1} fill={accent} />
+            <circle cx={d.x} cy={d.y} r={1.5} fill={accent} stroke={p.canvas} strokeWidth={0.4} />
           </g>
         ))}
         <rect

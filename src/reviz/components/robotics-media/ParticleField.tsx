@@ -290,10 +290,11 @@ export default function ParticleField({
                   const labelReveal = clamp((reveal - 0.55) / 0.4, 0, 1);
                   const active = hover === -1 - i;
 
-                  // Background plate so the callout reads against the busy field.
-                  const plateW = l.text.length * 7.4 + 12;
-                  const plateH = 18;
-                  const plateX = onLeft ? textX - plateW + 6 : textX - 6;
+                  // Opaque background plate so the callout reads cleanly against
+                  // the busy particle field (translucent lets dots bleed through).
+                  const plateW = l.text.length * 7.4 + 16;
+                  const plateH = 20;
+                  const plateX = onLeft ? textX - plateW + 8 : textX - 8;
 
                   return (
                     <motion.g
@@ -329,7 +330,9 @@ export default function ParticleField({
                         width={plateW}
                         height={plateH}
                         rx={3}
-                        fill={withAlpha(p.canvas, 0.82)}
+                        fill={p.canvas}
+                        stroke={withAlpha(p.inkFaint, 0.5)}
+                        strokeWidth={0.75}
                       />
                       <text
                         x={textX}

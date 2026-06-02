@@ -496,7 +496,7 @@ export const meta: RevizMeta = {
         a: 3,
         b: 2,
         title: "Lissajous curve",
-        caption: "x = sin(3t + π⁄2), y = sin(2t) — a 3:2 frequency ratio.",
+        caption: "x = sin(3t + π/2), y = sin(2t) — a 3:2 frequency ratio.",
         loop: true,
         duration: 2600,
       },

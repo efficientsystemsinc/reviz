@@ -151,7 +151,11 @@ export default function SwimlaneDiagram({
 
             // Box footprint inside each (lane, column) cell. Boxes nearly fill
             // their column (small gap) so step labels fit without truncation.
-            const boxW = Math.max(76, Math.min(colW - 6, 176));
+            // The minimum is generous enough to hold typical step labels
+            // ("Verify token", "Stream back") and their mono detail lines;
+            // since adjacent columns rarely share a lane, a touch of overflow
+            // into empty neighbour cells is harmless.
+            const boxW = Math.max(118, Math.min(colW - 6, 188));
             const boxH = Math.max(38, Math.min(laneH - 18, 58));
 
             const laneY = (li: number) => li * laneH;
@@ -165,10 +169,16 @@ export default function SwimlaneDiagram({
             const hw = boxW / 2;
             const hh = boxH / 2;
 
-            // Character budgets so labels stay inside the box (left pad 11 + right pad ~3).
-            const textW = Math.max(0, boxW - 14);
-            const labelMax = Math.max(4, Math.floor(textW / 5.2)); // font-sans 10.5
-            const detailMax = Math.max(4, Math.floor(textW / 4.4)); // font-mono 8
+            // Character budgets so labels stay inside the box (left pad 11 + right pad 9).
+            // The title shares its row with the order chip (top-right, ~22px), so its
+            // budget reserves that zone; the detail row sits below the chip and may
+            // use the full width.
+            const padL = 11;
+            const padR = 9;
+            const titleW = Math.max(0, boxW - padL - padR - 22);
+            const detailW = Math.max(0, boxW - padL - padR);
+            const labelMax = Math.max(4, Math.floor(titleW / 5.6)); // font-sans 10.5
+            const detailMax = Math.max(4, Math.floor(detailW / 4.7)); // font-mono 8
 
             return (
               <g transform={`translate(${margin.left},${margin.top})`}>

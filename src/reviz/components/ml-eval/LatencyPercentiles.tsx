@@ -188,6 +188,40 @@ export default function LatencyPercentiles({
                   // Bottom edge of this row's band, where its own tick labels sit.
                   const axisY = cy + violinH / 2 + 22;
 
+                  // Layout pass for the p50/p90/p95/p99 callouts. Each label is
+                  // tied to its tick by a short leader; we alternate above/below
+                  // and push crowded labels into stacked lanes so adjacent boxes
+                  // never touch and the label-to-line association stays clear.
+                  const half = violinH / 2 + 9;
+                  const lane = 14; // vertical spacing between stacked lanes
+                  const labelLayout = PCTS.map((pc, pi) => {
+                    const v = g[pc.key];
+                    const hidden = logScale && v < rowMin;
+                    const px = x(Math.max(v, rowMin));
+                    const above = pi % 2 === 0;
+                    const halfW = pc.label.length * 3 + 3;
+                    return { pi, pc, v, hidden, px, above, halfW, tier: 0 };
+                  });
+                  // Within each side, bump a label up a tier whenever its box
+                  // would overlap an already-placed label on the same side.
+                  for (const side of [true, false]) {
+                    const placed: { px: number; halfW: number; tier: number }[] = [];
+                    for (const L of labelLayout) {
+                      if (L.hidden || L.above !== side) continue;
+                      let tier = 0;
+                      // bump until this box clears every same-tier neighbour
+                      while (
+                        placed.some(
+                          (q) => q.tier === tier && Math.abs(q.px - L.px) < q.halfW + L.halfW + 4,
+                        )
+                      ) {
+                        tier += 1;
+                      }
+                      L.tier = tier;
+                      placed.push({ px: L.px, halfW: L.halfW, tier });
+                    }
+                  }
+
                   return (
                     <g key={`${g.name}-${gi}`}>
                       {/* per-row vertical gridlines (this row's own scale) */}
@@ -287,22 +321,20 @@ export default function LatencyPercentiles({
                       />
 
                       {/* percentile markers */}
-                      {PCTS.map((pc, pi) => {
-                        const v = g[pc.key];
-                        if (logScale && v < rowMin) return null;
-                        const px = x(Math.max(v, rowMin));
-                        // If a neighbouring percentile sits within a label-width,
-                        // nudge this label horizontally so the two don't collide.
-                        const prevPx = pi > 0 ? x(Math.max(g[PCTS[pi - 1].key], rowMin)) : -Infinity;
-                        const tooClose = Math.abs(px - prevPx) < 22;
-                        const labelDx = tooClose ? (pi % 2 === 0 ? -12 : 12) : 0;
+                      {labelLayout.map(({ pi, pc, px, above, halfW, tier }) => {
+                        if (logScale && g[pc.key] < rowMin) return null;
                         const isP50 = pc.key === "p50";
                         const isTail = pc.key === "p99";
                         const tone = isP50 ? accent : mixTone(accent, p, pi);
-                        const half = violinH / 2 + 9;
                         const active = hover?.gi === gi && hover?.pk === pc.key;
-                        const labelAbove = pi % 2 === 0;
                         const markDelay = drawDelay + duration / 1000 + pi * 0.06;
+                        // Tick endpoint nearest the label, and the label baseline,
+                        // pushed out by its lane so stacked boxes never touch.
+                        const tickEnd = above ? cy - half : cy + half;
+                        const labelY = above
+                          ? cy - half - 6 - tier * lane
+                          : cy + half + 10 + tier * lane;
+                        const plateY = labelY - 8;
 
                         return (
                           <motion.g
@@ -349,21 +381,33 @@ export default function LatencyPercentiles({
                               stroke={p.surface}
                               strokeWidth={1}
                             />
-                            {/* background plate so the label stays legible over
-                                gridlines and the row's own x-axis tick labels */}
+                            {/* leader from the tick to its stacked label, so the
+                                label-to-line association is never ambiguous */}
+                            {tier > 0 && (
+                              <line
+                                x1={px}
+                                x2={px}
+                                y1={tickEnd}
+                                y2={above ? labelY + 3 : labelY - 9}
+                                stroke={withAlpha(tone, 0.55)}
+                                strokeWidth={1}
+                              />
+                            )}
+                            {/* opaque background plate so the label stays legible
+                                over gridlines and the row's x-axis tick labels */}
                             <rect
-                              x={px + labelDx - pc.label.length * 3 - 2}
-                              y={(labelAbove ? cy - half - 5 : cy + half - 4) - 8}
-                              width={pc.label.length * 6 + 4}
-                              height={12}
-                              fill={p.surface}
+                              x={px - halfW - 2}
+                              y={plateY}
+                              width={halfW * 2 + 4}
+                              height={13}
+                              fill={p.canvas}
                               rx={2}
                             />
                             <text
-                              x={px + labelDx}
-                              y={labelAbove ? cy - half - 5 : cy + half - 4}
+                              x={px}
+                              y={labelY}
                               textAnchor="middle"
-                              fill={active ? p.ink : p.inkMuted}
+                              fill={active ? p.ink : tone}
                               className="font-mono"
                               style={{ fontSize: 9.5, letterSpacing: "0.04em" }}
                             >

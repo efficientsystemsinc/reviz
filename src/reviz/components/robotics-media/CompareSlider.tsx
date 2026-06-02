@@ -147,11 +147,14 @@ export default function CompareSlider({
     replay();
   }, [replay]);
 
-  // Two procedural placeholder palettes — synthetic (cool) vs. real (accent).
-  const synthFrom = useMemo(() => mix(p.surfaceAlt, p.accent, 0.18), [p]);
-  const synthTo = useMemo(() => mix(p.canvas, p.accent, 0.06), [p]);
-  const realFrom = useMemo(() => mix(p.surface, p.series[3] || p.ink, 0.1), [p]);
-  const realTo = useMemo(() => mix(p.surfaceAlt, p.ink, 0.16), [p]);
+  // Two procedural placeholder palettes — synthetic (warm accent) vs. real
+  // (cool neutral). Pushed to clearly distinct tones so the two sides read as
+  // different renders rather than near-identical washes.
+  const synthFrom = useMemo(() => mix(p.surfaceAlt, p.accent, 0.4), [p]);
+  const synthTo = useMemo(() => mix(p.surface, p.accent, 0.18), [p]);
+  const coolNeutral = useMemo(() => p.series[3] || p.series[1] || p.inkMuted, [p]);
+  const realFrom = useMemo(() => mix(p.surface, coolNeutral, 0.28), [p, coolNeutral]);
+  const realTo = useMemo(() => mix(p.surfaceAlt, coolNeutral, 0.42), [p, coolNeutral]);
 
   return (
     <Figure variant="plain" align="center" title={title} caption={caption} source={source}>
@@ -177,8 +180,8 @@ export default function CompareSlider({
             gridId={gridB.current}
             from={realFrom}
             to={realTo}
-            stroke={withAlpha(p.ink, 0.08)}
-            dot={withAlpha(p.ink, 0.16)}
+            stroke={withAlpha(coolNeutral, 0.32)}
+            dot={withAlpha(coolNeutral, 0.6)}
           />
 
           {/* LEFT layer (clipped by divider, on top) */}
@@ -193,8 +196,8 @@ export default function CompareSlider({
               gridId={gridA.current}
               from={synthFrom}
               to={synthTo}
-              stroke={withAlpha(p.accent, 0.16)}
-              dot={withAlpha(p.accent, 0.28)}
+              stroke={withAlpha(p.accent, 0.34)}
+              dot={withAlpha(p.accent, 0.55)}
             />
           </div>
 
@@ -307,15 +310,24 @@ function Panel({
         <pattern id={gridId} width="20" height="20" patternUnits="userSpaceOnUse">
           <path d="M20 0 L0 0 0 20" fill="none" stroke={stroke} strokeWidth="0.75" />
         </pattern>
+        {/* Vertical fade so the floor grid emerges gradually from the horizon
+            instead of cutting in as a hard tonal seam. */}
+        <linearGradient id={`${gridId}-fade`} x1="0" y1="118" x2="0" y2="200" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stopColor="#fff" stopOpacity="0" />
+          <stop offset="34%" stopColor="#fff" stopOpacity="1" />
+          <stop offset="100%" stopColor="#fff" stopOpacity="1" />
+        </linearGradient>
+        <mask id={`${gridId}-mask`}>
+          <rect x="0" y="118" width="320" height="82" fill={`url(#${gridId}-fade)`} />
+        </mask>
       </defs>
       <rect x="0" y="0" width="320" height="200" fill={`url(#${gradId})`} />
       {/* perspective floor */}
-      <g opacity={kind === "synthetic" ? 0.9 : 0.55}>
+      <g opacity={kind === "synthetic" ? 0.9 : 0.55} mask={`url(#${gridId}-mask)`}>
         <rect x="0" y="118" width="320" height="82" fill={`url(#${gridId})`} />
         {[40, 80, 120, 160, 200, 240, 280].map((x) => (
           <line key={x} x1={x} y1={118} x2={160 + (x - 160) * 3.2} y2={200} stroke={stroke} strokeWidth="0.75" />
         ))}
-        <line x1="0" y1="118" x2="320" y2="118" stroke={dot} strokeWidth="1" />
       </g>
       {/* sky objects */}
       {kind === "synthetic" ? (

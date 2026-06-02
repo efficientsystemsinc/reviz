@@ -214,7 +214,12 @@ export default function WaterfallChart({
                   const labelText = s.isTotal
                     ? formatCompact(s.end, 1)
                     : `${s.delta >= 0 ? "+" : "−"}${formatCompact(Math.abs(s.delta), 1)}`;
-                  const labelY = yTop - 7;
+                  // Keep the label inside the plot so a tall total's value is
+                  // never clipped by the top margin.
+                  const labelY = Math.max(yTop - 7, 9);
+                  // Opaque plate so the value reads clearly even when it sits
+                  // over a connector or a neighbouring bar at the crowded top.
+                  const labelW = labelText.length * 6.6 + 6;
 
                   return (
                     <g key={s.label}>
@@ -265,12 +270,7 @@ export default function WaterfallChart({
                         />
                       )}
                       {showValues && (
-                        <motion.text
-                          x={x + bw / 2}
-                          y={labelY}
-                          textAnchor="middle"
-                          fill={s.isTotal ? p.ink : s.kind === "up" ? up : down}
-                          className="font-mono text-[10.5px] font-medium tabular-nums"
+                        <motion.g
                           initial={{ opacity: 0 }}
                           animate={{ opacity: inView ? 1 : 0 }}
                           transition={{
@@ -278,8 +278,24 @@ export default function WaterfallChart({
                             duration: reduced ? 0 : 0.3,
                           }}
                         >
-                          {labelText}
-                        </motion.text>
+                          <rect
+                            x={x + bw / 2 - labelW / 2}
+                            y={labelY - 10}
+                            width={labelW}
+                            height={14}
+                            rx={2}
+                            fill={p.canvas}
+                          />
+                          <text
+                            x={x + bw / 2}
+                            y={labelY}
+                            textAnchor="middle"
+                            fill={s.isTotal ? p.ink : s.kind === "up" ? up : down}
+                            className="font-mono text-[10.5px] font-medium tabular-nums"
+                          >
+                            {labelText}
+                          </text>
+                        </motion.g>
                       )}
                     </g>
                   );

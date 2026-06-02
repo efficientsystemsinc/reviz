@@ -204,6 +204,7 @@ export default function ProgressRing({
                   thickness={thickness}
                   frac={threshold / 100}
                   color={p.ink}
+                  canvas={p.canvas}
                 />
               )}
             </g>
@@ -328,7 +329,11 @@ export default function ProgressRing({
   );
 }
 
-/** A small notch drawn across the ring track marking a target value. */
+/**
+ * A target marker drawn across the ring track at a target value. It is rendered
+ * as a clean notch the width of the canvas color cutting through the track, then
+ * outlined, so it reads as an intentional gauge marker rather than a stray stick.
+ */
 function ThresholdTick({
   cx,
   cy,
@@ -336,6 +341,7 @@ function ThresholdTick({
   thickness,
   frac,
   color,
+  canvas,
 }: {
   cx: number;
   cy: number;
@@ -343,23 +349,41 @@ function ThresholdTick({
   thickness: number;
   frac: number;
   color: string;
+  canvas: string;
 }) {
   const angle = frac * 2 * Math.PI;
-  const inner = r - thickness / 2;
-  const outer = r + thickness / 2;
+  // Span exactly the track band (no overshoot past the stroke) so the marker
+  // sits flush within the ring instead of poking out as an orphaned tick.
+  const half = thickness / 2;
+  const inner = r - half;
+  const outer = r + half;
   const x1 = cx + inner * Math.cos(angle);
   const y1 = cy + inner * Math.sin(angle);
   const x2 = cx + outer * Math.cos(angle);
   const y2 = cy + outer * Math.sin(angle);
   return (
-    <line
-      x1={x1}
-      y1={y1}
-      x2={x2}
-      y2={y2}
-      stroke={color}
-      strokeWidth={3}
-    />
+    <g>
+      {/* Carve a clean gap in the track/arc so the marker reads intentionally. */}
+      <line
+        x1={x1}
+        y1={y1}
+        x2={x2}
+        y2={y2}
+        stroke={canvas}
+        strokeWidth={4}
+        strokeLinecap="round"
+      />
+      {/* Crisp target line within the gap. */}
+      <line
+        x1={x1}
+        y1={y1}
+        x2={x2}
+        y2={y2}
+        stroke={color}
+        strokeWidth={2}
+        strokeLinecap="round"
+      />
+    </g>
   );
 }
 

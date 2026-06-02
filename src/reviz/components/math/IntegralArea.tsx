@@ -499,11 +499,11 @@ export default function IntegralArea({
                     t === 0 ? null : (
                       <text
                         key={`yt-${i}`}
-                        x={(xHasZero ? originX : 0) - 8}
+                        x={-8}
                         y={y(t)}
                         dy="0.32em"
                         textAnchor="end"
-                        fill={p.inkFaint}
+                        fill={p.inkMuted}
                         style={{ fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.04em" }}
                       >
                         {formatCompact(t)}

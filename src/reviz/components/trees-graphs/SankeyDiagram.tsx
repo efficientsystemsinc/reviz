@@ -265,11 +265,27 @@ export default function SankeyDiagram({
             normNodes.forEach((n) => columns[colMap.get(n.id) ?? 0].push(n));
 
             // Vertical scale: pixels-per-unit so the busiest column fits.
+            // A minimum node height keeps tiny nodes (and their labels) from
+            // collapsing into a cramped cluster next to a dominant neighbour.
+            const minNodeHeight = 18;
             const colTotals = columns.map((c) => c.reduce((s, n) => s + (value.get(n.id) || 0), 0));
             const colCounts = columns.map((c) => c.length);
             const maxTotal = Math.max(1, ...colTotals);
             const maxPad = Math.max(...colCounts.map((c) => Math.max(0, c - 1) * nodePadding), 0);
-            const ppu = (inner.height - maxPad) / maxTotal;
+            // Solve for a ppu that fits every column once the min-height floor
+            // is applied (small nodes inflate to minNodeHeight, eating space).
+            const nodeHeight = (v: number, scale: number) => Math.max(minNodeHeight, v * scale);
+            const colFilled = (scale: number) =>
+              Math.max(
+                ...columns.map(
+                  (c, i) =>
+                    c.reduce((s, n) => s + nodeHeight(value.get(n.id) || 0, scale), 0) +
+                    Math.max(0, colCounts[i] - 1) * nodePadding,
+                ),
+                1,
+              );
+            let ppu = (inner.height - maxPad) / maxTotal;
+            for (let i = 0; i < 24 && colFilled(ppu) > inner.height; i++) ppu *= 0.92;
 
             // Node x positions.
             const colX = (c: number) =>
@@ -279,12 +295,12 @@ export default function SankeyDiagram({
             const laid = new Map<string, LaidNode>();
             columns.forEach((colNodes, c) => {
               const total =
-                colNodes.reduce((s, n) => s + (value.get(n.id) || 0), 0) * ppu +
+                colNodes.reduce((s, n) => s + nodeHeight(value.get(n.id) || 0, ppu), 0) +
                 Math.max(0, colNodes.length - 1) * nodePadding;
               let y = (inner.height - total) / 2;
               const x0 = colX(c);
               colNodes.forEach((n, order) => {
-                const h = Math.max(1, (value.get(n.id) || 0) * ppu);
+                const h = nodeHeight(value.get(n.id) || 0, ppu);
                 laid.set(n.id, {
                   id: n.id,
                   label: n.label,
@@ -318,20 +334,27 @@ export default function SankeyDiagram({
               (a, b) => (laid.get(a.l.source)?.y0 ?? 0) - (laid.get(b.l.source)?.y0 ?? 0),
             );
 
+            // When a node rect is floored taller than the ribbons it carries,
+            // centre the ribbon stack on the face so it attaches mid-node.
+            const faceCenter = (n: LaidNode, flowSum: number) =>
+              Math.max(0, (n.y1 - n.y0 - flowSum * ppu) / 2);
+
             const sBand = new Map<number, { y0: number; y1: number }>();
             const tBand = new Map<number, { y0: number; y1: number }>();
             sortedForSource.forEach(({ l, index }) => {
               const sn = laid.get(l.source)!;
               const w = l.value * ppu;
+              const base = sn.y0 + faceCenter(sn, outSum.get(sn.id) || 0);
               const off = srcOffset.get(l.source)!;
-              sBand.set(index, { y0: sn.y0 + off, y1: sn.y0 + off + w });
+              sBand.set(index, { y0: base + off, y1: base + off + w });
               srcOffset.set(l.source, off + w);
             });
             sortedForTarget.forEach(({ l, index }) => {
               const tn = laid.get(l.target)!;
               const w = l.value * ppu;
+              const base = tn.y0 + faceCenter(tn, inSum.get(tn.id) || 0);
               const off = tgtOffset.get(l.target)!;
-              tBand.set(index, { y0: tn.y0 + off, y1: tn.y0 + off + w });
+              tBand.set(index, { y0: base + off, y1: base + off + w });
               tgtOffset.set(l.target, off + w);
             });
 

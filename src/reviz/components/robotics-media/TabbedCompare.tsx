@@ -282,14 +282,14 @@ function SyntheticFrame({
       />
 
       {hasComparison ? (
-        <div className="absolute inset-0 flex flex-col justify-center gap-2.5 px-[8%] py-[7%]">
+        <div className="absolute inset-0 flex flex-col justify-between px-[8%] py-[9%]">
           {tabs.map((t, i) => {
             const v = metrics[i];
             const color = p.series[i % p.series.length];
             const isActive = i === activeIndex;
             const frac = v == null ? 0 : Math.max(0, Math.min(1, v / maxMetric));
             return (
-              <div key={`${t.label}-${i}`} className="flex flex-col gap-1">
+              <div key={`${t.label}-${i}`} className="flex flex-1 flex-col justify-center gap-2">
                 <div className="flex items-baseline justify-between gap-3">
                   <span
                     className="font-mono text-[12px] uppercase tracking-label"
@@ -305,7 +305,7 @@ function SyntheticFrame({
                   </span>
                 </div>
                 <div
-                  className="h-2.5 w-full overflow-hidden rounded-full"
+                  className="h-3.5 w-full overflow-hidden rounded-full"
                   style={{ backgroundColor: withAlpha(p.border, 0.6) }}
                 >
                   <div

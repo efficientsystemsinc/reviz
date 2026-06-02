@@ -66,13 +66,16 @@ export default function HighlightBox({
   const H = W > 0 ? Math.max(W / (16 / 10), 220) : 0;
 
   // Highlight rectangle in px, clamped so the tag and border stay on-canvas.
+  // A small inset keeps the box border off the frame edge (no edge-touching
+  // or doubled-border artifact on the right/bottom).
   const box = useMemo(() => {
+    const pad = 16;
+    const bw = Math.min((clamp(w, 2, 100) / 100) * W, Math.max(0, W - pad * 2));
+    const bh = Math.min((clamp(h, 2, 100) / 100) * H, Math.max(0, H - pad * 2));
     const bx = (clamp(x, 0, 100) / 100) * W;
     const by = (clamp(y, 0, 100) / 100) * H;
-    const bw = (clamp(w, 2, 100) / 100) * W;
-    const bh = (clamp(h, 2, 100) / 100) * H;
-    const left = clamp(bx, 0, Math.max(0, W - bw));
-    const top = clamp(by, 0, Math.max(0, H - bh));
+    const left = clamp(bx, pad, Math.max(pad, W - bw - pad));
+    const top = clamp(by, pad, Math.max(pad, H - bh - pad));
     return { left, top, w: bw, h: bh };
   }, [x, y, w, h, W, H]);
 
@@ -117,6 +120,12 @@ export default function HighlightBox({
 
   // Tag sits on the top-left corner of the box, riding the border line.
   const tagOnTop = box.top > 26;
+
+  // Dimension chip rides below the box, unless there is no room before the
+  // frame edge, in which case it flips above.
+  const dimsBelow = box.top + box.h + 26 <= H;
+  const dimsStemY = dimsBelow ? box.top + box.h : box.top;
+  const dimsChipY = dimsBelow ? box.top + box.h + 7 : box.top - 23;
 
   return (
     <Figure variant="plain" align="center" title={title} caption={caption} source={source}>
@@ -281,20 +290,42 @@ export default function HighlightBox({
                 );
               })}
 
-              {/* dimensions readout along the bottom edge */}
-              <motion.text
-                x={box.left + box.w / 2}
-                y={box.top + box.h + 16}
-                textAnchor="middle"
-                fill={withAlpha(p.inkMuted, 0.85)}
-                className="font-mono uppercase tracking-label"
-                style={{ fontSize: 9.5 }}
+              {/* dimensions readout — a chip anchored to the box bottom-center,
+                  with a short stem so it reads as tied to the region */}
+              <motion.g
                 initial={{ opacity: 0 }}
                 animate={{ opacity: animate || reduced ? 1 : 0 }}
                 transition={{ duration: 0.3, delay: reduced ? 0 : dur * 0.8 }}
               >
-                {Math.round(clamp(w, 2, 100))}% × {Math.round(clamp(h, 2, 100))}%
-              </motion.text>
+                <line
+                  x1={box.left + box.w / 2}
+                  x2={box.left + box.w / 2}
+                  y1={dimsStemY}
+                  y2={dimsBelow ? dimsStemY + 7 : dimsStemY - 7}
+                  stroke={withAlpha(fill, 0.55)}
+                  strokeWidth={1.5}
+                />
+                <rect
+                  x={box.left + box.w / 2 - 33}
+                  y={dimsChipY}
+                  width={66}
+                  height={16}
+                  rx={4}
+                  fill={p.canvas}
+                  stroke={withAlpha(p.inkFaint, 0.5)}
+                  strokeWidth={1}
+                />
+                <text
+                  x={box.left + box.w / 2}
+                  y={dimsChipY + 11.5}
+                  textAnchor="middle"
+                  fill={p.inkMuted}
+                  className="font-mono uppercase tracking-label"
+                  style={{ fontSize: 9.5 }}
+                >
+                  {Math.round(clamp(w, 2, 100))}% × {Math.round(clamp(h, 2, 100))}%
+                </text>
+              </motion.g>
             </svg>
           )}
 

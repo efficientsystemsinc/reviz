@@ -114,34 +114,42 @@ export default function EquationBlock({
               dangerouslySetInnerHTML={{ __html: html }}
             />
 
-            {/* highlighted term overlay — a soft chip pinned above the equation */}
+            {/* highlighted term — a captioned chip sitting below the equation,
+                clearly attached rather than floating in the corner */}
             <AnimatePresence>
               {hiHtml && showHi && (
-                <motion.button
-                  type="button"
-                  onClick={() => setShowHi(false)}
-                  title="Highlighted term — click to dismiss"
-                  className="absolute top-0 right-0 inline-flex items-center gap-1.5 rounded-md px-2 py-1"
-                  style={{
-                    background: p.accent,
-                    border: `1px solid ${p.accent}`,
-                    color: p.accentContrast,
-                    fontSize: Math.max(11, fontSize * 0.44),
-                  }}
-                  initial={{ opacity: 0, y: -4, scale: 0.9 }}
-                  animate={{
-                    opacity: animate || reduced ? 1 : 0,
-                    y: 0,
-                    scale: 1,
-                  }}
-                  exit={{ opacity: 0, scale: 0.9 }}
+                <motion.div
+                  className={`mt-2 flex items-center gap-2 ${leftAlign ? "justify-start" : "justify-center"}`}
+                  initial={{ opacity: 0, y: -4 }}
+                  animate={{ opacity: animate || reduced ? 1 : 0, y: 0 }}
+                  exit={{ opacity: 0, y: -4 }}
                   transition={{ duration: dur * 0.8, delay: animate ? dur + 0.05 : 0 }}
                 >
                   <span
-                    className="reviz-katex"
-                    dangerouslySetInnerHTML={{ __html: hiHtml }}
-                  />
-                </motion.button>
+                    aria-hidden
+                    className="select-none font-medium uppercase tracking-wide"
+                    style={{ color: p.inkMuted, fontSize: Math.max(10, fontSize * 0.34) }}
+                  >
+                    where
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setShowHi(false)}
+                    title="Highlighted term — click to dismiss"
+                    className="inline-flex items-center gap-1.5 rounded-md px-2 py-1"
+                    style={{
+                      background: p.accent,
+                      border: `1px solid ${p.accent}`,
+                      color: p.accentContrast,
+                      fontSize: Math.max(11, fontSize * 0.44),
+                    }}
+                  >
+                    <span
+                      className="reviz-katex"
+                      dangerouslySetInnerHTML={{ __html: hiHtml }}
+                    />
+                  </button>
+                </motion.div>
               )}
             </AnimatePresence>
           </motion.div>

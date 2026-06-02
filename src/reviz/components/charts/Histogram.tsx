@@ -162,7 +162,7 @@ export default function Histogram({
   return (
     <Figure variant="plain" align="center" title={title} caption={caption} source={source}>
       <div ref={ref} className="relative">
-        <ResponsiveSvg aspect={16 / 10} margin={{ top: 34, right: 18, bottom: 46, left: 48 }}>
+        <ResponsiveSvg aspect={16 / 10} margin={{ top: 38, right: 18, bottom: 46, left: 48 }}>
           {({ inner, margin }) => {
             const x = scaleLinear().domain(domain).range([0, inner.width]);
             const y = scaleLinear().domain([0, yMax]).range([inner.height, 0]).nice();
@@ -249,16 +249,6 @@ export default function Histogram({
                       strokeWidth={1}
                       strokeDasharray="2 3"
                     />
-                    <text
-                      x={medX - 6}
-                      y={-22}
-                      textAnchor="end"
-                      fill={p.inkMuted}
-                      className="font-mono"
-                      style={{ fontSize: 9.5, letterSpacing: "0.08em" }}
-                    >
-                      MED {formatCompact(medianV, 2)}
-                    </text>
                     {/* mean */}
                     <line
                       x1={meanX}
@@ -271,16 +261,63 @@ export default function Histogram({
                     <g transform={`translate(${meanX}, 6)`}>
                       <polygon points="0,0 -4,-6 4,-6" fill={p.accent} />
                     </g>
-                    <text
-                      x={meanX + 6}
-                      y={-10}
-                      textAnchor="start"
-                      fill={p.accent}
-                      className="font-mono"
-                      style={{ fontSize: 9.5, letterSpacing: "0.08em" }}
-                    >
-                      μ {formatCompact(meanV, 2)}
-                    </text>
+                    {/* Labels — drawn last, anchored to opposite sides with opaque
+                        plates so the near-coincident guide lines never bleed through.
+                        Median label is pulled left, mean label pushed right, and the
+                        two are staggered vertically to fully decouple the cluster. */}
+                    {(() => {
+                      const medLabel = `MED ${formatCompact(medianV, 2)}`;
+                      const meanLabel = `μ ${formatCompact(meanV, 2)}`;
+                      const ch = 5.6; // approx mono glyph advance at 9.5px
+                      const plateH = 13;
+                      const padX = 3;
+                      const medW = medLabel.length * ch;
+                      const meanW = meanLabel.length * ch;
+                      const medAnchorX = medX - 8;
+                      const meanAnchorX = meanX + 8;
+                      const medY = -22;
+                      const meanY = -8;
+                      return (
+                        <>
+                          <rect
+                            x={medAnchorX - medW - padX}
+                            y={medY - plateH + 2}
+                            width={medW + padX * 2}
+                            height={plateH}
+                            rx={2}
+                            fill={p.canvas}
+                          />
+                          <text
+                            x={medAnchorX}
+                            y={medY}
+                            textAnchor="end"
+                            fill={p.inkMuted}
+                            className="font-mono"
+                            style={{ fontSize: 9.5, letterSpacing: "0.08em" }}
+                          >
+                            {medLabel}
+                          </text>
+                          <rect
+                            x={meanAnchorX - padX}
+                            y={meanY - plateH + 2}
+                            width={meanW + padX * 2}
+                            height={plateH}
+                            rx={2}
+                            fill={p.canvas}
+                          />
+                          <text
+                            x={meanAnchorX}
+                            y={meanY}
+                            textAnchor="start"
+                            fill={p.accent}
+                            className="font-mono"
+                            style={{ fontSize: 9.5, letterSpacing: "0.08em" }}
+                          >
+                            {meanLabel}
+                          </text>
+                        </>
+                      );
+                    })()}
                   </g>
                 )}
 

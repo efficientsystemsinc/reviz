@@ -416,24 +416,35 @@ export default function ForceGraph({
                           strokeWidth={1.5}
                           filter={focused ? `url(#${glowId})` : `url(#${shadowId})`}
                         />
-                        {showLabels && (
-                          <text
-                            x={px(d)}
-                            y={py(d) + r + 11}
-                            textAnchor="middle"
-                            fill={dim ? p.inkFaint : p.inkMuted}
-                            stroke={p.surface}
-                            strokeWidth={3}
-                            className="font-mono text-[9.5px]"
-                            style={{
-                              pointerEvents: "none",
-                              paintOrder: "stroke",
-                              strokeLinejoin: "round",
-                            }}
-                          >
-                            {d.label ?? d.id}
-                          </text>
-                        )}
+                        {showLabels &&
+                          (() => {
+                            const text = d.label ?? d.id;
+                            // monospace at 9.5px ≈ 5.7px/char; opaque plate
+                            // masks any edge passing behind the label.
+                            const plateW = text.length * 5.7 + 8;
+                            const labelY = py(d) + r + 11;
+                            return (
+                              <g style={{ pointerEvents: "none" }}>
+                                <rect
+                                  x={px(d) - plateW / 2}
+                                  y={labelY - 8}
+                                  width={plateW}
+                                  height={13}
+                                  rx={2}
+                                  fill={p.canvas}
+                                />
+                                <text
+                                  x={px(d)}
+                                  y={labelY}
+                                  textAnchor="middle"
+                                  fill={dim ? p.inkFaint : p.inkMuted}
+                                  className="font-mono text-[9.5px]"
+                                >
+                                  {text}
+                                </text>
+                              </g>
+                            );
+                          })()}
                       </motion.g>
                     );
                   })}

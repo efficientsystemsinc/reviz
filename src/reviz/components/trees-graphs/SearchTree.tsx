@@ -231,8 +231,8 @@ export default function SearchTree({
           aspect={horizontal ? 16 / 11 : 16 / 12}
           margin={
             horizontal
-              ? { top: 30, right: 118, bottom: 24, left: 64 }
-              : { top: 34, right: 56, bottom: 30, left: 56 }
+              ? { top: 34, right: 124, bottom: 28, left: 70 }
+              : { top: 50, right: 92, bottom: 38, left: 92 }
           }
         >
           {({ inner, margin }) => {

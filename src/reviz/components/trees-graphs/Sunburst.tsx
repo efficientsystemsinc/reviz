@@ -302,18 +302,34 @@ export default function Sunburst({
                     // wedges fit their full name along the band's depth rather
                     // than its narrow arc — no truncation, no missing labels.
                     const isLeaf = s.depth === maxDepth;
-                    const radialRoom = r.outer - r.inner - 8;
+                    // Usable radial run: the full band depth minus small insets
+                    // at each edge so glyphs never kiss the segment borders.
+                    const radialRoom = r.outer - r.inner - 6;
+                    // Center the label in the band and shrink the font (and drop
+                    // the tracking) just enough for the full name to fit — so
+                    // "transformer" / "benchmarks" / "data_loader" read in full
+                    // instead of clipping to an ellipsis.
+                    const radTrack = 0;
+                    const radSize = clamp(
+                      Math.min(labelSize, (radialRoom / Math.max(1, s.label.length)) * 1.55),
+                      6.5,
+                      labelSize,
+                    );
+                    const radClipped = clipLabel(s.label, radialRoom, radSize + radTrack);
                     const showRadial =
                       isLeaf &&
                       reveal > 0.85 &&
-                      span * lr > labelSize * 1.4 &&
+                      span * lr > radSize * 1.4 &&
                       radialRoom > 16;
                     const showLabel =
                       !isLeaf && frac > 0.05 && reveal > 0.85 && r.outer - r.inner > 13;
                     // Run text outward from the inner edge; flip on the left
-                    // half so it always reads upright.
+                    // half so it always reads upright. Center the run within the
+                    // band so the text sits clear of both edges.
                     const onLeft = deg > 180;
-                    const radStart = polarToCartesian(0, 0, r.inner + 4, deg);
+                    const radEst = radClipped.length * (radSize + radTrack) * 0.62;
+                    const radInset = clamp((radialRoom + 6 - radEst) / 2, 2, 12);
+                    const radStart = polarToCartesian(0, 0, r.inner + radInset, deg);
                     const radRot = deg - 90 + (onLeft ? 180 : 0);
                     const radAnchor = onLeft ? "end" : "start";
 
@@ -360,13 +376,13 @@ export default function Sunburst({
                             dy="0.32em"
                             textAnchor={radAnchor}
                             className="font-mono uppercase"
-                            fontSize={labelSize}
-                            letterSpacing={0.4}
+                            fontSize={radSize}
+                            letterSpacing={radTrack}
                             fill={dim ? p.inkFaint : ink}
-                            opacity={dim ? 0.5 : 0.95}
+                            opacity={dim ? 0.6 : 1}
                             style={{ pointerEvents: "none" }}
                           >
-                            {clipLabel(s.label, radialRoom)}
+                            {radClipped}
                           </text>
                         )}
                       </g>
@@ -448,9 +464,15 @@ export default function Sunburst({
   );
 }
 
-/** Truncate a label to roughly fit `arcLen` px of curved space (mono ~6px/char). */
-function clipLabel(label: string, arcLen: number): string {
-  const max = Math.max(3, Math.floor(arcLen / 7));
+/**
+ * Truncate a label to roughly fit `room` px along its run. By default assumes
+ * a curved label at ~7px/glyph; pass `fontSize` for radial labels so the
+ * per-glyph advance matches the (smaller) rendered font and full names are
+ * kept whenever they genuinely fit.
+ */
+function clipLabel(label: string, room: number, fontSize?: number): string {
+  const per = fontSize ? fontSize * 0.62 : 7;
+  const max = Math.max(3, Math.floor(room / per));
   if (label.length <= max) return label;
   return `${label.slice(0, Math.max(2, max - 1))}…`;
 }

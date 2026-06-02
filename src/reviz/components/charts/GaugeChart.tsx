@@ -1,6 +1,6 @@
 "use client";
 
-import { animate as animateValue, motion, useMotionTemplate, useMotionValue } from "framer-motion";
+import { animate as animateValue, motion, useMotionTemplate, useMotionValue, useTransform } from "framer-motion";
 import { useEffect, useMemo } from "react";
 import {
   Figure,
@@ -276,43 +276,59 @@ export default function GaugeChart({
                   token={token}
                 />
 
-                {/* Center readout */}
-                <motion.g
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: inView || reduced ? 1 : 0 }}
-                  transition={{ duration: reduced ? 0 : 0.5, ease: EASE, delay: reduced ? 0 : 0.25 }}
-                >
-                  <text
-                    x={cx}
-                    y={cy - r * 0.06}
-                    textAnchor="middle"
-                    dominantBaseline="alphabetic"
-                    className="font-sans tabular-nums"
-                    style={{ fontSize: numSize, fontWeight: 600, fill: p.ink }}
-                  >
-                    {round(animated, decimals).toFixed(decimals)}
-                    {unit && (
-                      <tspan
-                        dx={3}
-                        style={{ fontSize: numSize * 0.42, fill: p.inkMuted, fontWeight: 500 }}
-                      >
-                        {unit}
-                      </tspan>
-                    )}
-                  </text>
-                  {label && (
-                    <text
-                      x={cx}
-                      y={cy + r * 0.18}
-                      textAnchor="middle"
-                      dominantBaseline="middle"
-                      className="font-mono uppercase tracking-label"
-                      style={{ fontSize: clamp(r * 0.1, 9, 13), fill: p.inkFaint }}
+                {/* Center readout — lifted above the hub, on an opaque plate so the
+                    needle never reads as crossing through the digits. */}
+                {(() => {
+                  const numStr = round(clampedValue, decimals).toFixed(decimals);
+                  const numW = numStr.length * numSize * 0.6 + (unit ? unit.length * numSize * 0.28 : 0);
+                  const numBaseline = cy - r * 0.18;
+                  return (
+                    <motion.g
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: inView || reduced ? 1 : 0 }}
+                      transition={{ duration: reduced ? 0 : 0.5, ease: EASE, delay: reduced ? 0 : 0.25 }}
                     >
-                      {label}
-                    </text>
-                  )}
-                </motion.g>
+                      <rect
+                        x={cx - numW / 2 - 6}
+                        y={numBaseline - numSize * 0.82}
+                        width={numW + 12}
+                        height={numSize * 1.02}
+                        rx={6}
+                        fill={p.canvas}
+                      />
+                      <text
+                        x={cx}
+                        y={numBaseline}
+                        textAnchor="middle"
+                        dominantBaseline="alphabetic"
+                        className="font-sans tabular-nums"
+                        style={{ fontSize: numSize, fontWeight: 600, fill: p.ink }}
+                      >
+                        {round(animated, decimals).toFixed(decimals)}
+                        {unit && (
+                          <tspan
+                            dx={3}
+                            style={{ fontSize: numSize * 0.42, fill: p.inkMuted, fontWeight: 500 }}
+                          >
+                            {unit}
+                          </tspan>
+                        )}
+                      </text>
+                      {label && (
+                        <text
+                          x={cx}
+                          y={cy + r * 0.42}
+                          textAnchor="middle"
+                          dominantBaseline="middle"
+                          className="font-mono uppercase tracking-label"
+                          style={{ fontSize: clamp(r * 0.1, 9, 13), fill: p.inkFaint }}
+                        >
+                          {label}
+                        </text>
+                      )}
+                    </motion.g>
+                  );
+                })()}
               </g>
             );
           }}
@@ -361,15 +377,26 @@ function Needle({
 }) {
   const len = r - thickness / 2 - 2;
   const hubR = clamp(r * 0.12, 8, 18);
+  const halfBase = hubR * 0.5;
   const target = inView || reduced ? toDeg : fromDeg;
 
-  // Animate the rotation as an SVG `transform` attribute pivoting explicitly
-  // about (cx, cy). A CSS `transform-origin` on an SVG <g> resolves against
-  // the element's bounding box / viewport rather than the gauge center, which
-  // detaches the needle from the hub and aims it wrongly; `rotate(deg cx cy)`
-  // always pivots about the supplied point.
+  // Animate the value *angle* and build the needle's path `d` directly from it.
+  // We deliberately do NOT animate an SVG `transform` attribute: framer-motion
+  // rewrites a `transform` on an SVG element into a CSS transform whose
+  // `transform-origin` resolves against the path's bounding box (not the gauge
+  // center), so an explicit `rotate(deg cx cy)` is silently re-pivoted and the
+  // needle ends up aimed straight up regardless of value. Recomputing the three
+  // triangle vertices about (cx, cy) keeps the needle anchored to the hub and
+  // correctly aimed, while `d` is a plain attribute framer-motion passes through.
   const deg = useMotionValue(fromDeg);
-  const transform = useMotionTemplate`rotate(${deg} ${cx} ${cy})`;
+  const toRad = (d: number) => (d * Math.PI) / 180;
+  const tipX = useTransform(deg, (d) => cx + len * Math.sin(toRad(d)));
+  const tipY = useTransform(deg, (d) => cy - len * Math.cos(toRad(d)));
+  const baseLX = useTransform(deg, (d) => cx - halfBase * Math.cos(toRad(d)));
+  const baseLY = useTransform(deg, (d) => cy - halfBase * Math.sin(toRad(d)));
+  const baseRX = useTransform(deg, (d) => cx + halfBase * Math.cos(toRad(d)));
+  const baseRY = useTransform(deg, (d) => cy + halfBase * Math.sin(toRad(d)));
+  const path = useMotionTemplate`M ${tipX} ${tipY} L ${baseLX} ${baseLY} L ${baseRX} ${baseRY} Z`;
 
   useEffect(() => {
     if (reduced) {
@@ -383,19 +410,14 @@ function Needle({
       delay: 0.12,
     });
     return () => controls.stop();
-    // token re-triggers the sweep on replay; cx/cy/r recompute the pivot.
+    // token re-triggers the sweep on replay; cx/cy/r recompute the geometry.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [target, reduced, duration, token, cx, cy]);
+  }, [target, reduced, duration, token, cx, cy, len, halfBase]);
 
   return (
     <g>
-      {/* Needle points straight up at rotate=0; rotation maps to the value angle. */}
-      <motion.path
-        d={`M ${cx} ${cy - len} L ${cx - hubR * 0.5} ${cy} L ${cx + hubR * 0.5} ${cy} Z`}
-        fill={color}
-        filter={`url(#${shadowId})`}
-        transform={transform}
-      />
+      {/* Needle vertices are recomputed about (cx, cy) so the tip aims at the value angle. */}
+      <motion.path d={path} fill={color} filter={`url(#${shadowId})`} />
       <circle cx={cx} cy={cy} r={hubR} fill={hubFill} stroke={hubStroke} strokeWidth={2.5} />
       <circle cx={cx} cy={cy} r={hubR * 0.4} fill={color} />
     </g>

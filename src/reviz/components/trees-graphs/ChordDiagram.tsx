@@ -418,11 +418,11 @@ export default function ChordDiagram({
                           {showValues && (
                             <text
                               x={lp.x}
-                              y={lp.y + 12}
+                              y={lp.y + 13}
                               textAnchor={onRight ? "start" : "end"}
                               className="font-mono tabular-nums"
-                              fontSize={10}
-                              fill={active ? p.inkMuted : withAlpha(p.inkMuted, 0.5)}
+                              fontSize={11}
+                              fill={active ? p.ink : p.inkMuted}
                             >
                               {formatCompact(groupTotal(i))}
                             </text>

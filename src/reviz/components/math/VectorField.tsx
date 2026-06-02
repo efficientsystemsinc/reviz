@@ -456,11 +456,11 @@ export default function VectorField({
         </ResponsiveSvg>
 
         {/* Field formula + magnitude ramp legend. */}
-        <div className="mt-3 flex items-center justify-center gap-4">
-          <span className="font-mono text-[11px] uppercase tracking-label text-ink-muted">
+        <div className="mb-1 mt-4 flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
+          <span className="font-mono text-[11px] uppercase tracking-label text-ink">
             F(x, y) = {FIELD_FORMULA[field]}
           </span>
-          <span className="inline-flex items-center gap-1.5">
+          <span className="inline-flex items-center gap-2">
             <span className="font-mono text-[10px] uppercase tracking-label text-ink-muted">
               low
             </span>

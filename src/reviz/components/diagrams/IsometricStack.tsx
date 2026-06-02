@@ -96,10 +96,17 @@ export default function IsometricStack({
           {({ inner }: ChartArea) => {
             // Plane footprint sized to fit the diamond + the full stack height.
             const totalDepth = depth * (n - 1) + gap * (n - 1);
-            const planeW = Math.min(inner.width * 0.82, (inner.height - totalDepth) * 2.1);
+            // Reserve a left gutter for layer labels and a right gutter for the
+            // item lists, then center the diamond between them so neither clips.
+            const LG = 132;
+            const RG = 120;
+            const planeW = Math.min(
+              Math.max(inner.width - LG - RG, 160),
+              (inner.height - totalDepth) * 2.1,
+            );
             const planeH = planeW / 2; // 2:1 isometric diamond
 
-            const cx = inner.width / 2;
+            const cx = LG + planeW / 2;
             // Center the whole stack (top plane to bottom plane) vertically.
             const stackH = planeH + totalDepth;
             const topY = (inner.height - stackH) / 2;

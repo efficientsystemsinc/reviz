@@ -82,9 +82,15 @@ export default function HeatmapOverlay({
 
   const tOf = (v: number) => clamp((v - lo) / (hi - lo), 0, 1);
 
-  // Heat color ramp: dim accent tint -> saturated accent, eased so the hottest
-  // regions read instantly while faint attention stays legible.
-  const heatColor = (t: number) => mix(mix(p.surfaceAlt, accent, 0.78), accent, Math.pow(t, 0.55));
+  // Heat color ramp: dim accent tint -> saturated accent -> deepened hot core,
+  // eased so the hottest regions read instantly while faint attention stays
+  // legible. The hot end is darkened so it survives the multiply blend and
+  // clearly separates from the cream canvas.
+  const heatColor = (t: number) => {
+    const e = Math.pow(t, 0.55);
+    const base = mix(mix(p.surfaceAlt, accent, 0.82), accent, e);
+    return mix(base, mix(accent, p.ink, 0.35), Math.pow(t, 1.4));
+  };
 
   const aspect = 1.32;
   const stepDelay = (r: number, c: number) => {
@@ -119,6 +125,9 @@ export default function HeatmapOverlay({
             const over = Math.min(cw, ch) * 0.55;
             const blur = Math.min(cw, ch) * 0.42;
             const rx = Math.min(10, Math.min(W, H) * 0.03);
+            // colorbar geometry: label on the left, gradient bar bracketed by lo/hi
+            const barW = W * 0.56;
+            const barX = W - barW;
 
             const clipId = `heat-clip-${gid}`;
             const blurId = `heat-blur-${gid}`;
@@ -136,9 +145,9 @@ export default function HeatmapOverlay({
                   </filter>
                   <Glow id={glowId} blur={blur * 0.4} />
                   <linearGradient id={sceneId} x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor={mix(p.surface, p.canvas, 0.3)} />
-                    <stop offset="55%" stopColor={p.surfaceAlt} />
-                    <stop offset="100%" stopColor={mix(p.surfaceAlt, p.borderStrong, 0.45)} />
+                    <stop offset="0%" stopColor={mix(p.surfaceAlt, p.ink, 0.12)} />
+                    <stop offset="55%" stopColor={mix(p.surfaceAlt, p.ink, 0.22)} />
+                    <stop offset="100%" stopColor={mix(p.surfaceAlt, p.ink, 0.42)} />
                   </linearGradient>
                 </defs>
 
@@ -163,25 +172,25 @@ export default function HeatmapOverlay({
                         width={W * 0.26}
                         height={H * 0.3}
                         rx={W * 0.02}
-                        fill={withAlpha(p.ink, 0.08)}
-                        stroke={withAlpha(p.ink, 0.16)}
-                        strokeWidth={1}
+                        fill={withAlpha(p.ink, 0.22)}
+                        stroke={withAlpha(p.ink, 0.42)}
+                        strokeWidth={1.25}
                       />
                       <circle
                         cx={W * 0.74}
                         cy={H * 0.72}
                         r={Math.min(W, H) * 0.13}
-                        fill={withAlpha(p.ink, 0.07)}
-                        stroke={withAlpha(p.ink, 0.14)}
-                        strokeWidth={1}
+                        fill={withAlpha(p.ink, 0.2)}
+                        stroke={withAlpha(p.ink, 0.38)}
+                        strokeWidth={1.25}
                       />
                       <line
                         x1={0}
                         y1={H * 0.62}
                         x2={W}
                         y2={H * 0.62}
-                        stroke={withAlpha(p.ink, 0.1)}
-                        strokeWidth={1}
+                        stroke={withAlpha(p.ink, 0.3)}
+                        strokeWidth={1.25}
                       />
                     </g>
                   )}
@@ -278,40 +287,41 @@ export default function HeatmapOverlay({
                     </linearGradient>
                   </defs>
                   <text
-                    x={0}
+                    x={barX - 10}
                     y={-2}
+                    textAnchor="end"
                     fill={p.ink}
                     className="font-mono uppercase"
-                    style={{ fontSize: 13, letterSpacing: "0.12em" }}
+                    style={{ fontSize: 13, letterSpacing: "0.1em" }}
                   >
                     {legendLabel}
                   </text>
                   <motion.rect
-                    x={W * 0.42}
+                    x={barX}
                     y={-9}
                     height={9}
                     rx={3}
                     fill={`url(#heat-bar-${gid})`}
-                    stroke={p.border}
+                    stroke={p.borderStrong}
                     strokeWidth={0.75}
                     initial={{ width: 0 }}
-                    animate={{ width: inView ? W * 0.58 : 0 }}
+                    animate={{ width: inView ? barW : 0 }}
                     transition={{ duration: reduced ? 0 : 0.7, ease: [0.22, 1, 0.36, 1] }}
                   />
                   <text
-                    x={W * 0.42}
+                    x={barX}
                     y={12}
-                    fill={p.ink}
+                    fill={p.inkMuted}
                     className="font-mono tabular-nums"
                     style={{ fontSize: 11.5 }}
                   >
                     {round(lo, 2)}
                   </text>
                   <text
-                    x={W}
+                    x={barX + barW}
                     y={12}
                     textAnchor="end"
-                    fill={p.ink}
+                    fill={p.inkMuted}
                     className="font-mono tabular-nums"
                     style={{ fontSize: 11.5 }}
                   >
