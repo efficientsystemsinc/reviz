@@ -6,6 +6,7 @@ import { Sliders, Palette, Code2, Download, ImageDown, Monitor, Square, Smartpho
 import { getEntry } from "@/reviz/registry";
 import { CATEGORIES, propsForPreset } from "@/reviz/types";
 import { generateCode } from "@/reviz/codegen";
+import { fontVars } from "@/reviz/fonts";
 import { downloadPng, downloadSvg } from "@/lib/exportSvg";
 import { cn } from "@/lib/utils";
 import { ControlsPane } from "./ControlsPane";
@@ -28,6 +29,7 @@ export function ComponentDetail({ id }: { id: string }) {
   const containerRef = useRef<HTMLDivElement>(null);
 
   const palette = useMemo(() => resolvePreviewPalette(theme), [theme]);
+  const fonts = useMemo(() => fontVars(theme.fonts), [theme]);
   const code = useMemo(
     () => (entry ? generateCode(entry.meta, props, { includeDefaults }) : ""),
     [entry, props, includeDefaults],
@@ -153,6 +155,7 @@ export function ComponentDetail({ id }: { id: string }) {
             bg={bg}
             width={width}
             containerRef={containerRef}
+            fontVars={fonts}
           />
 
           <div className="flex flex-col gap-2">

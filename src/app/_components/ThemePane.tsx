@@ -1,13 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Check, RotateCcw, Plus, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Check, RotateCcw, Plus, X, ChevronDown, Type } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { PALETTES, type RevizPalette } from "@/reviz/theme";
+import { FONTS, type FontChoice, type FontRole } from "@/reviz/fonts";
 
 export interface PreviewTheme {
   paletteId: string;
   overrides: Partial<RevizPalette>;
+  fonts?: FontChoice;
 }
 
 export function resolvePreviewPalette(t: PreviewTheme): RevizPalette {
@@ -73,9 +75,32 @@ export function ThemePane({ theme, onChange }: { theme: PreviewTheme; onChange: 
     onChange({ ...theme, overrides: next });
   };
   const setSeries = (arr: string[]) => onChange({ ...theme, overrides: { ...theme.overrides, series: arr } });
+  const setFont = (role: FontRole, id: string) => onChange({ ...theme, fonts: { ...theme.fonts, [role]: id } });
+  const fontsCustomized = theme.fonts && Object.values(theme.fonts).some(Boolean);
 
   return (
     <div className="flex flex-col gap-5">
+      <section>
+        <div className="mb-2 flex items-center justify-between">
+          <span className="flex items-center gap-1.5 font-mono text-[10.5px] uppercase tracking-label text-ink-faint">
+            <Type className="h-3 w-3" /> Typography
+          </span>
+          {fontsCustomized && (
+            <button
+              onClick={() => onChange({ ...theme, fonts: {} })}
+              className="inline-flex items-center gap-1 font-mono text-[9.5px] uppercase tracking-wide text-ink-faint hover:text-ink"
+            >
+              <RotateCcw className="h-3 w-3" /> Reset
+            </button>
+          )}
+        </div>
+        <div className="flex flex-col gap-2">
+          <FontSelect role="display" label="Headings" value={theme.fonts?.display} onChange={(id) => setFont("display", id)} />
+          <FontSelect role="mono" label="Labels & numbers" value={theme.fonts?.mono} onChange={(id) => setFont("mono", id)} />
+          <FontSelect role="serif" label="Captions" value={theme.fonts?.serif} onChange={(id) => setFont("serif", id)} />
+        </div>
+      </section>
+
       <section>
         <div className="mb-2.5 flex items-center justify-between">
           <span className="font-mono text-[10.5px] uppercase tracking-label text-ink-faint">Palette</span>
@@ -178,6 +203,76 @@ export function ThemePane({ theme, onChange }: { theme: PreviewTheme; onChange: 
           The categorical ramp multi-series charts cycle through.
         </p>
       </section>
+    </div>
+  );
+}
+
+const ROLE_DEFAULT_VAR: Record<FontRole, string> = {
+  display: "--font-sans",
+  mono: "--font-mono",
+  serif: "--font-serif",
+};
+
+function FontSelect({
+  role,
+  label,
+  value,
+  onChange,
+}: {
+  role: FontRole;
+  label: string;
+  value: string | undefined;
+  onChange: (id: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!open) return;
+    const onDoc = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", onDoc);
+    return () => document.removeEventListener("mousedown", onDoc);
+  }, [open]);
+  const opts = FONTS[role];
+  const current = opts.find((o) => o.id === value) ?? opts[0];
+  const faceOf = (o: (typeof opts)[number]) =>
+    ({ fontFamily: o.varName ? `var(${o.varName}), ${o.fallback}` : `var(${ROLE_DEFAULT_VAR[role]}), ${o.fallback}` });
+  return (
+    <div className="flex items-center justify-between gap-3">
+      <span className="text-[12.5px] text-ink">{label}</span>
+      <div ref={ref} className="relative">
+        <button
+          type="button"
+          onClick={() => setOpen((o) => !o)}
+          className="flex w-[140px] items-center justify-between gap-1.5 rounded-md border border-border bg-surface px-2 py-1 text-ink transition-colors hover:border-border-strong"
+        >
+          <span className="truncate text-[13px]" style={faceOf(current)}>
+            {current.name}
+          </span>
+          <ChevronDown className="h-3 w-3 shrink-0 text-ink-faint" />
+        </button>
+        {open && (
+          <div className="absolute right-0 top-9 z-50 max-h-64 w-48 overflow-y-auto rounded-reviz border border-border bg-surface p-1 shadow-float-lg">
+            {opts.map((o) => (
+              <button
+                key={o.id}
+                type="button"
+                onClick={() => {
+                  onChange(o.id);
+                  setOpen(false);
+                }}
+                className="flex w-full items-center justify-between gap-2 rounded-md px-2 py-1.5 text-left hover:bg-surface-alt"
+              >
+                <span className="truncate text-[14px] text-ink" style={faceOf(o)}>
+                  {o.name}
+                </span>
+                {o.id === current.id && <Check className="h-3.5 w-3.5 shrink-0 text-accent" />}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

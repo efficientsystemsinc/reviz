@@ -24,6 +24,7 @@ export function LivePreview({
   bg = "dots",
   width = "full",
   containerRef,
+  fontVars,
 }: {
   Component: ComponentType<Record<string, unknown>>;
   props: Record<string, unknown>;
@@ -34,6 +35,7 @@ export function LivePreview({
   bg?: PreviewBg;
   width?: PreviewWidth;
   containerRef?: RefObject<HTMLDivElement>;
+  fontVars?: Record<string, string>;
 }) {
   const widthClass = width === "full" ? "max-w-full" : width === "md" ? "max-w-2xl" : "max-w-sm";
 
@@ -46,7 +48,7 @@ export function LivePreview({
         bg === "grid" && "reviz-gridlines",
         className,
       )}
-      style={{ background: `rgb(var(--rz-canvas))` }}
+      style={{ background: `rgb(var(--rz-canvas))`, ...fontVars }}
     >
       <div ref={containerRef} className={cn("w-full", widthClass)}>
         <PreviewErrorBoundary resetKey={resetKey}>
