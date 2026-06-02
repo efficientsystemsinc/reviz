@@ -475,9 +475,9 @@ export const meta: RevizMeta = {
         title: "Latency density by model",
         yLabel: "Requests",
         series: [
-          { name: "Haiku", data: [2, 8, 24, 52, 78, 64, 38, 18, 8, 3] },
-          { name: "Sonnet", data: [1, 4, 12, 30, 55, 72, 60, 36, 16, 6] },
-          { name: "Opus", data: [0, 2, 6, 16, 34, 58, 70, 54, 28, 10] },
+          { name: "Aria-S", data: [2, 8, 24, 52, 78, 64, 38, 18, 8, 3] },
+          { name: "Aria-M", data: [1, 4, 12, 30, 55, 72, 60, 36, 16, 6] },
+          { name: "Aria-L", data: [0, 2, 6, 16, 34, 58, 70, 54, 28, 10] },
         ],
         xLabels: ["50", "100", "150", "200", "250", "300", "350", "400", "450", "500"],
       },

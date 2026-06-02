@@ -327,7 +327,7 @@ export const meta: RevizMeta = {
         title: "New experiment",
         current: 0,
         steps: [
-          { label: "Dataset", sublabel: "ImageNet" },
+          { label: "Dataset", sublabel: "Vision-1k" },
           { label: "Config", sublabel: "Sweep" },
           { label: "Launch", sublabel: "64 GPUs" },
         ],

@@ -476,7 +476,7 @@ function truncate(s: string, n: number): string {
 
 const DEFAULT_NODES: FlowNode[] = [
   { id: "ingest", label: "Ingest", sublabel: "12.4M samples", tone: "muted" },
-  { id: "train", label: "Pretrain", sublabel: "256 × H100", tone: "accent" },
+  { id: "train", label: "Pretrain", sublabel: "256 × GPU-B", tone: "accent" },
   { id: "eval", label: "Evaluate", sublabel: "held-out suite", tone: "accent" },
   { id: "ship", label: "Deploy", sublabel: "canary 5%", tone: "ok" },
   { id: "rollback", label: "Rollback", sublabel: "if regress", tone: "bad" },

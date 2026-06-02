@@ -51,7 +51,7 @@ const DEFAULT_STEPS: Step[] = [
   {
     title: "Pretrain the policy",
     description:
-      "Train a vision-language-action transformer on the demo corpus for 80k gradient steps across 64 H100s.",
+      "Train a vision-language-action transformer on the demo corpus for 80k gradient steps across 64 GPU-Bs.",
   },
   {
     title: "Evaluate held-out suite",

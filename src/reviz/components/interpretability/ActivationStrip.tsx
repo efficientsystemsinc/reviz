@@ -46,19 +46,19 @@ export interface ActivationStripProps {
 /* Defaults                                                           */
 /* ------------------------------------------------------------------ */
 
-// A "Golden Gate Bridge" style feature firing across a sentence — strongest on
+// A "mountain summit" style feature firing across a sentence — strongest on
 // the literal landmark phrase, with mild negative activation on filler tokens.
 const DEFAULT_TOKENS: TokenDatum[] = [
   { token: "I", value: -0.12 },
-  { token: "drove", value: 0.08 },
-  { token: "across", value: 0.46 },
+  { token: "hiked", value: 0.08 },
+  { token: "up", value: 0.46 },
   { token: "the", value: 0.31 },
-  { token: "Golden", value: 0.93 },
-  { token: "Gate", value: 0.97 },
-  { token: "Bridge", value: 0.88 },
-  { token: "into", value: 0.22 },
-  { token: "San", value: 0.41 },
-  { token: "Francisco", value: 0.37 },
+  { token: "Cedar", value: 0.93 },
+  { token: "Ridge", value: 0.97 },
+  { token: "Summit", value: 0.88 },
+  { token: "above", value: 0.22 },
+  { token: "Pine", value: 0.41 },
+  { token: "Valley", value: 0.37 },
   { token: "this", value: -0.05 },
   { token: "morning", value: -0.18 },
 ];
@@ -369,10 +369,10 @@ export const meta: RevizMeta = {
       id: "golden-gate",
       name: "Feature firing on a phrase",
       props: {
-        title: "Golden Gate feature",
+        title: "Mountain summit feature",
         caption:
-          "A monosemantic feature peaks on the literal bridge name and stays warm across the surrounding place reference — quiet on the framing tokens.",
-        source: "Anthropic · Scaling Monosemanticity",
+          "A monosemantic feature peaks on the literal summit name and stays warm across the surrounding place reference — quiet on the framing tokens.",
+        source: "Internal interpretability study",
         tokens: DEFAULT_TOKENS,
         diverging: true,
       },

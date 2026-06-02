@@ -489,7 +489,7 @@ export const meta: RevizMeta = {
         style: "curly",
         label: "Capability",
         title: "Eval suite",
-        items: ["MMLU", "GSM8K", "HumanEval", "Toxicity", "Refusal", "Latency"],
+        items: ["Knowledge-bench", "Math-bench", "Code-eval", "Toxicity", "Refusal", "Latency"],
       },
     },
   ],

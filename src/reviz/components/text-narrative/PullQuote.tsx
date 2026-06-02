@@ -297,7 +297,7 @@ export const meta: RevizMeta = {
         quote:
           "The goal was never to memorize the internet. It was to compress understanding so densely that a single forward pass could feel like thought.",
         author: "Aria Venkatesh",
-        role: "Chief Scientist, Helix AI",
+        role: "Chief Scientist, Research Lab",
         align: "left",
         size: "xl",
       },

@@ -423,9 +423,9 @@ export const meta: RevizMeta = {
         highlightLabel: "Best value",
         features: ["Long-context (1M)", "Tool use", "Vision", "Streaming", "Throughput", "$ / 1M tokens", "Latency p50"],
         options: [
-          { name: "Opus", note: "frontier" },
-          { name: "Sonnet", highlight: true, note: "balanced" },
-          { name: "Haiku", note: "fast" },
+          { name: "Aria-L", note: "frontier" },
+          { name: "Aria-M", highlight: true, note: "balanced" },
+          { name: "Aria-S", note: "fast" },
         ],
         cells: [
           [true, true, "partial"],
@@ -448,8 +448,8 @@ export const meta: RevizMeta = {
         features: ["PPO", "GRPO", "Multi-node FSDP", "vLLM rollouts", "Checkpoint resume", "Setup", "Stars"],
         options: [
           { name: "reviz-rl", highlight: true, note: "internal" },
-          { name: "OpenRLHF", note: "oss" },
-          { name: "TRL", note: "oss" },
+          { name: "RL-Framework A", note: "oss" },
+          { name: "RL-Framework B", note: "oss" },
         ],
         cells: [
           [true, true, true],

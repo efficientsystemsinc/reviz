@@ -530,7 +530,7 @@ export const meta: RevizMeta = {
       id: "syntax-vs-coref",
       name: "Syntax vs coreference",
       props: {
-        title: "Where does BERT encode syntax vs coreference?",
+        title: "Where does a masked language model encode syntax vs coreference?",
         caption: "Part-of-speech peaks in the middle layers; coreference keeps building into the deep layers.",
         yLabel: "Probe accuracy",
         chance: 0.25,

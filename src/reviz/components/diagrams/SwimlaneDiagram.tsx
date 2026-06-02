@@ -660,7 +660,7 @@ export const meta: RevizMeta = {
         steps: [
           { lane: "Researcher", label: "Submit", order: 1, detail: "config.yaml", tone: "muted" },
           { lane: "Scheduler", label: "Queue", order: 2, detail: "priority hi", tone: "accent" },
-          { lane: "Cluster", label: "Allocate", order: 3, detail: "256 × H100", tone: "accent" },
+          { lane: "Cluster", label: "Allocate", order: 3, detail: "256 × GPU-B", tone: "accent" },
           { lane: "Cluster", label: "Train", order: 4, detail: "12h · 3 epochs", tone: "accent" },
           { lane: "Registry", label: "Checkpoint", order: 5, detail: "step 40k", tone: "ok" },
           { lane: "Scheduler", label: "Release", order: 6, detail: "free nodes", tone: "muted" },

@@ -255,7 +255,7 @@ export const meta: RevizMeta = {
         tone: "success",
         icon: true,
         title: "Checkpoint promoted to production",
-        body: "v2.4-rc3 cleared all gating evals: +1.8 pts on MMLU, no regressions on safety suites, and p99 latency within budget. Rollout is at 100% with automatic rollback armed.",
+        body: "v2.4-rc3 cleared all gating evals: +1.8 pts on Knowledge-bench, no regressions on safety suites, and p99 latency within budget. Rollout is at 100% with automatic rollback armed.",
         source: "Release log · 2026-05-29",
       },
     },

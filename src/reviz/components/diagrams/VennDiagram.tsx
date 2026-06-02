@@ -640,7 +640,7 @@ export const meta: RevizMeta = {
       props: {
         sets: [{ label: "Model A" }, { label: "Model B" }],
         values: { a: 142, b: 167, ab: 308 },
-        caption: "Shared vs. unique failure cases on MMLU",
+        caption: "Shared vs. unique failure cases on Knowledge-bench",
       },
     },
   ],

@@ -28,9 +28,9 @@ interface SlopeItem {
 }
 
 const DEFAULT_DATA: SlopeItem[] = [
-  { label: "MMLU", before: 64.2, after: 71.8 },
-  { label: "GSM8K", before: 52.1, after: 68.4 },
-  { label: "HumanEval", before: 41.3, after: 59.7 },
+  { label: "Knowledge-bench", before: 64.2, after: 71.8 },
+  { label: "Math-bench", before: 52.1, after: 68.4 },
+  { label: "Code-eval", before: 41.3, after: 59.7 },
   { label: "ARC-C", before: 78.5, after: 82.1 },
   { label: "Hallucination", before: 18.9, after: 11.2 },
   { label: "Refusal rate", before: 9.4, after: 4.1 },

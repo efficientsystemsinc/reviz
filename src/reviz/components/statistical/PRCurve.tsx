@@ -56,7 +56,7 @@ export interface PRCurveProps {
 /** Default comparison: two object detectors evaluated on the same validation split. */
 const DEFAULT_CURVES: PRCurveData[] = [
   {
-    name: "DETR-R101",
+    name: "Model A",
     points: [
       { recall: 0.0, precision: 1.0 },
       { recall: 0.15, precision: 0.99 },
@@ -71,7 +71,7 @@ const DEFAULT_CURVES: PRCurveData[] = [
     ],
   },
   {
-    name: "Faster-RCNN",
+    name: "Model B",
     points: [
       { recall: 0.0, precision: 0.98 },
       { recall: 0.14, precision: 0.95 },
@@ -138,7 +138,7 @@ function isoF1Path(
 
 export default function PRCurve({
   curves = DEFAULT_CURVES,
-  title = "Detector precision–recall — COCO val",
+  title = "Detector precision–recall — validation split",
   caption = "",
   source = "",
   showAP = true,
@@ -439,7 +439,7 @@ export const meta: RevizMeta = {
       help: "F1 values (0–1) to draw as constant-F1 contour lines.",
       default: DEFAULT_ISO_F1,
     },
-    { key: "title", label: "Title", type: "text", group: "Labels", default: "Detector precision–recall — COCO val" },
+    { key: "title", label: "Title", type: "text", group: "Labels", default: "Detector precision–recall — validation split" },
     { key: "caption", label: "Caption", type: "text", group: "Labels", default: "" },
     { key: "source", label: "Source", type: "text", group: "Labels", default: "" },
     { key: "showAP", label: "Show AP", type: "boolean", group: "Labels", default: true },
@@ -454,8 +454,8 @@ export const meta: RevizMeta = {
       id: "two-detectors",
       name: "Two detectors compared",
       props: {
-        title: "Detector precision–recall — COCO val",
-        caption: "DETR holds higher precision deep into recall; AP gap ≈ 0.1.",
+        title: "Detector precision–recall — validation split",
+        caption: "Model A holds higher precision deep into recall; AP gap ≈ 0.1.",
         curves: DEFAULT_CURVES,
       },
     },
@@ -467,7 +467,7 @@ export const meta: RevizMeta = {
         caption: "Near-perfect precision until recall passes 0.6, then a sharp fall.",
         curves: [
           {
-            name: "DPR",
+            name: "Dense retriever",
             points: [
               { recall: 0.0, precision: 1.0 },
               { recall: 0.2, precision: 0.99 },

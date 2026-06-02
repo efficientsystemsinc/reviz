@@ -617,7 +617,7 @@ export const meta: RevizMeta = {
         stages: [
           { label: "Ingest", sublabel: "raw corpus", icon: "database", status: "muted" },
           { label: "Tokenize", sublabel: "BPE 200k", icon: "layers", status: "default" },
-          { label: "Pretrain", sublabel: "256 × H100", icon: "brain", status: "default" },
+          { label: "Pretrain", sublabel: "256 × GPU-B", icon: "brain", status: "default" },
           { label: "Evaluate", sublabel: "held-out", icon: "search", status: "warn" },
           { label: "Deploy", sublabel: "canary 5%", icon: "deploy", status: "ok" },
         ],

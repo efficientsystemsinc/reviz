@@ -172,11 +172,11 @@ function truncate(s: string, n: number): string {
 const DEFAULT_NODES: DAGNode[] = [
   { id: "data", label: "Dataset", sublabel: "12.4M docs", tone: "muted" },
   { id: "tok", label: "Tokenize", sublabel: "BPE 128k", tone: "muted" },
-  { id: "pretrain", label: "Pretrain", sublabel: "256 × H100", tone: "accent" },
+  { id: "pretrain", label: "Pretrain", sublabel: "256 × GPU-B", tone: "accent" },
   { id: "sft", label: "SFT", sublabel: "instruction", tone: "accent" },
   { id: "rm", label: "Reward Model", sublabel: "pairwise", tone: "accent" },
   { id: "rlhf", label: "RLHF", sublabel: "PPO", tone: "accent" },
-  { id: "evalcap", label: "Capability", sublabel: "MMLU · GPQA", tone: "ok" },
+  { id: "evalcap", label: "Capability", sublabel: "Knowledge-bench · GPQA", tone: "ok" },
   { id: "evalsafe", label: "Safety", sublabel: "red-team", tone: "warn" },
   { id: "ship", label: "Deploy", sublabel: "canary 5%", tone: "ok" },
 ];

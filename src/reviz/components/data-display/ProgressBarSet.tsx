@@ -395,7 +395,7 @@ export const meta: RevizMeta = {
         colorByThreshold: true,
         showValues: true,
         items: [
-          { label: "A100 GPU-hours", value: 7820, max: 8000, target: 7200 },
+          { label: "GPU-A GPU-hours", value: 7820, max: 8000, target: 7200 },
           { label: "vCPU cores", value: 1840, max: 4096, target: 3500 },
           { label: "Object storage (TB)", value: 96, max: 120, target: 110 },
           { label: "Egress (TB)", value: 41, max: 50, target: 45 },

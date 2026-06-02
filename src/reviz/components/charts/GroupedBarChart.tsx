@@ -306,9 +306,9 @@ export const meta: RevizMeta = {
         yLabel: "Accuracy (%)",
         seriesNames: ["No memory", "+ Retrieval", "+ Tools"],
         data: [
-          { label: "MMLU", values: { "No memory": 71, "+ Retrieval": 76, "+ Tools": 79 } },
-          { label: "GSM8K", values: { "No memory": 58, "+ Retrieval": 64, "+ Tools": 81 } },
-          { label: "HumanEval", values: { "No memory": 62, "+ Retrieval": 67, "+ Tools": 88 } },
+          { label: "Knowledge-bench", values: { "No memory": 71, "+ Retrieval": 76, "+ Tools": 79 } },
+          { label: "Math-bench", values: { "No memory": 58, "+ Retrieval": 64, "+ Tools": 81 } },
+          { label: "Code-eval", values: { "No memory": 62, "+ Retrieval": 67, "+ Tools": 88 } },
           { label: "ARC", values: { "No memory": 80, "+ Retrieval": 83, "+ Tools": 85 } },
         ],
       },

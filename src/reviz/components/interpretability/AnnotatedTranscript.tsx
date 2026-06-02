@@ -489,8 +489,8 @@ export const meta: RevizMeta = {
       props: {
         title: "Planning in poetry",
         caption:
-          "Claude plans its rhyme before writing the line — the end-word is decided, then the sentence is composed to reach it.",
-        source: "Anthropic · On the Biology of a Large Language Model",
+          "Aria plans its rhyme before writing the line — the end-word is decided, then the sentence is composed to reach it.",
+        source: "Internal study · On the Biology of a Large Language Model",
         text:
           "He saw a carrot and had to grab it,\nHis hunger was like a starving rabbit.",
         annotations: DEFAULT_ANNOTATIONS,

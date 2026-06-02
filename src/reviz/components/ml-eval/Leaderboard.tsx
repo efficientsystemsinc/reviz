@@ -50,7 +50,7 @@ export default function Leaderboard({
   title = "Frontier model leaderboard",
   caption = "",
   source = "",
-  metricName = "MMLU-Pro",
+  metricName = "Knowledge-Pro",
   color = "",
   duration = 900,
   showBars = true,
@@ -377,7 +377,7 @@ export const meta: RevizMeta = {
     { key: "title", label: "Title", type: "text", group: "Labels", default: "Frontier model leaderboard" },
     { key: "caption", label: "Caption", type: "text", group: "Labels", default: "" },
     { key: "source", label: "Source", type: "text", group: "Labels", default: "" },
-    { key: "metricName", label: "Metric name", type: "text", group: "Labels", default: "MMLU-Pro" },
+    { key: "metricName", label: "Metric name", type: "text", group: "Labels", default: "Knowledge-Pro" },
     { key: "showBars", label: "Show bars", type: "boolean", group: "Style", default: true },
     { key: "color", label: "Accent color", type: "color", group: "Style", default: "" },
     { key: "duration", label: "Animation (ms)", type: "number", group: "Animation", default: 900, min: 0, max: 2500, step: 50 },
@@ -388,8 +388,8 @@ export const meta: RevizMeta = {
       name: "LLM benchmark",
       props: {
         title: "Frontier model leaderboard",
-        metricName: "MMLU-Pro",
-        caption: "Accuracy on the held-out MMLU-Pro test split; Δ vs. previous release.",
+        metricName: "Knowledge-Pro",
+        caption: "Accuracy on the held-out Knowledge-Pro test split; Δ vs. previous release.",
         source: "Internal eval harness",
         rows: [
           { name: "Atlas-3", score: 88.4, delta: 2.1 },
@@ -406,7 +406,7 @@ export const meta: RevizMeta = {
       id: "agent-bench",
       name: "Agent benchmark",
       props: {
-        title: "SWE-bench Verified",
+        title: "Code-bench Verified",
         metricName: "% resolved",
         caption: "Share of GitHub issues resolved end-to-end by each agent.",
         rows: [

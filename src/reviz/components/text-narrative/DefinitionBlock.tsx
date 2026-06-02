@@ -36,7 +36,7 @@ export default function DefinitionBlock({
   term = "Monte Carlo Tree Search",
   tag = "MCTS · noun",
   definition = "A best-first search algorithm that incrementally builds a game tree by simulating rollouts. Each iteration runs four phases — selection, expansion, simulation, and backpropagation — balancing exploration and exploitation via an upper-confidence bound (UCB) over visited nodes. Given more compute, its value estimates provably converge toward the minimax optimum.",
-  example = "AlphaGo paired MCTS with a policy network (to bias which moves to expand) and a value network (to replace random rollouts), letting the search spend simulations where they mattered most — the key to defeating a human Go champion.",
+  example = "A self-play board-game agent paired MCTS with a policy network (to bias which moves to expand) and a value network (to replace random rollouts), letting the search spend simulations where they mattered most — the key to defeating a human champion.",
   exampleLabel = "Example",
   accent = "",
   title = "",
@@ -230,7 +230,7 @@ export const meta: RevizMeta = {
       group: "Labels",
       rows: 4,
       default:
-        "AlphaGo paired MCTS with a policy network (to bias which moves to expand) and a value network (to replace random rollouts), letting the search spend simulations where they mattered most — the key to defeating a human Go champion.",
+        "A self-play board-game agent paired MCTS with a policy network (to bias which moves to expand) and a value network (to replace random rollouts), letting the search spend simulations where they mattered most — the key to defeating a human champion.",
     },
     {
       key: "exampleLabel",
@@ -265,7 +265,7 @@ export const meta: RevizMeta = {
         definition:
           "A best-first search algorithm that incrementally builds a game tree by simulating rollouts. Each iteration runs four phases — selection, expansion, simulation, and backpropagation — balancing exploration and exploitation via an upper-confidence bound (UCB) over visited nodes. Given more compute, its value estimates provably converge toward the minimax optimum.",
         example:
-          "AlphaGo paired MCTS with a policy network (to bias which moves to expand) and a value network (to replace random rollouts), letting the search spend simulations where they mattered most — the key to defeating a human Go champion.",
+          "A self-play board-game agent paired MCTS with a policy network (to bias which moves to expand) and a value network (to replace random rollouts), letting the search spend simulations where they mattered most — the key to defeating a human champion.",
         exampleLabel: "Example",
         source: "Glossary · Reinforcement learning",
       },

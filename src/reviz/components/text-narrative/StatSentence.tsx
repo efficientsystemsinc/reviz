@@ -340,7 +340,7 @@ export const meta: RevizMeta = {
           { value: 0.918, decimals: 3 },
           { value: 0.41, suffix: "×", decimals: 2 },
         ],
-        source: "A100 · batched serving",
+        source: "GPU-A · batched serving",
       },
     },
   ],

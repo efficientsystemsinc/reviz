@@ -65,8 +65,8 @@ const DEFAULT_NODES: GraphNode[] = [
   { id: "rlhf", label: "RLHF", group: "training", value: 6 },
   { id: "sft", label: "SFT", group: "training", value: 4 },
   { id: "scaling", label: "Scaling Laws", group: "method", value: 5 },
-  { id: "mmlu", label: "MMLU", group: "eval", value: 4 },
-  { id: "gsm8k", label: "GSM8K", group: "eval", value: 3 },
+  { id: "mmlu", label: "Knowledge-bench", group: "eval", value: 4 },
+  { id: "gsm8k", label: "Math-bench", group: "eval", value: 3 },
   { id: "agent", label: "Agents", group: "eval", value: 5 },
 ];
 

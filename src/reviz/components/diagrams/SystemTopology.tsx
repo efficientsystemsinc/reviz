@@ -121,7 +121,7 @@ const DEFAULT_NODES: TopoNode[] = [
   { id: "planner", label: "Planner", zone: "Control Plane", icon: "planner", sublabel: "decomposes task" },
   { id: "wm", label: "World Model", zone: "Control Plane", icon: "worldmodel", sublabel: "state belief" },
   { id: "memory", label: "Memory Store", zone: "Control Plane", icon: "db", sublabel: "vector + kv" },
-  { id: "gpu", label: "GPU Pool", zone: "Compute", icon: "gpu", sublabel: "64 × H100" },
+  { id: "gpu", label: "GPU Pool", zone: "Compute", icon: "gpu", sublabel: "64 × GPU-B" },
   { id: "kv", label: "KV Cache", zone: "Compute", icon: "cache", sublabel: "paged attn" },
 ];
 
@@ -761,7 +761,7 @@ export const meta: RevizMeta = {
           { id: "embed", label: "Embedder", zone: "Retrieval", icon: "zap", sublabel: "text-3-large" },
           { id: "vec", label: "Vector DB", zone: "Retrieval", icon: "db", sublabel: "HNSW" },
           { id: "rerank", label: "Reranker", zone: "Retrieval", icon: "search", sublabel: "cross-enc" },
-          { id: "llm", label: "LLM Pool", zone: "Inference", icon: "gpu", sublabel: "32 × H100" },
+          { id: "llm", label: "LLM Pool", zone: "Inference", icon: "gpu", sublabel: "32 × GPU-B" },
         ],
         links: [
           { source: "gw", target: "auth", label: "verify" },

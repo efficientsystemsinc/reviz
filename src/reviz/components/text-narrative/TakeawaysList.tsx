@@ -56,7 +56,7 @@ export interface TakeawaysListProps {
 const DEFAULT_ITEMS: Takeaway[] = [
   {
     lead: "Scale unlocks emergent reasoning.",
-    text: "Chain-of-thought accuracy on GSM8K stays near chance until ~60B parameters, then climbs sharply — the capability is latent, not gradual.",
+    text: "Chain-of-thought accuracy on Math-bench stays near chance until ~60B parameters, then climbs sharply — the capability is latent, not gradual.",
   },
   {
     lead: "RLHF aligns behavior, not knowledge.",
@@ -365,7 +365,7 @@ export const meta: RevizMeta = {
           },
           {
             lead: "Batching beats hardware upgrades for throughput.",
-            text: "Continuous batching delivered a larger gain than moving from A100 to H100 at the same batch policy.",
+            text: "Continuous batching delivered a larger gain than moving from GPU-A to GPU-B at the same batch policy.",
           },
         ],
       },

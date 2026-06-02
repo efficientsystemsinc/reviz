@@ -64,7 +64,7 @@ export interface KeyInsightProps {
 export default function KeyInsight({
   title = "Planning in poetry",
   subtitle = "The model decides how a line will end before it begins writing it.",
-  body = "When asked to complete a rhyming couplet, Claude appears to plan the rhyming word several tokens ahead — then composes the intervening words to land on that target. The forethought is visible in the residual stream long before the final token is produced, evidence that the model reasons over the whole line rather than generating it word by word.",
+  body = "When asked to complete a rhyming couplet, Aria appears to plan the rhyming word several tokens ahead — then composes the intervening words to land on that target. The forethought is visible in the residual stream long before the final token is produced, evidence that the model reasons over the whole line rather than generating it word by word.",
   eyebrow = "Key insight",
   icon = "feather",
   accent = "",
@@ -237,7 +237,7 @@ export const meta: RevizMeta = {
   name: "Key Insight",
   category: "text-narrative",
   description:
-    "An Anthropic-style insight header that frames a single key finding with an eyebrow tag, bold title, serif subtitle, and supporting body in a softly accented card.",
+    "An insight header that frames a single key finding with an eyebrow tag, bold title, serif subtitle, and supporting body in a softly accented card.",
   tags: ["insight", "callout", "header", "narrative", "finding", "takeaway"],
   badges: ["animated", "themed", "responsive"],
   exportName: "KeyInsight",
@@ -265,7 +265,7 @@ export const meta: RevizMeta = {
       group: "Labels",
       rows: 5,
       default:
-        "When asked to complete a rhyming couplet, Claude appears to plan the rhyming word several tokens ahead — then composes the intervening words to land on that target. The forethought is visible in the residual stream long before the final token is produced, evidence that the model reasons over the whole line rather than generating it word by word.",
+        "When asked to complete a rhyming couplet, Aria appears to plan the rhyming word several tokens ahead — then composes the intervening words to land on that target. The forethought is visible in the residual stream long before the final token is produced, evidence that the model reasons over the whole line rather than generating it word by word.",
     },
     {
       key: "eyebrow",
@@ -334,8 +334,8 @@ export const meta: RevizMeta = {
         tone: "highlight",
         title: "Planning in poetry",
         subtitle: "The model decides how a line will end before it begins writing it.",
-        body: "When asked to complete a rhyming couplet, Claude appears to plan the rhyming word several tokens ahead — then composes the intervening words to land on that target. The forethought is visible in the residual stream long before the final token is produced, evidence that the model reasons over the whole line rather than generating it word by word.",
-        source: "Anthropic · Tracing the thoughts of a language model",
+        body: "When asked to complete a rhyming couplet, Aria appears to plan the rhyming word several tokens ahead — then composes the intervening words to land on that target. The forethought is visible in the residual stream long before the final token is produced, evidence that the model reasons over the whole line rather than generating it word by word.",
+        source: "Research lab · Tracing the thoughts of a language model",
       },
     },
     {

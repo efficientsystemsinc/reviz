@@ -68,7 +68,7 @@ export interface FeatureDashboardProps {
 
 const DEFAULT_FEATURE: FeatureSpec = {
   id: 34219,
-  label: "Golden Gate Bridge",
+  label: "Mountain summits",
   stats: [
     { label: "Sparsity", value: "0.18%" },
     { label: "Max act", value: "12.7" },
@@ -84,23 +84,23 @@ const DEFAULT_HIST: number[] = [
 
 const DEFAULT_EXAMPLES: FeatureExample[] = [
   {
-    text: "Driving north across the Golden Gate Bridge, the fog rolled in over the bay.",
-    fireToken: "Golden Gate Bridge",
+    text: "The climbers reached the summit just before the storm rolled in.",
+    fireToken: "summit",
     act: 12.7,
   },
   {
-    text: "The orange towers of the bridge connecting San Francisco to Marin County.",
-    fireToken: "bridge",
+    text: "A narrow ridge connected the two highest peaks of the range.",
+    fireToken: "highest peaks",
     act: 9.4,
   },
   {
-    text: "We watched the sunset behind the Golden Gate from Baker Beach.",
-    fireToken: "Golden Gate",
+    text: "Snow lingered near the summit even through late summer.",
+    fireToken: "summit",
     act: 11.2,
   },
   {
-    text: "An iconic suspension bridge painted in international orange.",
-    fireToken: "suspension bridge",
+    text: "An exposed alpine peak rising sharply above the treeline.",
+    fireToken: "alpine peak",
     act: 7.8,
   },
 ];
@@ -477,12 +477,12 @@ export const meta: RevizMeta = {
   ],
   presets: [
     {
-      id: "golden-gate",
-      name: "Golden Gate feature",
+      id: "landmark",
+      name: "Summit feature",
       props: {
-        title: "Feature #34219 — Golden Gate Bridge",
-        caption: "A near-monosemantic feature that fires on mentions of the Golden Gate Bridge.",
-        source: "Claude 3 Sonnet · 34M-latent SAE",
+        title: "Feature #34219 — Mountain summits",
+        caption: "A near-monosemantic feature that fires on mentions of mountain summits.",
+        source: "Reference model · 34M-latent SAE",
         feature: DEFAULT_FEATURE,
         activationHist: DEFAULT_HIST,
         topExamples: DEFAULT_EXAMPLES,
