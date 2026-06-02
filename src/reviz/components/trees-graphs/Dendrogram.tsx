@@ -77,17 +77,17 @@ const DEFAULT_TREE: ClusterNode = {
         {
           height: 0.26,
           children: [
-            { label: "ResNet-50" },
-            { label: "ViT-B/16" },
+            { label: "Orion-50" },
+            { label: "Iris-B/16" },
           ],
         },
         {
           height: 0.34,
           children: [
-            { label: "ConvNeXt-T" },
+            { label: "Halo-T" },
             {
               height: 0.15,
-              children: [{ label: "EfficientNet" }, { label: "RegNet-Y" }],
+              children: [{ label: "Vega-E" }, { label: "Vega-Y" }],
             },
           ],
         },
@@ -98,9 +98,9 @@ const DEFAULT_TREE: ClusterNode = {
       children: [
         {
           height: 0.19,
-          children: [{ label: "BERT-base" }, { label: "RoBERTa" }],
+          children: [{ label: "Nova-base" }, { label: "Nova-R" }],
         },
-        { label: "GPT-2" },
+        { label: "Atlas-2" },
       ],
     },
   ],
@@ -634,7 +634,7 @@ export const meta: RevizMeta = {
         title: "Hierarchical clustering of model embeddings",
         caption:
           "Vision backbones fuse early into one branch; language models form a second; the cut at 0.45 yields four interpretable clusters.",
-        source: "embedding-atlas · ward linkage",
+        source: "embedding index · ward linkage",
         orientation: "bottom-up",
         colorThreshold: 0.45,
       },

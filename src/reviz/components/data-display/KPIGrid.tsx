@@ -460,7 +460,7 @@ export const meta: RevizMeta = {
       id: "training",
       name: "Training run",
       props: {
-        title: "Perseus-7B · run 0412",
+        title: "Reference model · run #128",
         columns: 3,
         items: [
           {

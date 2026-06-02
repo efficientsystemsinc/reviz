@@ -40,7 +40,7 @@ export interface WinRateMatrixProps {
 const FALLBACK_MODELS = (n: number) => Array.from({ length: n }, (_, i) => `M${i + 1}`);
 
 export default function WinRateMatrix({
-  models = ["GPT-4o", "Claude-3.5", "Gemini-1.5", "Llama-3-70B", "Mistral-L"],
+  models = ["Atlas-4", "Aria-3", "Nova-1", "Vega-70B", "Lyra-L"],
   winRates = [
     [50, 58, 62, 71, 76],
     [42, 50, 55, 66, 70],
@@ -426,7 +426,7 @@ export const meta: RevizMeta = {
       label: "Models",
       type: "json",
       group: "Data",
-      default: ["GPT-4o", "Claude-3.5", "Gemini-1.5", "Llama-3-70B", "Mistral-L"],
+      default: ["Atlas-4", "Aria-3", "Nova-1", "Vega-70B", "Lyra-L"],
     },
     {
       key: "winRates",
@@ -457,7 +457,7 @@ export const meta: RevizMeta = {
         title: "Head-to-head win rates — pairwise LLM arena",
         caption: "Each cell is the % of judged battles the row model wins against the column model.",
         source: "12.4k human preference battles",
-        models: ["GPT-4o", "Claude-3.5", "Gemini-1.5", "Llama-3-70B", "Mistral-L"],
+        models: ["Atlas-4", "Aria-3", "Nova-1", "Vega-70B", "Lyra-L"],
         winRates: [
           [50, 58, 62, 71, 76],
           [42, 50, 55, 66, 70],

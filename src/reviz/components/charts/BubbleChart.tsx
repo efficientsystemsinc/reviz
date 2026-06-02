@@ -38,18 +38,18 @@ interface Bubble {
  * x = inference cost ($/1M tokens), y = benchmark accuracy (%), size = params (B).
  */
 const DEFAULT_DATA: Bubble[] = [
-  { x: 0.5, y: 71.2, size: 8, group: "open", label: "Llama-3 8B" },
-  { x: 0.9, y: 79.5, size: 70, group: "open", label: "Llama-3 70B" },
-  { x: 0.3, y: 68.4, size: 7, group: "open", label: "Mistral 7B" },
-  { x: 2.4, y: 84.1, size: 141, group: "open", label: "Mixtral 8x22B" },
-  { x: 1.2, y: 82.7, size: 34, group: "open", label: "Qwen2 34B" },
-  { x: 5.0, y: 88.9, size: 175, group: "frontier", label: "GPT-4o" },
-  { x: 3.0, y: 87.4, size: 120, group: "frontier", label: "Claude Sonnet" },
-  { x: 15.0, y: 91.6, size: 400, group: "frontier", label: "GPT-4" },
-  { x: 8.0, y: 90.2, size: 280, group: "frontier", label: "Claude Opus" },
-  { x: 7.0, y: 86.0, size: 60, group: "frontier", label: "Gemini Pro" },
-  { x: 0.15, y: 58.3, size: 3, group: "small", label: "Phi-3 mini" },
-  { x: 0.2, y: 62.1, size: 4, group: "small", label: "Gemma 2B" },
+  { x: 0.5, y: 71.2, size: 8, group: "open", label: "Vega-8B" },
+  { x: 0.9, y: 79.5, size: 70, group: "open", label: "Vega-70B" },
+  { x: 0.3, y: 68.4, size: 7, group: "open", label: "Lyra-7B" },
+  { x: 2.4, y: 84.1, size: 141, group: "open", label: "Lyra-141B" },
+  { x: 1.2, y: 82.7, size: 34, group: "open", label: "Orion-34B" },
+  { x: 5.0, y: 88.9, size: 175, group: "frontier", label: "Atlas-4" },
+  { x: 3.0, y: 87.4, size: 120, group: "frontier", label: "Aria-M" },
+  { x: 15.0, y: 91.6, size: 400, group: "frontier", label: "Atlas-4 Pro" },
+  { x: 8.0, y: 90.2, size: 280, group: "frontier", label: "Aria-L" },
+  { x: 7.0, y: 86.0, size: 60, group: "frontier", label: "Nova-Pro" },
+  { x: 0.15, y: 58.3, size: 3, group: "small", label: "Halo-3 mini" },
+  { x: 0.2, y: 62.1, size: 4, group: "small", label: "Iris-2B" },
 ];
 
 export interface BubbleChartProps {

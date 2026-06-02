@@ -53,7 +53,7 @@ const fmtDelta = (v: number): string => {
 export default function AblationTable({
   rows = [
     {
-      name: "Full model (Perseus)",
+      name: "Full model",
       isBaseline: true,
       metrics: { success: 0.871, return: 14.62, solve_rate: 0.804, plan_depth: 9.4 },
     },
@@ -408,7 +408,7 @@ export const meta: RevizMeta = {
       help: "Array of { name, metrics: { metricKey: number }, isBaseline?: boolean }. The baseline row is pinned and deltas are measured against it.",
       default: [
         {
-          name: "Full model (Perseus)",
+          name: "Full model",
           isBaseline: true,
           metrics: { success: 0.871, return: 14.62, solve_rate: 0.804, plan_depth: 9.4 },
         },
@@ -464,9 +464,9 @@ export const meta: RevizMeta = {
   presets: [
     {
       id: "perseus-ablation",
-      name: "Perseus ablation",
+      name: "Agent ablation",
       props: {
-        title: "Component ablation — Perseus agent",
+        title: "Component ablation — retrieval agent",
         caption:
           "Removing each component from the full model. Best per metric is accented; deltas are vs. the full model.",
         source: "internal eval · 512 held-out tasks",

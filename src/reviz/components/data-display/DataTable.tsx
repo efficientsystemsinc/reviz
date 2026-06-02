@@ -418,9 +418,9 @@ export const meta: RevizMeta = {
           { key: "rps", label: "RPS", type: "number" },
         ],
         rows: [
-          { model: "Opus 4.8", p50_ms: 412, p99_ms: 1180, rps: 86 },
-          { model: "Sonnet 4.6", p50_ms: 168, p99_ms: 540, rps: 214 },
-          { model: "Haiku 4.5", p50_ms: 61, p99_ms: 198, rps: 612 },
+          { model: "Aria-L", p50_ms: 412, p99_ms: 1180, rps: 86 },
+          { model: "Aria-M", p50_ms: 168, p99_ms: 540, rps: 214 },
+          { model: "Aria-S", p50_ms: 61, p99_ms: 198, rps: 612 },
           { model: "Distill-7B", p50_ms: 39, p99_ms: 142, rps: 940 },
         ],
       },

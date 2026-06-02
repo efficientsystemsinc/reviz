@@ -105,7 +105,7 @@ const DEFAULT_STAGES: Stage[] = [
   { label: "Embed", sublabel: "text-3-large", icon: "embed", status: "default" },
   { label: "Retrieve", sublabel: "top-k = 64", icon: "retrieve", status: "default" },
   { label: "Rerank", sublabel: "cross-encoder", icon: "rerank", status: "default" },
-  { label: "Synthesize", sublabel: "Opus 4.8", icon: "synthesize", status: "ok" },
+  { label: "Synthesize", sublabel: "Aria-L", icon: "synthesize", status: "ok" },
 ];
 
 /* ------------------------------------------------------------------ */

@@ -69,7 +69,7 @@ const DEFAULT_STEPS: Step[] = [
   { lane: "Gateway", label: "Route", order: 2, detail: "rate-limit", tone: "accent" },
   { lane: "Auth", label: "Verify token", order: 3, detail: "JWT · 4ms", tone: "warn" },
   { lane: "Cache", label: "Lookup", order: 4, detail: "semantic key", tone: "muted" },
-  { lane: "Inference", label: "Generate", order: 5, detail: "Opus 4.8 · 820ms", tone: "accent" },
+  { lane: "Inference", label: "Generate", order: 5, detail: "Aria-L · 820ms", tone: "accent" },
   { lane: "Cache", label: "Store", order: 6, detail: "ttl 1h", tone: "ok" },
   { lane: "Gateway", label: "Stream back", order: 7, detail: "SSE", tone: "accent" },
   { lane: "Client", label: "Render", order: 8, detail: "tokens/s 96", tone: "ok" },

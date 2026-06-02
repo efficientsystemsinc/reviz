@@ -377,9 +377,9 @@ export const meta: RevizMeta = {
         innerRadius: 0.58,
         highlightIndex: 0,
         data: [
-          { label: "Opus 4.8", value: 1840 },
-          { label: "Sonnet 4.6", value: 2960 },
-          { label: "Haiku 4.5", value: 1320 },
+          { label: "Aria-L", value: 1840 },
+          { label: "Aria-M", value: 2960 },
+          { label: "Aria-S", value: 1320 },
           { label: "Embeddings", value: 540 },
         ],
       },

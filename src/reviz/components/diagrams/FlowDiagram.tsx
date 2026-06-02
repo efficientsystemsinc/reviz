@@ -566,10 +566,10 @@ export const meta: RevizMeta = {
         accent: "",
         nodes: [
           { id: "q", label: "Query", sublabel: "user prompt", tone: "muted" },
-          { id: "embed", label: "Embed", sublabel: "text-3-large", tone: "accent" },
+          { id: "embed", label: "Embed", sublabel: "embed-large", tone: "accent" },
           { id: "retrieve", label: "Retrieve", sublabel: "top-k = 8", tone: "accent" },
           { id: "rerank", label: "Rerank", sublabel: "cross-encoder", tone: "accent" },
-          { id: "gen", label: "Generate", sublabel: "Opus 4.8", tone: "ok" },
+          { id: "gen", label: "Generate", sublabel: "Aria-L", tone: "ok" },
           { id: "guard", label: "Guardrail", sublabel: "safety check", tone: "warn" },
         ],
         edges: [

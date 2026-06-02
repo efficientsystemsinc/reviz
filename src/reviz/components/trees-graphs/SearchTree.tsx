@@ -556,7 +556,7 @@ export const meta: RevizMeta = {
         title: "MCTS over a code-retrieval agent",
         caption:
           "Search prefers the high-prior grep → open → edit path; low-value branches are pruned after a few visits.",
-        source: "Perseus · sim run #4412",
+        source: "run #128",
         orientation: "top-down",
       },
     },

@@ -39,7 +39,7 @@ const FALLBACK_MODELS = (n: number) => Array.from({ length: n }, (_, i) => `Mode
 
 export default function EvalGrid({
   tasks = ["Math reasoning", "Code generation", "Tool use", "Long-context QA", "Multimodal", "Safety refusals"],
-  models = ["Opus 4.8", "GPT-5.3", "Gemini 3", "Llama 4"],
+  models = ["Aria-L", "Atlas-3", "Nova-2", "Vega-4"],
   scores = [
     [0.91, 0.88, 0.83, 0.71],
     [0.86, 0.9, 0.79, 0.68],
@@ -470,7 +470,7 @@ export const meta: RevizMeta = {
       type: "json",
       group: "Data",
       help: "Array of model labels (string[]).",
-      default: ["Opus 4.8", "GPT-5.3", "Gemini 3", "Llama 4"],
+      default: ["Aria-L", "Atlas-3", "Nova-2", "Vega-4"],
     },
     {
       key: "scores",
@@ -525,7 +525,7 @@ export const meta: RevizMeta = {
         source: "eval harness · val split",
         mode: "score",
         tasks: ["Math reasoning", "Code generation", "Tool use", "Long-context QA", "Multimodal", "Safety refusals"],
-        models: ["Opus 4.8", "GPT-5.3", "Gemini 3", "Llama 4"],
+        models: ["Aria-L", "Atlas-3", "Nova-2", "Vega-4"],
         scores: [
           [0.91, 0.88, 0.83, 0.71],
           [0.86, 0.9, 0.79, 0.68],

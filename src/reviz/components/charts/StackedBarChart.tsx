@@ -372,7 +372,7 @@ export const meta: RevizMeta = {
       props: {
         title: "Failure composition across models",
         yLabel: "Failures (per 1k)",
-        categories: ["GPT-5.3", "Opus 4.8", "Gemini 3", "Llama 4", "Mistral L"],
+        categories: ["Atlas-3", "Aria-L", "Nova-2", "Vega-4", "Lyra-L"],
         series: [
           { name: "Hallucination", data: [22, 14, 19, 31, 28] },
           { name: "Refusal", data: [9, 12, 7, 6, 11] },

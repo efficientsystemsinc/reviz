@@ -323,10 +323,10 @@ export const meta: RevizMeta = {
         title: "Anatomy of a retrieval-augmented answer",
         activeStep: 4,
         steps: [
-          { title: "Embed the query", description: "Encode the user prompt with text-3-large into a 3,072-dim vector." },
+          { title: "Embed the query", description: "Encode the user prompt with embed-large into a 3,072-dim vector." },
           { title: "Retrieve candidates", description: "Pull the top-50 nearest chunks from the vector index." },
           { title: "Rerank", description: "Score candidates with a cross-encoder and keep the top 8." },
-          { title: "Generate", description: "Condition Opus 4.8 on the retrieved context to draft an answer." },
+          { title: "Generate", description: "Condition Aria-L on the retrieved context to draft an answer." },
           { title: "Cite and guard", description: "Attach source spans and run a final safety check before returning." },
         ],
       },

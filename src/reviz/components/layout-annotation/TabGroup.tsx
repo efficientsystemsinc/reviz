@@ -38,7 +38,7 @@ const DEFAULT_TABS: Tab[] = [
     label: "Architecture",
     eyebrow: "Model",
     content:
-      "Perseus-7B is a decoder-only transformer with 32 layers, 32 attention heads, and a 4,096-token context window. Grouped-query attention keeps the KV cache compact for long-horizon planning.\n\nRotary position embeddings let the model extrapolate cleanly past its training context, a property we lean on heavily during multi-step tool use.",
+      "The reference model is a decoder-only transformer with 32 layers, 32 attention heads, and a 4,096-token context window. Grouped-query attention keeps the KV cache compact for long-horizon planning.\n\nRotary position embeddings let the model extrapolate cleanly past its training context, a property we lean on heavily during multi-step tool use.",
   },
   {
     label: "Training",
@@ -50,7 +50,7 @@ const DEFAULT_TABS: Tab[] = [
     label: "Evaluation",
     eyebrow: "Results",
     content:
-      "On the internal agentic benchmark, Perseus-7B reaches 88.2% recall@10 and a 74% stop-acceptance rate, beating the previous checkpoint by 4.1 points.\n\nLatency at p50 dropped to 650 ms after the KV-cache rewrite, with no measurable regression in task success.",
+      "On the internal agentic benchmark, the reference model reaches 88.2% recall@10 and a 74% stop-acceptance rate, beating the previous checkpoint by 4.1 points.\n\nLatency at p50 dropped to 650 ms after the KV-cache rewrite, with no measurable regression in task success.",
   },
 ];
 
@@ -291,7 +291,7 @@ export const meta: RevizMeta = {
       id: "model-card",
       name: "Model card",
       props: {
-        title: "Perseus-7B · checkpoint 41k",
+        title: "Reference model · checkpoint 41k",
         variant: "underline",
         labelStyle: "mono",
         tabs: DEFAULT_TABS,

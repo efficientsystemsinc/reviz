@@ -455,10 +455,10 @@ export const meta: RevizMeta = {
       id: "overconfident",
       name: "Overconfident model",
       props: {
-        title: "Value-head calibration · Perseus-7B",
+        title: "Value-head calibration · Reference model",
         caption:
           "The model is systematically overconfident: observed accuracy trails predicted probability across the high-confidence bins.",
-        source: "Perseus eval · 5.2k held-out states",
+        source: "Eval · 5.2k held-out states",
         bins: [
           { predicted: 0.05, observed: 0.03, count: 760 },
           { predicted: 0.15, observed: 0.09, count: 480 },

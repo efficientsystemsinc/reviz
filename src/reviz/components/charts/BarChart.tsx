@@ -302,7 +302,7 @@ export const meta: RevizMeta = {
     {
       id: "eval",
       name: "Eval results",
-      props: { title: "1XWM success rate by task", yLabel: "Success rate (%)", highlightIndex: 3 },
+      props: { title: "Task success rate by task", yLabel: "Success rate (%)", highlightIndex: 3 },
     },
     {
       id: "horizontal",
@@ -312,11 +312,11 @@ export const meta: RevizMeta = {
         title: "Tokens processed by model",
         yLabel: "",
         data: [
-          { label: "Opus 4.8", value: 182 },
-          { label: "Sonnet 4.6", value: 154 },
-          { label: "Haiku 4.5", value: 121 },
-          { label: "GPT-5.3", value: 168 },
-          { label: "Gemini 3", value: 149 },
+          { label: "Aria-L", value: 182 },
+          { label: "Aria-M", value: 154 },
+          { label: "Aria-S", value: 121 },
+          { label: "Atlas-3", value: 168 },
+          { label: "Nova-2", value: 149 },
         ],
       },
     },

@@ -377,9 +377,9 @@ export const meta: RevizMeta = {
   presets: [
     {
       id: "perseus",
-      name: "Perseus checkpoint",
+      name: "Latest checkpoint",
       props: {
-        title: "Perseus-7B · checkpoint 41k",
+        title: "Reference model · checkpoint 41k",
         source: "internal eval harness",
         columns: 4,
         metrics: [

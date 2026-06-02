@@ -67,7 +67,7 @@ const DEFAULT_DATA: BenchmarkDatum[] = [
 
 export default function BenchmarkBars({
   data = DEFAULT_DATA,
-  title = "1XWM success rate by task",
+  title = "World-model success rate by task",
   caption = "",
   source = "",
   yLabel = "Success rate (%)",
@@ -332,7 +332,7 @@ export const meta: RevizMeta = {
       help: "Array of { label, value, error?, description?, muted? }.",
       default: DEFAULT_DATA,
     },
-    { key: "title", label: "Title", type: "text", group: "Labels", default: "1XWM success rate by task" },
+    { key: "title", label: "Title", type: "text", group: "Labels", default: "World-model success rate by task" },
     { key: "caption", label: "Caption", type: "text", group: "Labels", default: "" },
     { key: "source", label: "Source", type: "text", group: "Labels", default: "" },
     { key: "yLabel", label: "Y-axis label", type: "text", group: "Labels", default: "Success rate (%)" },
@@ -359,7 +359,7 @@ export const meta: RevizMeta = {
       id: "world-model",
       name: "World-model eval",
       props: {
-        title: "1XWM success rate by task",
+        title: "World-model success rate by task",
         yLabel: "Success rate (%)",
         baseline: 55,
         baselineLabel: "prior best",
