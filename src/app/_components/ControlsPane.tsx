@@ -675,34 +675,158 @@ function MatrixEditor({ value, onChange }: { value: number[][]; onChange: (v: nu
 }
 
 function JsonEditor({ value, onChange }: { value: unknown; onChange: (v: unknown) => void }) {
-  // Flat array of primitives -> structured list of fields (no JSON blob).
-  if (Array.isArray(value) && value.length > 0 && value.every((v) => v === null || typeof v !== "object")) {
-    const numeric = value.every((v) => typeof v === "number");
-    return <PrimitiveListEditor value={value as (string | number)[]} numeric={numeric} onChange={onChange} />;
-  }
+  return <StructuredJson value={value} onChange={onChange} />;
+}
 
-  // Array of flat objects -> editable table. Otherwise a structured JSON field.
-  const isRecordArray =
-    Array.isArray(value) &&
-    value.length > 0 &&
-    value.every((v) => v && typeof v === "object" && !Array.isArray(v));
-
-  if (isRecordArray) {
-    const rows = value as Record<string, unknown>[];
-    const flatKeys = [...new Set(rows.flatMap((r) => Object.keys(r)))].filter((k) =>
-      rows.every((r) => r[k] == null || typeof r[k] !== "object"),
-    );
-    const allFlat = rows.every((r) => Object.keys(r).every((k) => flatKeys.includes(k)));
-    if (allFlat && flatKeys.length > 0) {
-      const columns: Col[] = flatKeys.map((k) => {
-        const sample = rows.find((r) => r[k] != null)?.[k];
-        return { key: k, type: typeof sample === "number" ? "number" : typeof sample === "boolean" ? "boolean" : "text" };
-      });
-      const newRow = Object.fromEntries(columns.map((c) => [c.key, c.type === "number" ? 0 : c.type === "boolean" ? false : ""]));
-      return <RecordTable value={rows} columns={columns} onChange={onChange} newRow={newRow} />;
+/**
+ * Recursive structured editor: turns ANY nested data into bespoke fields,
+ * sub-tables, and chips — never a raw JSON blob. Arrays of flat objects become
+ * tables, arrays of objects-with-nested-values become labelled cards, primitive
+ * arrays become chip/field lists, and nested arrays/objects recurse.
+ */
+function StructuredJson({ value, onChange, depth = 0 }: { value: unknown; onChange: (v: unknown) => void; depth?: number }) {
+  if (Array.isArray(value)) {
+    if (value.length === 0) {
+      return (
+        <button
+          onClick={() => onChange([0])}
+          className="inline-flex w-fit items-center gap-1 rounded-md border border-dashed border-border px-2 py-1 font-mono text-[10px] uppercase tracking-wide text-ink-faint hover:border-accent hover:text-accent"
+        >
+          <Plus className="h-3 w-3" /> Add item
+        </button>
+      );
     }
+    const allPrimitive = value.every((v) => v === null || typeof v !== "object");
+    if (allPrimitive) {
+      const numeric = value.every((v) => typeof v === "number");
+      return <PrimitiveListEditor value={value as (string | number)[]} numeric={numeric} onChange={onChange} />;
+    }
+    const allObjects = value.every((v) => v && typeof v === "object" && !Array.isArray(v));
+    if (allObjects) {
+      const rows = value as Record<string, unknown>[];
+      const flat = rows.every((r) => Object.values(r).every((x) => x === null || typeof x !== "object"));
+      if (flat) {
+        const keys = [...new Set(rows.flatMap((r) => Object.keys(r)))];
+        const columns: Col[] = keys.map((k) => {
+          const sample = rows.find((r) => r[k] != null)?.[k];
+          return { key: k, type: typeof sample === "number" ? "number" : typeof sample === "boolean" ? "boolean" : "text" };
+        });
+        const newRow = Object.fromEntries(columns.map((c) => [c.key, c.type === "number" ? 0 : c.type === "boolean" ? false : ""]));
+        return <RecordTable value={rows} columns={columns} onChange={onChange} newRow={newRow} />;
+      }
+      return <ObjectCardsEditor value={rows} onChange={onChange} depth={depth} />;
+    }
+    // array of arrays / mixed — genuinely irregular, last resort
+    return <RawJson value={value} onChange={onChange} />;
+  }
+  if (value && typeof value === "object") {
+    return <ObjectFields value={value as Record<string, unknown>} onChange={onChange} depth={depth} />;
   }
   return <RawJson value={value} onChange={onChange} />;
+}
+
+const emptyLike = (v: unknown): unknown =>
+  typeof v === "number"
+    ? 0
+    : typeof v === "boolean"
+      ? false
+      : typeof v === "string"
+        ? ""
+        : Array.isArray(v)
+          ? []
+          : v && typeof v === "object"
+            ? Object.fromEntries(Object.entries(v).map(([k, x]) => [k, emptyLike(x)]))
+            : null;
+
+function ObjectCardsEditor({
+  value,
+  onChange,
+  depth,
+}: {
+  value: Record<string, unknown>[];
+  onChange: (v: unknown) => void;
+  depth: number;
+}) {
+  const rows = value;
+  return (
+    <div className="flex flex-col gap-2">
+      {rows.map((row, i) => (
+        <div key={i} className="rounded-lg border border-border p-2">
+          <div className="mb-1.5 flex items-center justify-between">
+            <span className="font-mono text-[9.5px] uppercase tracking-wide text-ink-faint">#{i + 1}</span>
+            <button
+              onClick={() => onChange(rows.filter((_, j) => j !== i))}
+              title="Remove item"
+              className="text-ink-faint hover:text-bad"
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+            </button>
+          </div>
+          <ObjectFields value={row} onChange={(nv) => onChange(rows.map((r, j) => (j === i ? nv : r)))} depth={depth + 1} />
+        </div>
+      ))}
+      <button
+        onClick={() => onChange([...rows, emptyLike(rows[rows.length - 1] ?? {}) as Record<string, unknown>])}
+        className="flex items-center justify-center gap-1 rounded-lg border border-dashed border-border py-1.5 font-mono text-[10px] uppercase tracking-wide text-ink-faint hover:border-accent hover:text-accent"
+      >
+        <Plus className="h-3 w-3" /> Add item
+      </button>
+    </div>
+  );
+}
+
+const isColorKey = (k: string) => /color|colour|fill|stroke|tint/i.test(k);
+
+function ObjectFields({
+  value,
+  onChange,
+  depth,
+}: {
+  value: Record<string, unknown>;
+  onChange: (v: unknown) => void;
+  depth: number;
+}) {
+  const set = (k: string, v: unknown) => onChange({ ...value, [k]: v });
+  return (
+    <div className="flex flex-col gap-2">
+      {Object.entries(value).map(([k, v]) => {
+        const nested = v != null && typeof v === "object";
+        const isString = !nested && (typeof v === "string" || v == null);
+        return (
+          <div key={k} className={nested || isString ? "flex flex-col gap-1" : "flex items-center justify-between gap-2"}>
+            <span className="shrink-0 font-mono text-[10px] uppercase tracking-wide text-ink-faint">{k}</span>
+            {nested ? (
+              <div className="border-l-2 border-border pl-2">
+                <StructuredJson value={v} onChange={(nv) => set(k, nv)} depth={depth + 1} />
+              </div>
+            ) : isColorKey(k) && typeof v === "string" ? (
+              <div className="flex justify-end">
+                <ColorInput value={v} onChange={(nv) => set(k, nv)} allowEmpty />
+              </div>
+            ) : typeof v === "number" ? (
+              <div className="flex justify-end">
+                <NumberCell
+                  value={v}
+                  onChange={(nv) => set(k, nv)}
+                  className="w-24 rounded-md border border-border bg-surface px-2 py-1 text-right"
+                />
+              </div>
+            ) : typeof v === "boolean" ? (
+              <div className="flex justify-end">
+                <Toggle checked={v} onChange={(nv) => set(k, nv)} />
+              </div>
+            ) : (
+              <input
+                value={v == null ? "" : String(v)}
+                onChange={(e) => set(k, e.target.value)}
+                className="w-full rounded-md border border-border bg-surface px-2 py-1 text-[12px] text-ink outline-none focus:border-accent"
+              />
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
 }
 
 /** A flat list of strings or numbers, each its own field — no JSON, no commas. */
