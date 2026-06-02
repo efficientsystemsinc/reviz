@@ -134,7 +134,7 @@ export default function CalibrationPlot({
           <Legend items={legendItems} align="center" />
         </div>
 
-        <ResponsiveSvg aspect={1.18} margin={{ top: 16, right: 18, bottom: 40 + histH, left: 48 }}>
+        <ResponsiveSvg aspect={1.6} margin={{ top: 16, right: 18, bottom: 40 + histH, left: 48 }}>
           {({ inner, margin }) => {
             const x = scaleLinear().domain([0, 1]).range([0, inner.width]);
             const y = scaleLinear().domain([0, 1]).range([inner.height, 0]);

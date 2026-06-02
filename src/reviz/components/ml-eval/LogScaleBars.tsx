@@ -15,7 +15,7 @@ import {
   usePalette,
   usePrefersReducedMotion,
   useReplay,
-  withAlpha,
+  mix,
   type LegendItem,
   type RevizMeta,
 } from "@/reviz";
@@ -100,7 +100,6 @@ export default function LogScaleBars({
   const reduced = usePrefersReducedMotion();
   const [ref, inView] = useInView<HTMLDivElement>();
   const { token, replay } = useReplay();
-  const [active, setActive] = useState(0);
   const [hover, setHover] = useState<{ gi: number; si: number; x: number; y: number } | null>(null);
 
   const rows = data.length ? data : [];
@@ -139,31 +138,6 @@ export default function LogScaleBars({
   return (
     <Figure variant="plain" align="center" title={title} caption={caption} source={source}>
       <div ref={ref} className="group/figure relative">
-        {/* two-state variant toggle, top-right corner */}
-        {seriesCount > 1 && (
-          <div className="absolute right-0 top-0 z-20 flex items-center gap-px rounded-md border border-border bg-surface p-px shadow-float">
-            {seriesNames.slice(0, seriesCount).map((name, i) => (
-              <button
-                key={name}
-                type="button"
-                onClick={() => setActive(i)}
-                className="relative rounded-[5px] px-2.5 py-1 font-mono text-[10px] uppercase tracking-label transition-colors"
-                style={{ color: active === i ? p.canvas : p.inkMuted }}
-              >
-                {active === i && (
-                  <motion.span
-                    layoutId={`${gradIds[0]}-toggle`}
-                    className="absolute inset-0 rounded-[5px]"
-                    style={{ background: palCols[i] }}
-                    transition={{ type: "spring", stiffness: 420, damping: 34 }}
-                  />
-                )}
-                <span className="relative whitespace-nowrap">{name}</span>
-              </button>
-            ))}
-          </div>
-        )}
-
         <ResponsiveSvg
           aspect={16 / 9}
           margin={{ top: 26, right: 24, bottom: 42, left: yLabel ? 62 : 48 }}
@@ -188,8 +162,8 @@ export default function LogScaleBars({
                 <defs>
                   {gradIds.map((id, i) => (
                     <linearGradient key={id} id={id} x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor={palCols[i]} stopOpacity={0.95} />
-                      <stop offset="100%" stopColor={withAlpha(palCols[i], 0.6)} />
+                      <stop offset="0%" stopColor={palCols[i]} stopOpacity={1} />
+                      <stop offset="100%" stopColor={mix(palCols[i], p.canvas, 0.18)} stopOpacity={1} />
                     </linearGradient>
                   ))}
                 </defs>
@@ -276,14 +250,13 @@ export default function LogScaleBars({
                         const bw = inner2.bandwidth();
                         const top = y(v);
                         const h = Math.max(0, inner.height - top);
-                        const dim = seriesCount > 1 && active !== si;
                         const isHovered = hover?.gi === gi && hover?.si === si;
                         const drawDelay = reduced ? 0 : gi * 0.07 + si * 0.04;
 
                         return (
                           <motion.g
                             key={si}
-                            animate={{ opacity: dim ? 0.32 : 1 }}
+                            animate={{ opacity: 1 }}
                             transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
                           >
                             <motion.rect
@@ -319,8 +292,8 @@ export default function LogScaleBars({
                               onMouseLeave={() => setHover(null)}
                               key={`bar-${token}-${gi}-${si}`}
                             />
-                            {/* value label atop the active series' bar */}
-                            {(!dim || seriesCount === 1) && (
+                            {/* value label atop the first (reference) series' bar */}
+                            {(si === 0 || seriesCount === 1) && (
                               <motion.text
                                 x={bx + bw / 2}
                                 y={top - 6}
@@ -342,32 +315,6 @@ export default function LogScaleBars({
                           </motion.g>
                         );
                       })}
-
-                      {/* italic serif annotation pinned above the group */}
-                      {r.note && (
-                        <motion.text
-                          x={xGroup.bandwidth() / 2}
-                          y={-12}
-                          textAnchor="middle"
-                          fill={p.inkMuted}
-                          style={{
-                            fontFamily: "var(--font-serif)",
-                            fontStyle: "italic",
-                            fontSize: 12.5,
-                          }}
-                          initial={reduced ? false : { opacity: 0, y: -6 }}
-                          animate={
-                            inView || reduced ? { opacity: 1, y: -12 } : { opacity: 0, y: -6 }
-                          }
-                          transition={{
-                            duration: 0.4,
-                            delay: reduced ? 0 : gi * 0.07 + duration / 1000 + 0.2,
-                          }}
-                          key={`note-${token}-${gi}`}
-                        >
-                          {r.note}
-                        </motion.text>
-                      )}
                     </g>
                   );
                 })}

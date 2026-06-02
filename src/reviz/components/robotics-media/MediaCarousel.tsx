@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { ChevronLeft, ChevronRight, ImageOff, Pause, Play } from "lucide-react";
+import { ChevronLeft, ChevronRight, Pause, Play } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Figure,
@@ -155,14 +155,14 @@ export default function MediaCarousel({
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: reduced ? 0 : dir * -12 }}
                     transition={{ duration: dur, ease: [0.22, 1, 0.36, 1] }}
-                    className="block whitespace-nowrap font-mono text-[11px] uppercase tracking-label text-ink"
+                    className="block whitespace-nowrap font-mono text-[13px] uppercase tracking-label text-ink"
                   >
                     {current?.title || `Slide ${idx + 1}`}
                   </motion.span>
                 </AnimatePresence>
               </div>
               <span
-                className="shrink-0 font-mono text-[10px] tabular-nums tracking-label"
+                className="shrink-0 font-mono text-[12px] tabular-nums tracking-label"
                 style={{ color: p.inkFaint }}
               >
                 {String(idx + 1).padStart(2, "0")}/{String(n).padStart(2, "0")}
@@ -228,7 +228,7 @@ export default function MediaCarousel({
                   animate={{ opacity: inView ? 1 : 0, y: 0 }}
                   exit={{ opacity: 0, y: reduced ? 0 : -6 }}
                   transition={{ duration: dur, ease: [0.22, 1, 0.36, 1] }}
-                  className="max-w-[44ch] font-serif text-[12.5px] italic leading-snug"
+                  className="max-w-[44ch] font-serif text-[14.5px] italic leading-snug"
                   style={{ color: withAlpha(p.ink, 0.92) }}
                 >
                   {current.caption}
@@ -292,7 +292,7 @@ export default function MediaCarousel({
             onClick={() => setPlaying((v) => !v)}
             disabled={reduced || n <= 1}
             className={cn(
-              "inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 font-mono text-[10px] uppercase tracking-label outline-none transition-colors",
+              "inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 font-mono text-[11px] uppercase tracking-label outline-none transition-colors",
               "disabled:cursor-not-allowed disabled:opacity-40",
             )}
             style={{
@@ -314,8 +314,8 @@ export default function MediaCarousel({
                   type="button"
                   onClick={() => select(i, idx)}
                   className={cn(
-                    "inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-label outline-none transition-colors",
-                    isActive ? "text-ink" : "text-ink-faint hover:text-ink-muted",
+                    "inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-label outline-none transition-colors",
+                    isActive ? "text-ink" : "text-ink-muted hover:text-ink",
                   )}
                 >
                   <span
@@ -382,11 +382,10 @@ function NavButton({
 /* ------------------------------------------------------------------ */
 
 function SyntheticFrame({
-  label,
   seriesIndex,
   palette,
 }: {
-  label: string;
+  label?: string;
   seriesIndex: number;
   palette: ReturnType<typeof usePalette>;
 }) {
@@ -476,21 +475,6 @@ function SyntheticFrame({
           rx={1.2}
         />
       </svg>
-      <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
-        <div
-          className="grid h-9 w-9 place-items-center rounded-full"
-          style={{
-            backgroundColor: withAlpha(accent, 0.14),
-            color: accent,
-            border: `1px solid ${withAlpha(accent, 0.4)}`,
-          }}
-        >
-          <ImageOff className="h-4 w-4" />
-        </div>
-        <span className="max-w-[80%] text-center font-mono text-[10px] uppercase tracking-label text-ink-faint">
-          {label || "No media"}
-        </span>
-      </div>
     </div>
   );
 }

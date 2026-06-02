@@ -213,7 +213,7 @@ export default function ConceptMap({
     () => Math.max(1, ...placed.map((d) => d.degree)),
     [placed],
   );
-  const radiusFor = (d: Placed) => 16 + 12 * Math.sqrt(d.degree / maxDegree);
+  const radiusFor = (d: Placed) => 30 + 12 * Math.sqrt(d.degree / maxDegree);
 
   const neighbors = hover ? adjacency.get(hover.id) : undefined;
   const nodeActive = (id: string) =>
@@ -414,19 +414,31 @@ export default function ConceptMap({
                           strokeWidth={focused ? 2 : 1.4}
                           filter={focused ? `url(#${ids}-glow)` : `url(#${ids}-shadow)`}
                         />
-                        <text
-                          x={cx}
-                          y={cy}
-                          dy="0.32em"
-                          textAnchor="middle"
-                          className="font-sans"
-                          fontSize={r > 24 ? 10.5 : 9.5}
-                          fontWeight={600}
-                          fill={focused ? readableOn(surface) : p.ink}
-                          style={{ pointerEvents: "none" }}
-                        >
-                          {wrapLabel(d.label, r)}
-                        </text>
+                        {(() => {
+                          const lines = wrapLabel(d.label, r);
+                          const fontSize = r > 36 ? 10.5 : 9.5;
+                          const lineH = fontSize + 2;
+                          const y0 = cy - ((lines.length - 1) * lineH) / 2;
+                          return (
+                            <text
+                              x={cx}
+                              y={y0}
+                              dy="0.32em"
+                              textAnchor="middle"
+                              className="font-sans"
+                              fontSize={fontSize}
+                              fontWeight={600}
+                              fill={focused ? readableOn(surface) : p.ink}
+                              style={{ pointerEvents: "none" }}
+                            >
+                              {lines.map((line, li) => (
+                                <tspan key={li} x={cx} dy={li === 0 ? 0 : lineH}>
+                                  {line}
+                                </tspan>
+                              ))}
+                            </text>
+                          );
+                        })()}
                       </motion.g>
                     );
                   })}
@@ -495,10 +507,33 @@ export default function ConceptMap({
 /* Helpers                                                             */
 /* ------------------------------------------------------------------ */
 
-/** Soft single-line truncation tuned to the node radius. */
-function wrapLabel(label: string, r: number): string {
-  const maxChars = clamp(Math.round(r / 2.6), 6, 14);
-  return label.length > maxChars ? label.slice(0, maxChars - 1) + "…" : label;
+/** Word-wrap a concept label onto up to two lines that fit inside the node. */
+function wrapLabel(label: string, r: number): string[] {
+  // Characters that fit on one line at the node's width, with a little inset.
+  const maxChars = clamp(Math.round((r * 1.7) / 5.2), 8, 16);
+  if (label.length <= maxChars) return [label];
+
+  const words = label.split(/\s+/);
+  const lines: string[] = [];
+  let current = "";
+  for (const word of words) {
+    const next = current ? `${current} ${word}` : word;
+    if (next.length > maxChars && current) {
+      lines.push(current);
+      current = word;
+    } else {
+      current = next;
+    }
+  }
+  if (current) lines.push(current);
+
+  // Cap at two lines; truncate the second with an ellipsis only if needed.
+  if (lines.length > 2) {
+    const rest = lines.slice(1).join(" ");
+    lines.length = 1;
+    lines.push(rest.length > maxChars ? rest.slice(0, maxChars - 1) + "…" : rest);
+  }
+  return lines;
 }
 
 /* ------------------------------------------------------------------ */

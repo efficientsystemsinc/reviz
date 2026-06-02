@@ -164,7 +164,7 @@ export default function BubbleChart({
     <Figure variant="plain" align="center" title={title} caption={caption} source={source}>
       <div ref={ref} className="relative">
         <ResponsiveSvg
-          aspect={16 / 11}
+          aspect={16 / 9}
           margin={{ top: 18, right: 22, bottom: xLabel || yLabel ? 46 : 40, left: yLabel ? 56 : 46 }}
         >
           {({ inner, margin }) => {

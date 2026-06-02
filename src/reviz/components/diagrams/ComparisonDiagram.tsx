@@ -408,12 +408,12 @@ export default function ComparisonDiagram({
             );
           })}
 
-          {/* center pill label, floating over the divider */}
+          {/* center pill label, floating above the divider */}
           {centerLabel !== "" && items.length === 2 && (
             <motion.div
-              className="pointer-events-none absolute left-1/2 top-0 z-10 hidden -translate-x-1/2 -translate-y-1/2 md:block"
-              initial={reduced ? false : { opacity: 0, scale: 0.8, y: "-50%" }}
-              animate={{ opacity: inView ? 1 : 0, scale: inView ? 1 : 0.8, y: "-50%" }}
+              className="pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 hidden -translate-x-1/2 md:block"
+              initial={reduced ? false : { opacity: 0, scale: 0.8 }}
+              animate={{ opacity: inView ? 1 : 0, scale: inView ? 1 : 0.8 }}
               transition={{ duration: reduced ? 0 : 0.4, delay: stepDelay + durationS * 0.5, ease: [0.22, 1, 0.36, 1] }}
             >
               <span

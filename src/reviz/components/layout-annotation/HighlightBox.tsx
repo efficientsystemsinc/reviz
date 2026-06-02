@@ -307,7 +307,9 @@ export default function HighlightBox({
                 style={{
                   left: box.left,
                   top: tagOnTop ? box.top : box.top + box.h,
-                  transform: tagOnTop ? "translateY(-100%)" : "translateY(2px)",
+                  transform: tagOnTop
+                    ? "translateY(calc(-100% - 6px))"
+                    : "translateY(6px)",
                   background: fill,
                   color: p.surface,
                 }}

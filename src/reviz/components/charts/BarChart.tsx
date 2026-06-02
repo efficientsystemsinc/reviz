@@ -179,12 +179,12 @@ export default function BarChart({
                       {showValues && (
                         <motion.text
                           x={x + bw / 2}
-                          y={value(d.value) - 7}
+                          y={value(d.value) - 8}
                           textAnchor="middle"
                           fill={p.inkMuted}
                           className="font-mono text-[10.5px] tabular-nums"
-                          initial={{ opacity: 0, y: value(d.value) }}
-                          animate={{ opacity: inView ? 1 : 0, y: value(d.value) - 7 }}
+                          initial={{ opacity: 0, y: value(d.value) - 8 }}
+                          animate={{ opacity: inView ? 1 : 0, y: value(d.value) - 8 }}
                           transition={{ delay: i * 0.06 + duration / 1400 }}
                         >
                           {formatCompact(d.value)}

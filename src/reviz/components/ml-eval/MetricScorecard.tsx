@@ -307,7 +307,7 @@ export default function MetricScorecard({
 
   return (
     <Figure variant="plain" align="left" title={title} caption={caption} source={source}>
-      <div ref={ref} className="group/scorecard relative">
+      <div ref={ref} className="group/scorecard relative pt-7">
         <div className={`grid grid-cols-1 gap-3 ${gridCols}`}>
           {list.map((m, i) => (
             <Cell
@@ -332,7 +332,7 @@ export default function MetricScorecard({
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ delay: reduced ? 0 : 0.4 }}
-              className="absolute -top-1 right-0 opacity-0 transition-opacity group-hover/scorecard:opacity-100"
+              className="absolute top-0 right-0 opacity-0 transition-opacity group-hover/scorecard:opacity-100"
             >
               <ReplayButton onClick={replay} label="Replay" />
             </motion.div>

@@ -96,7 +96,7 @@ function buildField(count: number, shape: FieldShape): Particle[] {
     if (shape === "column") {
       // Gentle spindle: fattest mid-column, tapering at both ends.
       const taper = Math.sin(by * Math.PI); // 0 at ends, 1 mid
-      halfWidth = lerp(0.08, 0.34, 0.35 + 0.65 * taper);
+      halfWidth = lerp(0.06, 0.22, 0.35 + 0.65 * taper);
       centerX = 0.5 + Math.sin(by * Math.PI * 1.4) * 0.015;
     } else if (shape === "wave") {
       // A sinuous ribbon meandering left↔right down the field.
@@ -119,8 +119,8 @@ function buildField(count: number, shape: FieldShape): Particle[] {
     const dist = Math.min(1, Math.abs(bx - centerX) / Math.max(0.001, halfWidth));
     const depth = 1 - dist; // 1 at core, 0 at rim
 
-    const r = lerp(1.4, 5.6, Math.pow(depth, 0.6)) * lerp(0.7, 1.15, rand());
-    const baseOpacity = lerp(0.22, 0.95, Math.pow(depth, 0.5));
+    const r = lerp(2.2, 6.4, Math.pow(depth, 0.6)) * lerp(0.7, 1.15, rand());
+    const baseOpacity = lerp(0.45, 0.98, Math.pow(depth, 0.5));
 
     out.push({
       bx,
@@ -210,8 +210,8 @@ export default function ParticleField({
                 <defs>
                   <Glow id={ids.glow} blur={4} />
                   <radialGradient id={ids.halo} cx="50%" cy="50%" r="50%">
-                    <stop offset="0%" stopColor={withAlpha(tint, 0.16)} />
-                    <stop offset="55%" stopColor={withAlpha(tint, 0.05)} />
+                    <stop offset="0%" stopColor={withAlpha(tint, 0.3)} />
+                    <stop offset="55%" stopColor={withAlpha(tint, 0.1)} />
                     <stop offset="100%" stopColor={withAlpha(tint, 0)} />
                   </radialGradient>
                   <radialGradient id={ids.core} cx="38%" cy="34%" r="72%">
@@ -225,7 +225,7 @@ export default function ParticleField({
                 <ellipse
                   cx={axisX}
                   cy={H / 2}
-                  rx={W * 0.42}
+                  rx={W * 0.3}
                   ry={H * 0.46}
                   fill={`url(#${ids.halo})`}
                   opacity={reveal}
@@ -305,8 +305,8 @@ export default function ParticleField({
                         y1={cy}
                         x2={axisX + dir * lineLen}
                         y2={cy}
-                        stroke={withAlpha(tint, active ? 0.9 : 0.55)}
-                        strokeWidth={1}
+                        stroke={withAlpha(tint, active ? 0.95 : 0.75)}
+                        strokeWidth={1.25}
                       />
                       <circle
                         cx={axisX}
@@ -323,11 +323,11 @@ export default function ParticleField({
                         y={cy}
                         dy="0.32em"
                         textAnchor={onLeft ? "end" : "start"}
-                        fill={active ? p.ink : p.inkMuted}
+                        fill={active ? p.accent : p.ink}
                         style={{
                           fontFamily: "var(--font-mono)",
-                          fontSize: 10.5,
-                          letterSpacing: "0.12em",
+                          fontSize: 12,
+                          letterSpacing: "0.1em",
                           textTransform: "uppercase",
                         }}
                       >

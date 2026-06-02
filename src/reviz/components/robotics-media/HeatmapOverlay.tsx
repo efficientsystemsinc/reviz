@@ -85,7 +85,7 @@ export default function HeatmapOverlay({
 
   // Heat color ramp: dim accent tint -> saturated accent, eased so the hottest
   // regions read instantly while faint attention stays legible.
-  const heatColor = (t: number) => mix(mix(p.surfaceAlt, accent, 0.25), accent, Math.pow(t, 0.55));
+  const heatColor = (t: number) => mix(mix(p.surfaceAlt, accent, 0.55), accent, Math.pow(t, 0.45));
 
   // A synthetic "scene" backdrop (used when no bgSrc is given): soft horizon
   // bands plus a few schematic objects, deterministic via seeded noise.
@@ -175,7 +175,7 @@ export default function HeatmapOverlay({
                           y={H * (b.t * 0.7 + 0.1 + b.jitter)}
                           width={W}
                           height={Math.max(1, H * 0.012)}
-                          fill={withAlpha(p.borderStrong, 0.5)}
+                          fill={withAlpha(p.borderStrong, 0.28)}
                         />
                       ))}
                       {/* schematic objects the policy might attend to */}
@@ -209,7 +209,7 @@ export default function HeatmapOverlay({
                   )}
 
                   {/* dim scrim so heat reads on any backdrop */}
-                  <rect x={0} y={0} width={W} height={H} fill={withAlpha(p.canvas, 0.18)} />
+                  <rect x={0} y={0} width={W} height={H} fill={withAlpha(p.canvas, 0.1)} />
 
                   {/* The smooth heat field: blurred, opacity-ramped cells */}
                   <g filter={`url(#${blurId})`} style={{ mixBlendMode: "multiply" }}>
@@ -217,7 +217,7 @@ export default function HeatmapOverlay({
                       row.map((v, c) => {
                         const t = tOf(v);
                         if (t <= 0.001) return null;
-                        const cellOpacity = opacity * Math.pow(t, 0.85);
+                        const cellOpacity = opacity * Math.pow(t, 0.6);
                         return (
                           <motion.rect
                             key={`heat-${token}-${r}-${c}`}
@@ -304,7 +304,7 @@ export default function HeatmapOverlay({
                     y={-2}
                     fill={p.inkMuted}
                     className="font-mono uppercase"
-                    style={{ fontSize: 9.5, letterSpacing: "0.12em" }}
+                    style={{ fontSize: 12, letterSpacing: "0.12em" }}
                   >
                     {legendLabel}
                   </text>
@@ -322,20 +322,20 @@ export default function HeatmapOverlay({
                   />
                   <text
                     x={W * 0.42}
-                    y={11}
-                    fill={p.inkFaint}
+                    y={12}
+                    fill={p.inkMuted}
                     className="font-mono tabular-nums"
-                    style={{ fontSize: 9 }}
+                    style={{ fontSize: 10.5 }}
                   >
                     {round(lo, 2)}
                   </text>
                   <text
                     x={W}
-                    y={11}
+                    y={12}
                     textAnchor="end"
-                    fill={p.inkFaint}
+                    fill={p.inkMuted}
                     className="font-mono tabular-nums"
-                    style={{ fontSize: 9 }}
+                    style={{ fontSize: 10.5 }}
                   >
                     {round(hi, 2)}
                   </text>

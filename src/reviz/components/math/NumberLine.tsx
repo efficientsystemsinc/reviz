@@ -220,8 +220,8 @@ export default function NumberLine({
                             letterSpacing: "0.06em",
                             fontWeight: 600,
                           }}
-                          initial={{ opacity: 0, y: axisY - bandH - 6 }}
-                          animate={{ opacity: draw ? 1 : 0, y: draw ? axisY - bandH - 12 : axisY - bandH - 6 }}
+                          initial={{ opacity: 0, y: 6 }}
+                          animate={{ opacity: draw ? 1 : 0, y: draw ? 0 : 6 }}
                           transition={{ duration: reduced ? 0 : 0.34, delay: delay + 0.1 }}
                         >
                           {iv.label}
@@ -354,8 +354,8 @@ export default function NumberLine({
                             letterSpacing: "0.05em",
                             fontWeight: 600,
                           }}
-                          initial={{ opacity: 0, y: axisY + 32 }}
-                          animate={{ opacity: draw ? 1 : 0, y: draw ? axisY + 38 : axisY + 32 }}
+                          initial={{ opacity: 0, y: -6 }}
+                          animate={{ opacity: draw ? 1 : 0, y: 0 }}
                           transition={{ duration: reduced ? 0 : 0.3, delay: delay + 0.1 }}
                         >
                           {pt.label}

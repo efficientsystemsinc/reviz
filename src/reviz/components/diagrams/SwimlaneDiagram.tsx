@@ -164,6 +164,11 @@ export default function SwimlaneDiagram({
             const hw = boxW / 2;
             const hh = boxH / 2;
 
+            // Character budgets so labels stay inside the box (left pad 15 + right pad ~10).
+            const textW = Math.max(0, boxW - 25);
+            const labelMax = Math.max(4, Math.floor(textW / 7)); // font-sans 12
+            const detailMax = Math.max(4, Math.floor(textW / 5.1)); // font-mono 8.5
+
             return (
               <g transform={`translate(${margin.left},${margin.top})`}>
                 <defs>
@@ -438,7 +443,7 @@ export default function SwimlaneDiagram({
                           fontWeight={600}
                           fill={p.ink}
                         >
-                          {truncate(s.label, 15)}
+                          {truncate(s.label, labelMax)}
                         </text>
                         {s.detail && (
                           <text
@@ -450,7 +455,7 @@ export default function SwimlaneDiagram({
                             letterSpacing="0.02em"
                             fill={p.inkFaint}
                           >
-                            {truncate(s.detail, 17)}
+                            {truncate(s.detail, detailMax)}
                           </text>
                         )}
                       </motion.g>

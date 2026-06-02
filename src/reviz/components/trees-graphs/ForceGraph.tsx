@@ -422,8 +422,14 @@ export default function ForceGraph({
                             y={py(d) + r + 11}
                             textAnchor="middle"
                             fill={dim ? p.inkFaint : p.inkMuted}
+                            stroke={p.surface}
+                            strokeWidth={3}
                             className="font-mono text-[9.5px]"
-                            style={{ pointerEvents: "none" }}
+                            style={{
+                              pointerEvents: "none",
+                              paintOrder: "stroke",
+                              strokeLinejoin: "round",
+                            }}
                           >
                             {d.label ?? d.id}
                           </text>

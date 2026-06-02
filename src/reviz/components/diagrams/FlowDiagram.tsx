@@ -57,6 +57,8 @@ interface LaidNode extends FlowNode {
   slot: number;
   /** Total nodes in this layer. */
   lane: number;
+  /** Unique sequential index across all nodes (in layout order). */
+  order: number;
 }
 
 /** Assign every node a layer = longest dependency depth from a root. */
@@ -117,7 +119,7 @@ function layout(nodes: FlowNode[], edges: FlowEdge[]) {
   buckets.forEach((bucket, l) => {
     bucket.forEach((id, slot) => {
       const n = byId.get(id)!;
-      laid.push({ ...n, layer: l, slot, lane: bucket.length });
+      laid.push({ ...n, layer: l, slot, lane: bucket.length, order: laid.length });
     });
   });
 
@@ -402,7 +404,7 @@ export default function FlowDiagram({
                           fontWeight={600}
                           fill={active ? readableOn(tone) : tone}
                         >
-                          {n.layer + 1}
+                          {n.order + 1}
                         </text>
                         {/* Label */}
                         <text

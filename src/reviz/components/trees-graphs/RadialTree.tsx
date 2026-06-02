@@ -439,9 +439,17 @@ export default function RadialTree({
                             transform={`translate(${lp.x},${lp.y}) rotate(${rot})`}
                             textAnchor={anchor}
                             dy="0.32em"
-                            fill={active ? col : p.inkMuted}
+                            fill={active ? col : p.ink}
+                            stroke={p.surface}
+                            strokeWidth={3}
                             className="font-mono uppercase tracking-label"
-                            style={{ fontSize: 8.5, fontWeight: 600, letterSpacing: "0.04em" }}
+                            style={{
+                              fontSize: 8.5,
+                              fontWeight: 600,
+                              letterSpacing: "0.04em",
+                              paintOrder: "stroke",
+                              strokeLinejoin: "round",
+                            }}
                           >
                             {truncate(d.node.name, 14)}
                           </text>

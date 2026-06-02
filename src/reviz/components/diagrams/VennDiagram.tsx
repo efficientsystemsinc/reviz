@@ -120,22 +120,24 @@ export default function VennDiagram({
                 { x: cx + sep * 0.92, y: cy + sep * 0.62, align: "start" as const, ly: 1 }, // bottom-right (C)
               ];
               pts.forEach((pt, i) => {
+                // Top set sits above its circle; the two bottom sets are
+                // labeled beside their outer edge (left / right) so the labels
+                // stay inside the visible frame instead of clipping below.
+                const labelAnchor =
+                  pt.ly < 0
+                    ? { x: pt.x, y: pt.y - r - 14, align: pt.align }
+                    : {
+                        x: pt.align === "end" ? pt.x - r - 6 : pt.x + r + 6,
+                        y: pt.y + r * 0.62,
+                        align: pt.align,
+                      };
                 circles.push({
                   cx: pt.x,
                   cy: pt.y,
                   r,
                   color: colors[i],
                   label: list[i].label,
-                  labelAnchor: {
-                    x:
-                      pt.align === "middle"
-                        ? pt.x
-                        : pt.align === "end"
-                          ? pt.x - r * 0.74
-                          : pt.x + r * 0.74,
-                    y: pt.ly < 0 ? pt.y - r - 14 : pt.y + r + 6,
-                    align: pt.align,
-                  },
+                  labelAnchor,
                 });
               });
             } else {

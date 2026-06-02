@@ -500,6 +500,11 @@ function Inner({
           );
         }
 
+        // Place the label inside the bar only if the full task name fits;
+        // otherwise set it in the clear space after the bar (no truncation).
+        const checkPrefix = showProgress && !r.milestone && r.progress >= 1 ? "✓ " : "";
+        const labelChars = checkPrefix.length + r.name.length;
+        const fitsInside = bw > labelChars * 7 + 18;
         return (
           <g key={`row-${r.i}-${token}`}>
             {/* Track */}
@@ -532,20 +537,20 @@ function Inner({
                 style={{ pointerEvents: "none" }}
               />
             )}
-            {/* Label inside or after the bar */}
+            {/* Label inside (only when the full name fits) or after the bar */}
             <motion.text
-              x={bw > 64 ? bx + 9 : bx + bw + 8}
+              x={fitsInside ? bx + 9 : bx + bw + 8}
               y={cy}
               dy="0.32em"
               textAnchor="start"
-              fill={bw > 64 ? readableOn(mix(fill, p.canvas, 0.12)) : p.inkMuted}
+              fill={fitsInside ? readableOn(mix(fill, p.canvas, 0.12)) : p.inkMuted}
               style={{ fontFamily: "var(--font-mono)", fontSize: 10, pointerEvents: "none" }}
               initial={reduced ? false : { opacity: 0 }}
               animate={{ opacity: inView ? 1 : reduced ? 1 : 0 }}
               transition={{ duration: 0.4, delay: delay + baseDur * 0.55 }}
             >
-              {showProgress && !r.milestone && r.progress >= 1 ? "✓ " : ""}
-              {truncate(r.name, bw > 64 ? Math.floor(bw / 7) : 22)}
+              {checkPrefix}
+              {fitsInside ? r.name : truncate(r.name, 22)}
             </motion.text>
           </g>
         );

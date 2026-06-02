@@ -187,7 +187,7 @@ export default function PRCurve({
   return (
     <Figure variant="plain" align="center" title={title} caption={caption} source={source}>
       <div ref={ref} className="relative">
-        <ResponsiveSvg aspect={1} minHeight={300} margin={{ top: 18, right: 22, bottom: 46, left: 52 }}>
+        <ResponsiveSvg aspect={16 / 11} minHeight={300} margin={{ top: 18, right: 22, bottom: 46, left: 52 }}>
           {({ inner, margin }) => {
             const x = scaleLinear().domain([0, 1]).range([0, inner.width]);
             const y = scaleLinear().domain([0, 1]).range([inner.height, 0]);
@@ -248,10 +248,10 @@ export default function PRCurve({
                         <motion.text
                           x={x(apex) + 4}
                           y={y(apex) - 4}
-                          fill={p.inkFaint}
+                          fill={p.inkMuted}
                           style={{ fontFamily: "var(--font-mono)", fontSize: 8.5, letterSpacing: "0.04em" }}
                           initial={{ opacity: 0 }}
-                          animate={{ opacity: inView ? 0.75 : 0 }}
+                          animate={{ opacity: inView ? 1 : 0 }}
                           transition={{ duration: reduced ? 0 : 0.5, delay: reduced ? 0 : 0.1 + i * 0.06 }}
                           key={`isolab-${f}-${token}`}
                         >
@@ -404,7 +404,7 @@ export const meta: RevizMeta = {
   badges: ["animated", "interactive", "exportable", "themed", "responsive"],
   exportName: "PRCurve",
   sourcePath: "statistical/PRCurve",
-  aspect: 1,
+  aspect: 16 / 11,
   controls: [
     {
       key: "curves",

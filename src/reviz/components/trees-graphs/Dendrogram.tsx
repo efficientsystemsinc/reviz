@@ -240,7 +240,7 @@ export default function Dendrogram({
           margin={
             horizontal
               ? { top: 22, right: 120, bottom: 40, left: 52 }
-              : { top: 26, right: 28, bottom: 78, left: 56 }
+              : { top: 26, right: 28, bottom: 78, left: 72 }
           }
         >
           {({ inner, margin }) => {
@@ -331,13 +331,25 @@ export default function Dendrogram({
                     linearFormat={(v) => v.toFixed(2)}
                   />
                 ) : (
-                  <AxisLeft
-                    scale={heightScale}
-                    count={5}
-                    format={(v) => v.toFixed(2)}
-                    label="merge distance"
-                    height={inner.height}
-                  />
+                  <>
+                    <AxisLeft
+                      scale={heightScale}
+                      count={5}
+                      format={(v) => v.toFixed(2)}
+                      height={inner.height}
+                    />
+                    {/* Axis title placed clear of the tick labels (which end near x=-10). */}
+                    <text
+                      aria-hidden
+                      transform={`translate(${-52}, ${inner.height / 2}) rotate(-90)`}
+                      textAnchor="middle"
+                      fill={p.inkMuted}
+                      className="font-mono uppercase"
+                      style={{ fontSize: 10.5, letterSpacing: "0.14em" }}
+                    >
+                      merge distance
+                    </text>
+                  </>
                 )}
 
                 {/* Color-threshold cut line */}

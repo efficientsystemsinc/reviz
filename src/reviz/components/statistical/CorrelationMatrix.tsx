@@ -320,7 +320,7 @@ function CorrLegend({
 }) {
   const gradId = useMemo(() => uid("corr-legend-grad"), []);
   const barW = 9;
-  const barH = Math.max(40, height * 0.7);
+  const barH = Math.max(40, height * 0.58);
   const top = (height - barH) / 2;
   const ticks: { v: number; t: number }[] = [
     { v: 1, t: 0 },

@@ -280,8 +280,17 @@ export default function ArchitectureDiagram({
                   boxes.map((b) => {
                     if (!b.dim) return null;
                     const { x, y, w, h } = b.box;
-                    const dimY = b.shape === "vector" ? y - 12 : vertical ? y + h / 2 : y - 9;
-                    const dimX = vertical ? x + w + 12 : x + w / 2;
+                    // Trapezoids fan past their base box, so place the label clear of
+                    // the shape's widest edge rather than on top of the sloped border.
+                    const isTrap = b.shape === "trapezoidL" || b.shape === "trapezoidR";
+                    const crossHalf = (isTrap ? b.wideCross : b.box.h) / 2;
+                    const crossHalfW = (isTrap ? b.wideCross : b.box.w) / 2;
+                    const dimY = b.shape === "vector"
+                      ? y - 12
+                      : vertical
+                        ? y + h / 2
+                        : y + h / 2 - crossHalf - 8;
+                    const dimX = vertical ? x + w / 2 + crossHalfW + 12 : x + w / 2;
                     const anchor = vertical ? "start" : "middle";
                     const baseline = vertical ? "0.34em" : "0";
                     return (

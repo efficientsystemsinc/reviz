@@ -429,7 +429,7 @@ export default function SankeyDiagram({
                   {[...laid.values()].map((n, i) => {
                     const active = !linkedNodes || linkedNodes.has(n.id);
                     const onRight = n.column === maxCol;
-                    const labelX = onRight ? n.x0 - 8 : n.x1 + 8;
+                    const labelX = onRight ? n.x0 - 12 : n.x1 + 8;
                     const anchor = onRight ? "end" : "start";
                     const cy = (n.y0 + n.y1) / 2;
                     return (
@@ -479,7 +479,7 @@ export default function SankeyDiagram({
                         >
                           {n.label}
                           {showValues && (
-                            <tspan fill={p.inkFaint} className="tabular-nums">
+                            <tspan fill={p.inkMuted} className="tabular-nums">
                               {"  "}
                               {formatCompact(n.value)}
                             </tspan>

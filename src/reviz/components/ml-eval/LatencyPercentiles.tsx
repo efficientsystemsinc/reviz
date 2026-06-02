@@ -132,16 +132,6 @@ export default function LatencyPercentiles({
   const accent = color || p.accent;
   const safeGroups = groups.length ? groups : [];
 
-  const domainMax = useMemo(
-    () => Math.max(1, ...safeGroups.map((g) => g.p99 * 1.34)),
-    [safeGroups],
-  );
-  const domainMin = useMemo(() => {
-    if (!logScale) return 0;
-    const mins = safeGroups.map((g) => g.p50 * 0.16);
-    return Math.max(1, Math.min(...(mins.length ? mins : [1])));
-  }, [safeGroups, logScale]);
-
   const fmt = (v: number) => `${formatCompact(v)}${unit ? ` ${unit}` : ""}`;
   const fmtTick = (v: number) => formatCompact(v);
 
@@ -160,16 +150,8 @@ export default function LatencyPercentiles({
           margin={{ top: 18, right: 30, bottom: 40, left: 108 }}
         >
           {({ inner, margin }) => {
-            const x = logScale
-              ? scaleLog().domain([Math.max(1, domainMin), domainMax]).range([0, inner.width]).clamp(true)
-              : scaleLinear().domain([0, domainMax]).range([0, inner.width]).nice();
-
             const rowH = inner.height / Math.max(1, safeGroups.length);
-            const violinH = Math.min(rowH * 0.62, 96);
-
-            const xTicks = logScale
-              ? (x as ReturnType<typeof scaleLog>).ticks(5)
-              : (x as ReturnType<typeof scaleLinear>).ticks(6);
+            const violinH = Math.min(rowH * 0.46, 72);
 
             return (
               <g transform={`translate(${margin.left}, ${margin.top})`}>
@@ -177,55 +159,25 @@ export default function LatencyPercentiles({
                   <VerticalFade id={gradId} color={accent} from={0.26} to={0.04} />
                 </defs>
 
-                {/* vertical gridlines */}
-                {xTicks.map((t, i) => (
-                  <line
-                    key={`grid-${i}`}
-                    x1={x(t)}
-                    x2={x(t)}
-                    y1={0}
-                    y2={inner.height}
-                    stroke={p.grid}
-                    strokeWidth={1}
-                    strokeDasharray="2 5"
-                    shapeRendering="crispEdges"
-                  />
-                ))}
-
-                {/* x ticks (latency) */}
-                <g transform={`translate(0, ${inner.height})`}>
-                  {xTicks.map((t, i) => (
-                    <text
-                      key={`xt-${i}`}
-                      x={x(t)}
-                      y={18}
-                      textAnchor="middle"
-                      fill={p.inkFaint}
-                      className="font-mono"
-                      style={{ fontSize: 10.5, letterSpacing: "0.04em" }}
-                    >
-                      {fmtTick(t)}
-                    </text>
-                  ))}
-                  <text
-                    x={inner.width}
-                    y={32}
-                    textAnchor="end"
-                    fill={p.inkFaint}
-                    className="font-mono uppercase"
-                    style={{ fontSize: 9, letterSpacing: "0.14em" }}
-                  >
-                    latency{unit ? ` (${unit})` : ""}
-                  </text>
-                </g>
-
                 {safeGroups.map((g, gi) => {
                   const cy = rowH * gi + rowH / 2;
-                  const density = densityFor(g, domainMax, logScale);
-                  const visible = density.filter((d) => d.x >= (logScale ? domainMin : 0));
+                  // Each row gets its own x-scale so groups at very different
+                  // latency magnitudes (e.g. cold vs warm) are each legible.
+                  const rowMax = g.p99 * 1.34;
+                  const rowMin = logScale ? Math.max(1, g.p50 * 0.16) : 0;
+                  const x = logScale
+                    ? scaleLog().domain([Math.max(1, rowMin), rowMax]).range([0, inner.width]).clamp(true)
+                    : scaleLinear().domain([0, rowMax]).range([0, inner.width]).nice();
+
+                  const xTicks = logScale
+                    ? (x as ReturnType<typeof scaleLog>).ticks(5)
+                    : (x as ReturnType<typeof scaleLinear>).ticks(6);
+
+                  const density = densityFor(g, rowMax, logScale);
+                  const visible = density.filter((d) => d.x >= rowMin);
 
                   const violin = d3Area<{ x: number; w: number }>()
-                    .x((d) => x(Math.max(d.x, logScale ? domainMin : 0)))
+                    .x((d) => x(Math.max(d.x, rowMin)))
                     .y0((d) => cy - (d.w * violinH) / 2)
                     .y1((d) => cy + (d.w * violinH) / 2)
                     .curve(curveBasis);
@@ -233,8 +185,26 @@ export default function LatencyPercentiles({
                   const violinPath = violin(visible) ?? "";
                   const drawDelay = gi * 0.12;
 
+                  // Bottom edge of this row's band, where its own tick labels sit.
+                  const axisY = cy + violinH / 2 + 22;
+
                   return (
                     <g key={`${g.name}-${gi}`}>
+                      {/* per-row vertical gridlines (this row's own scale) */}
+                      {xTicks.map((t, i) => (
+                        <line
+                          key={`grid-${gi}-${i}`}
+                          x1={x(t)}
+                          x2={x(t)}
+                          y1={cy - violinH / 2 - 14}
+                          y2={cy + violinH / 2 + 14}
+                          stroke={p.grid}
+                          strokeWidth={1}
+                          strokeDasharray="2 5"
+                          shapeRendering="crispEdges"
+                        />
+                      ))}
+
                       {/* group label */}
                       <text
                         x={-margin.left + 4}
@@ -266,6 +236,33 @@ export default function LatencyPercentiles({
                         shapeRendering="crispEdges"
                       />
 
+                      {/* per-row x ticks (this group's own latency scale) */}
+                      {xTicks.map((t, i) => (
+                        <text
+                          key={`xt-${gi}-${i}`}
+                          x={x(t)}
+                          y={axisY}
+                          textAnchor="middle"
+                          fill={p.inkFaint}
+                          className="font-mono"
+                          style={{ fontSize: 10, letterSpacing: "0.04em" }}
+                        >
+                          {fmtTick(t)}
+                        </text>
+                      ))}
+                      {gi === safeGroups.length - 1 && (
+                        <text
+                          x={inner.width}
+                          y={axisY + 13}
+                          textAnchor="end"
+                          fill={p.inkFaint}
+                          className="font-mono uppercase"
+                          style={{ fontSize: 9, letterSpacing: "0.14em" }}
+                        >
+                          latency{unit ? ` (${unit})` : ""}
+                        </text>
+                      )}
+
                       {/* density / violin */}
                       <motion.path
                         d={violinPath}
@@ -292,8 +289,13 @@ export default function LatencyPercentiles({
                       {/* percentile markers */}
                       {PCTS.map((pc, pi) => {
                         const v = g[pc.key];
-                        if (logScale && v < domainMin) return null;
-                        const px = x(Math.max(v, logScale ? domainMin : 0));
+                        if (logScale && v < rowMin) return null;
+                        const px = x(Math.max(v, rowMin));
+                        // If a neighbouring percentile sits within a label-width,
+                        // nudge this label horizontally so the two don't collide.
+                        const prevPx = pi > 0 ? x(Math.max(g[PCTS[pi - 1].key], rowMin)) : -Infinity;
+                        const tooClose = Math.abs(px - prevPx) < 22;
+                        const labelDx = tooClose ? (pi % 2 === 0 ? -12 : 12) : 0;
                         const isP50 = pc.key === "p50";
                         const isTail = pc.key === "p99";
                         const tone = isP50 ? accent : mixTone(accent, p, pi);
@@ -348,7 +350,7 @@ export default function LatencyPercentiles({
                               strokeWidth={1}
                             />
                             <text
-                              x={px}
+                              x={px + labelDx}
                               y={labelAbove ? cy - half - 5 : cy + half + 13}
                               textAnchor="middle"
                               fill={active ? p.ink : p.inkMuted}

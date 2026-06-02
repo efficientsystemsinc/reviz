@@ -250,10 +250,10 @@ export default function Histogram({
                       strokeDasharray="2 3"
                     />
                     <text
-                      x={medX}
+                      x={medX - 6}
                       y={-10}
-                      textAnchor="middle"
-                      fill={p.inkFaint}
+                      textAnchor="end"
+                      fill={p.inkMuted}
                       className="font-mono"
                       style={{ fontSize: 9.5, letterSpacing: "0.08em" }}
                     >
@@ -272,9 +272,9 @@ export default function Histogram({
                       <polygon points="0,0 -4,-6 4,-6" fill={p.accent} />
                     </g>
                     <text
-                      x={meanX}
-                      y={inner.height + 30}
-                      textAnchor="middle"
+                      x={meanX + 6}
+                      y={-10}
+                      textAnchor="start"
                       fill={p.accent}
                       className="font-mono"
                       style={{ fontSize: 9.5, letterSpacing: "0.08em" }}

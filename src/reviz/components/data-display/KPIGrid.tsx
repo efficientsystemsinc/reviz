@@ -393,7 +393,7 @@ export default function KPIGrid({
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ delay: reduced ? 0 : 0.4 }}
-              className="absolute -top-1 right-0 opacity-0 transition-opacity group-hover/kpigrid:opacity-100"
+              className="absolute -top-9 right-0 z-10 opacity-0 transition-opacity group-hover/kpigrid:opacity-100"
             >
               <ReplayButton onClick={replay} label="Replay" />
             </motion.div>

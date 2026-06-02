@@ -163,7 +163,7 @@ export default function AdjacencyMatrix({
                 {/* Axis titles */}
                 <text
                   x={size / 2}
-                  y={-margin.top + 11}
+                  y={-margin.top + 2}
                   textAnchor="middle"
                   fill={p.inkMuted}
                   className="font-mono uppercase"

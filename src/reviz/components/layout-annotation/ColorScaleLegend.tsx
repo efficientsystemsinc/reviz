@@ -131,7 +131,7 @@ export default function ColorScaleLegend({
   // The reveal mask: a moving wipe + soft shimmer, snaps to full when reduced.
   const reveal = reduced ? 1 : progress;
 
-  const BAR = vertical ? 16 : 14; // bar thickness
+  const BAR = vertical ? 16 : 28; // bar thickness
   const LEN = vertical ? 196 : 100; // length basis (% for horizontal, px for vertical)
 
   return (

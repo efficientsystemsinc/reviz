@@ -153,7 +153,12 @@ function layout(nodes: DAGNode[], edges: DAGEdge[]) {
     });
   });
 
-  return { laid, edges: valid, layers: maxLayer + 1 };
+  // Assign a unique sequential index to every node (badge order), so nodes that
+  // share a topological layer still get distinct numbers instead of duplicates.
+  const indexOf = new Map<string, number>();
+  laid.forEach((n, i) => indexOf.set(n.id, i));
+
+  return { laid, edges: valid, layers: maxLayer + 1, indexOf };
 }
 
 function truncate(s: string, n: number): string {
@@ -211,7 +216,7 @@ export default function DAGFlow({
   const [hover, setHover] = useState<string | null>(null);
 
   const ids = useMemo(() => uid("dag"), []);
-  const { laid, edges: cleanEdges, layers } = useMemo(
+  const { laid, edges: cleanEdges, layers, indexOf } = useMemo(
     () => layout(nodes, edges),
     [nodes, edges],
   );
@@ -542,12 +547,12 @@ export default function DAGFlow({
                           fontWeight={600}
                           fill={active ? readableOn(tone) : tone}
                         >
-                          {n.layer}
+                          {indexOf.get(n.id) ?? i}
                         </text>
                         {/* Label */}
                         <text
                           x={x + 15}
-                          y={pos.cy - (n.sublabel ? 6 : 0)}
+                          y={pos.cy - (n.sublabel ? 4 : 0)}
                           dy={n.sublabel ? 0 : "0.32em"}
                           textAnchor="start"
                           className="font-sans"
@@ -560,7 +565,7 @@ export default function DAGFlow({
                         {n.sublabel && (
                           <text
                             x={x + 15}
-                            y={pos.cy + 11}
+                            y={pos.cy + 12}
                             textAnchor="start"
                             className="font-mono"
                             fontSize={9}

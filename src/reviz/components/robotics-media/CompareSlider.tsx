@@ -158,7 +158,7 @@ export default function CompareSlider({
       <div ref={viewRef} className="relative">
         <motion.div
           ref={trackRef}
-          className="group/cmp relative aspect-[16/10] w-full select-none overflow-hidden rounded-reviz border border-border bg-surface-alt"
+          className="group/cmp relative aspect-[4/3] w-full select-none overflow-hidden rounded-reviz border border-border bg-surface-alt"
           initial={{ opacity: 0, scale: 0.985 }}
           animate={inView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.985 }}
           transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
@@ -243,7 +243,7 @@ export default function CompareSlider({
 
           {/* Position readout */}
           <div
-            className="pointer-events-none absolute bottom-2.5 left-1/2 z-20 -translate-x-1/2 rounded-full border px-2 py-0.5 font-mono text-[10px] tabular-nums tracking-label text-ink-muted opacity-0 backdrop-blur-sm transition-opacity duration-200 group-hover/cmp:opacity-100"
+            className="pointer-events-none absolute bottom-2.5 left-1/2 z-20 -translate-x-1/2 rounded-full border px-2 py-0.5 font-mono text-[11px] tabular-nums tracking-label text-ink-muted opacity-0 backdrop-blur-sm transition-opacity duration-200 group-hover/cmp:opacity-100"
             style={{ borderColor: p.border, background: withAlpha(p.surface, 0.7) }}
           >
             {Math.round(pos)}%
@@ -251,10 +251,10 @@ export default function CompareSlider({
         </motion.div>
 
         <div className="mt-2 flex items-center justify-between">
-          <span className="font-mono text-[10px] uppercase tracking-label text-ink-faint">
+          <span className="font-mono text-[12px] uppercase tracking-label text-ink-muted">
             Drag to compare
           </span>
-          <ReplayButton onClick={onReplay} label="Sweep" />
+          <ReplayButton onClick={onReplay} label="Sweep" className="text-[12px]" />
         </div>
       </div>
     </Figure>
@@ -363,7 +363,7 @@ function CornerLabel({
         className="h-1.5 w-1.5 rounded-full"
         style={{ background: accent ? p.accent : p.inkMuted }}
       />
-      <span className="font-mono text-[10px] uppercase tracking-label text-ink">{text}</span>
+      <span className="font-mono text-[12px] uppercase tracking-label text-ink">{text}</span>
     </div>
   );
 }

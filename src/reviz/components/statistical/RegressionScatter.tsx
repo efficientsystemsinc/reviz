@@ -323,12 +323,12 @@ export default function RegressionScatter({
                     animate={{ opacity: inView ? 1 : 0, y: inView ? 0 : -6 }}
                     transition={{ duration: 0.5, delay: baseDelay + duration / 1800 }}
                   >
-                    <foreignObject x={0} y={0} width={158} height={52} style={{ overflow: "visible" }}>
+                    <foreignObject x={0} y={0} width={196} height={52} style={{ overflow: "visible" }}>
                       <div className="inline-flex flex-col gap-0.5 rounded-md border border-border bg-surface/90 px-2.5 py-1.5 shadow-float backdrop-blur-sm">
                         <div className="font-mono text-[11.5px] tabular-nums text-ink">
                           {`R² = ${round(fit.r2, 3)}`}
                         </div>
-                        <div className="font-mono text-[9.5px] uppercase tracking-label text-ink-faint">
+                        <div className="whitespace-nowrap font-mono text-[9.5px] uppercase tracking-label text-ink-faint">
                           {`slope = ${slopeTxt} · n = ${fit.n}`}
                         </div>
                       </div>

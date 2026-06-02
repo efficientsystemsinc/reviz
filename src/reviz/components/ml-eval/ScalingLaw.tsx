@@ -166,6 +166,16 @@ export default function ScalingLaw({
             const xTicks = xScale.ticks(6);
             const yTicks = yScale.ticks(5);
 
+            // On a wide log domain d3 emits every minor (2×,3×,…) tick, which
+            // overprints into an illegible smear. Label only decade (power-of-10)
+            // ticks so the compute axis stays readable.
+            const isDecade = (t: number) => {
+              const e = Math.log10(t);
+              return Math.abs(e - Math.round(e)) < 1e-6;
+            };
+            const decadeTicks = xTicks.filter(isDecade);
+            const xLabelTicks = decadeTicks.length > 0 ? decadeTicks : xScale.domain();
+
             // Fit endpoints over the observed range and the extrapolated range.
             const obsXMin = data[0]?.x ?? xDomain[0];
             const obsXMax = data[data.length - 1]?.x ?? xDomain[1];
@@ -357,7 +367,7 @@ export default function ScalingLaw({
                   format={(v) => formatCompact(v, 2)}
                 />
                 <g aria-hidden transform={`translate(0, ${inner.height})`}>
-                  {xTicks.map((t, i) => (
+                  {xLabelTicks.map((t, i) => (
                     <text
                       key={`tx-${i}`}
                       x={xScale(t)}

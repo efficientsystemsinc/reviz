@@ -345,8 +345,8 @@ function ThresholdTick({
   color: string;
 }) {
   const angle = frac * 2 * Math.PI;
-  const inner = r - thickness / 2 - 2;
-  const outer = r + thickness / 2 + 2;
+  const inner = r - thickness / 2;
+  const outer = r + thickness / 2;
   const x1 = cx + inner * Math.cos(angle);
   const y1 = cy + inner * Math.sin(angle);
   const x2 = cx + outer * Math.cos(angle);
@@ -358,9 +358,7 @@ function ThresholdTick({
       x2={x2}
       y2={y2}
       stroke={color}
-      strokeWidth={2}
-      strokeLinecap="round"
-      opacity={0.85}
+      strokeWidth={3}
     />
   );
 }

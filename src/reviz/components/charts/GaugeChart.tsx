@@ -365,24 +365,31 @@ function Needle({
 
   return (
     <g>
-      <motion.g
-        style={{ transformOrigin: `${cx}px ${cy}px` }}
-        initial={{ rotate: fromDeg }}
-        animate={{ rotate: target }}
-        transition={{
-          duration: reduced ? 0 : duration / 1000,
-          ease: EASE,
-          delay: reduced ? 0 : 0.12,
-        }}
-        key={token}
-      >
-        {/* Needle points straight up at rotate=0; rotation maps to the value angle. */}
-        <path
-          d={`M ${cx} ${cy - len} L ${cx - hubR * 0.5} ${cy} L ${cx + hubR * 0.5} ${cy} Z`}
-          fill={color}
-          filter={`url(#${shadowId})`}
-        />
-      </motion.g>
+      {/* Translate to the hub so rotation pivots about (cx, cy): the CSS
+          transform-origin on an SVG <g> resolves against the needle's own
+          bounding box, not the gauge center, which would aim it wrongly.
+          The outer static group sets the pivot; the inner motion.g only
+          rotates, about its now-correct origin (0,0). */}
+      <g transform={`translate(${cx},${cy})`}>
+        <motion.g
+          style={{ transformOrigin: "0px 0px" }}
+          initial={{ rotate: fromDeg }}
+          animate={{ rotate: target }}
+          transition={{
+            duration: reduced ? 0 : duration / 1000,
+            ease: EASE,
+            delay: reduced ? 0 : 0.12,
+          }}
+          key={token}
+        >
+          {/* Needle points straight up at rotate=0; rotation maps to the value angle. */}
+          <path
+            d={`M 0 ${-len} L ${-hubR * 0.5} 0 L ${hubR * 0.5} 0 Z`}
+            fill={color}
+            filter={`url(#${shadowId})`}
+          />
+        </motion.g>
+      </g>
       <circle cx={cx} cy={cy} r={hubR} fill={hubFill} stroke={hubStroke} strokeWidth={2.5} />
       <circle cx={cx} cy={cy} r={hubR * 0.4} fill={color} />
     </g>

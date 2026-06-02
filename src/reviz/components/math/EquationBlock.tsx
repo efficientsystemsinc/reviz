@@ -10,7 +10,6 @@ import {
   usePalette,
   usePrefersReducedMotion,
   useReplay,
-  withAlpha,
   type RevizMeta,
 } from "@/reviz";
 
@@ -122,11 +121,11 @@ export default function EquationBlock({
                   type="button"
                   onClick={() => setShowHi(false)}
                   title="Highlighted term — click to dismiss"
-                  className="absolute -top-3 right-0 inline-flex items-center gap-1.5 rounded-md px-2 py-1"
+                  className="absolute top-0 right-0 inline-flex items-center gap-1.5 rounded-md px-2 py-1"
                   style={{
-                    background: withAlpha(p.accent, 0.12),
-                    border: `1px solid ${withAlpha(p.accent, 0.35)}`,
-                    color: p.accent,
+                    background: p.accent,
+                    border: `1px solid ${p.accent}`,
+                    color: p.accentContrast,
                     fontSize: Math.max(11, fontSize * 0.44),
                   }}
                   initial={{ opacity: 0, y: -4, scale: 0.9 }}

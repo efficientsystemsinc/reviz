@@ -127,6 +127,10 @@ export default function StepChart({
           {({ inner, margin }) => {
             const x = scaleLinear().domain([0, span - 1]).range([0, inner.width]);
             const y = scaleLinear().domain(yDomain).range([inner.height, 0]).nice();
+            // formatCompact collapses sub-1 values (e.g. 1e-3 LR ticks) to "0";
+            // defer to the scale's own tick formatter so small magnitudes keep
+            // enough precision to read distinct tick values.
+            const yTickFormat = y.tickFormat(5);
 
             const lineGen = d3line<number>()
               .x((_, i) => x(i))
@@ -227,7 +231,7 @@ export default function StepChart({
                 )}
 
                 <Baseline y={inner.height} width={inner.width} />
-                <AxisLeft scale={y as never} height={inner.height} label={yLabel} format={(v) => formatCompact(v, 3)} />
+                <AxisLeft scale={y as never} height={inner.height} label={yLabel} format={yTickFormat} />
                 <AxisBottom scale={x as never} y={inner.height} linearFormat={(v) => formatCompact(v)} linearCount={Math.min(8, span)} />
 
                 {/* Hover crosshair + per-series readout dots. */}

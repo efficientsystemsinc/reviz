@@ -226,10 +226,10 @@ export default function FunnelChart({
                         fill={active ? p.ink : p.inkMuted}
                         className="font-mono"
                         style={{ fontSize: 11, letterSpacing: "0.01em" }}
-                        initial={{ opacity: 0, x: -margin.left }}
+                        initial={{ opacity: 0, x: -8 }}
                         animate={{
                           opacity: inView ? 1 : 0,
-                          x: inView ? -margin.left + 8 : -margin.left,
+                          x: inView ? 0 : -8,
                         }}
                         transition={{
                           delay: i * (duration / 1000 / Math.max(n, 1)) * 0.7 + duration / 1000 * 0.4,

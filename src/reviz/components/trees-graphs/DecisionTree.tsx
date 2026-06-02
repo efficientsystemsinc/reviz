@@ -228,7 +228,7 @@ export default function DecisionTree({
     <Figure variant="plain" align="center" title={title} caption={caption} source={source}>
       <div ref={ref} className="relative">
         <ResponsiveSvg
-          aspect={horizontal ? 16 / 9 : 16 / 11}
+          aspect={horizontal ? 16 / 9 : 16 / 10}
           margin={{ top: 22, right: 26, bottom: 22, left: 26 }}
         >
           {({ inner, margin }) => {
@@ -493,9 +493,9 @@ function SplitNode({
         textAnchor="middle"
         fill={p.ink}
         className="font-mono"
-        style={{ fontSize: 10.5, letterSpacing: "0.01em" }}
+        style={{ fontSize: 9.5, letterSpacing: "0.01em" }}
       >
-        {fit(label, w)}
+        {fit(label, w, 5.4)}
       </text>
     </g>
   );
@@ -614,9 +614,9 @@ function EdgeLabel({
 /* Text helpers                                                        */
 /* ------------------------------------------------------------------ */
 
-/** Truncate a label to fit a node width (rough monospace metric). */
-function fit(text: string, w: number): string {
-  const max = Math.max(3, Math.floor((w - 14) / 6.0));
+/** Truncate a label to fit a node width (rough per-char metric). */
+function fit(text: string, w: number, cw = 6.0): string {
+  const max = Math.max(3, Math.floor((w - 14) / cw));
   if (text.length <= max) return text;
   return text.slice(0, Math.max(1, max - 1)) + "…";
 }

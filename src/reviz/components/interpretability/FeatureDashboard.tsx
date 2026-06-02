@@ -286,9 +286,9 @@ export default function FeatureDashboard({
                             strokeDasharray="2 3"
                           />
                           <text
-                            x={x(fireFrom)}
-                            y={-1}
-                            textAnchor="middle"
+                            x={x(fireFrom) + 4}
+                            y={-3}
+                            textAnchor="start"
                             fill={fill}
                             className="font-mono"
                             style={{ fontSize: 8.5, letterSpacing: "0.08em" }}

@@ -265,19 +265,20 @@ export default function ViolinPlot({
                       />
 
                       {/* the violin body: scales open horizontally from the center axis */}
-                      <motion.path
-                        d={d}
-                        transform={`translate(${cx}, 0)`}
-                        fill={`url(#${gid})`}
-                        stroke={fill}
-                        strokeWidth={1.5}
-                        strokeLinejoin="round"
-                        initial={{ scaleX: 0, opacity: 0 }}
-                        animate={{ scaleX: play ? 1 : 0, opacity: play ? (active ? 1 : 0.92) : 0 }}
-                        transition={{ duration: sec * 0.7, delay, ease: [0.22, 1, 0.36, 1] }}
-                        style={{ transformBox: "fill-box", transformOrigin: "center" }}
-                        key={`${token}-body-${i}`}
-                      />
+                      <g transform={`translate(${cx}, 0)`}>
+                        <motion.path
+                          d={d}
+                          fill={`url(#${gid})`}
+                          stroke={fill}
+                          strokeWidth={1.5}
+                          strokeLinejoin="round"
+                          initial={{ scaleX: 0, opacity: 0 }}
+                          animate={{ scaleX: play ? 1 : 0, opacity: play ? (active ? 1 : 0.92) : 0 }}
+                          transition={{ duration: sec * 0.7, delay, ease: [0.22, 1, 0.36, 1] }}
+                          style={{ transformBox: "fill-box", transformOrigin: "center" }}
+                          key={`${token}-body-${i}`}
+                        />
+                      </g>
 
                       {/* inner box (IQR) */}
                       {showBox && (

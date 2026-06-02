@@ -283,6 +283,63 @@ export default function SystemTopology({
             const posById = new Map<string, { cx: number; cy: number }>();
             laid.forEach((n) => posById.set(n.id, nodeCenter(n)));
 
+            // Pre-compute edge-label anchors, then de-collide labels whose pills
+            // would overlap: links between the same pair of columns (and same-col
+            // hops routed to the same gutter) collapse into a narrow center band,
+            // so their pills stack. Spread colliding pills vertically so each
+            // annotation stays readable.
+            const labelH = 15;
+            const labelW = (s?: string) => (s ? s.length * 6.1 + 10 : 0);
+            const labelPos = new Map<number, { mx: number; my: number }>();
+            validLinks.forEach((l, i) => {
+              if (!l.label) return;
+              const a = posById.get(l.source);
+              const b = posById.get(l.target);
+              if (!a || !b) return;
+              const sameCol = Math.abs(a.cx - b.cx) < 1;
+              const hw = boxW / 2;
+              const mx = sameCol ? a.cx + hw + 24 : (a.cx + b.cx) / 2;
+              const my = (a.cy + b.cy) / 2;
+              labelPos.set(i, { mx, my });
+            });
+            // Cluster labels by horizontal pill overlap, then fan each cluster out
+            // vertically and re-center it around its original mean y.
+            const ordered = [...labelPos.keys()].sort(
+              (p, q) => labelPos.get(p)!.mx - labelPos.get(q)!.mx,
+            );
+            const clusters: number[][] = [];
+            ordered.forEach((i) => {
+              const li = labelPos.get(i)!;
+              const halfI = labelW(validLinks[i].label) / 2;
+              const last = clusters[clusters.length - 1];
+              if (last) {
+                const j = last[last.length - 1];
+                const lj = labelPos.get(j)!;
+                const halfJ = labelW(validLinks[j].label) / 2;
+                if (li.mx - lj.mx < halfI + halfJ) {
+                  last.push(i);
+                  return;
+                }
+              }
+              clusters.push([i]);
+            });
+            clusters.forEach((group) => {
+              if (group.length < 2) return;
+              group.sort((p, q) => labelPos.get(p)!.my - labelPos.get(q)!.my);
+              const minGap = labelH + 4;
+              const meanOrig =
+                group.reduce((s, g) => s + labelPos.get(g)!.my, 0) / group.length;
+              for (let k = 1; k < group.length; k++) {
+                const prev = labelPos.get(group[k - 1])!;
+                const cur = labelPos.get(group[k])!;
+                if (cur.my - prev.my < minGap) cur.my = prev.my + minGap;
+              }
+              const meanNow =
+                group.reduce((s, g) => s + labelPos.get(g)!.my, 0) / group.length;
+              const shift = meanOrig - meanNow;
+              group.forEach((g) => (labelPos.get(g)!.my += shift));
+            });
+
             // Reveal scheduling: zones → nodes (by column) → links.
             const zoneDelay = (col: number) => (reduced ? 0 : col * 0.07 * animBase);
             const nodeDelay = (n: LaidNode) =>
@@ -392,8 +449,9 @@ export default function SystemTopology({
                       ? `M ${x1} ${y1} C ${x1 + 34} ${y1}, ${x2 + 34} ${y2}, ${x2} ${y2}`
                       : `M ${x1} ${y1} C ${(x1 + x2) / 2} ${y1}, ${(x1 + x2) / 2} ${y2}, ${x2} ${y2}`;
 
-                    const mx = sameCol ? Math.max(x1, x2) + 24 : (x1 + x2) / 2;
-                    const my = (y1 + y2) / 2;
+                    const anchor = labelPos.get(i);
+                    const mx = anchor?.mx ?? (sameCol ? Math.max(x1, x2) + 24 : (x1 + x2) / 2);
+                    const my = anchor?.my ?? (y1 + y2) / 2;
 
                     const delay = linkBaseDelay + (reduced ? 0 : i * 0.05);
 

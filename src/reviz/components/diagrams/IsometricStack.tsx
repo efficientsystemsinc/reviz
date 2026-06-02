@@ -152,8 +152,8 @@ export default function IsometricStack({
               );
             };
 
-            // Label anchor: the back (top) corner of each plane.
-            const labelAnchor = (dy: number) => ({ x: cx + cTop.x, y: topY + cTop.y + dy });
+            // Label anchor: the left vertex of each plane, in clear space beside the stack.
+            const labelAnchor = (dy: number) => ({ x: cx + cLeft.x, y: topY + cLeft.y + dy });
             // Items run down the right edge of the diamond.
             const itemAnchor = (dy: number) => ({ x: cx + cRight.x, y: topY + cRight.y + dy });
 
@@ -240,8 +240,8 @@ export default function IsometricStack({
                         strokeLinecap="round"
                       />
 
-                      {/* layer index badge on the back corner */}
-                      <g transform={`translate(${la.x - 6}, ${la.y - 22})`}>
+                      {/* layer index badge, tied to this plane's left vertex */}
+                      <g transform={`translate(${la.x - 36}, ${la.y - 8})`}>
                         <rect
                           x={0}
                           y={0}
@@ -265,10 +265,11 @@ export default function IsometricStack({
                         </text>
                       </g>
 
-                      {/* layer label, riding the back edge */}
+                      {/* layer label, set in the clear space left of its plane */}
                       <text
-                        x={la.x + 22}
-                        y={la.y - 14}
+                        x={la.x - 44}
+                        y={la.y - 4}
+                        textAnchor="end"
                         className="font-mono"
                         fill={dim ? p.inkFaint : p.ink}
                         style={{
@@ -282,8 +283,9 @@ export default function IsometricStack({
                       </text>
                       {layer.sublabel && (
                         <text
-                          x={la.x + 22}
-                          y={la.y - 2}
+                          x={la.x - 44}
+                          y={la.y + 9}
+                          textAnchor="end"
                           fill={p.inkFaint}
                           className="font-mono"
                           style={{ fontSize: 9, letterSpacing: "0.08em", textTransform: "uppercase" }}

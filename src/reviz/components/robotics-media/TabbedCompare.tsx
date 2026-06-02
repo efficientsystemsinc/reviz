@@ -100,8 +100,8 @@ export default function TabbedCompare({
                 onClick={() => setActive(i)}
                 className={cn(
                   "group/tab relative -mb-px px-3 pb-2.5 pt-1 outline-none",
-                  "font-mono text-[11px] uppercase tracking-label transition-colors",
-                  isActive ? "text-ink" : "text-ink-faint hover:text-ink-muted",
+                  "font-mono text-[13px] uppercase tracking-label transition-colors",
+                  isActive ? "text-ink" : "text-ink-muted hover:text-ink",
                 )}
               >
                 <span className="flex items-center gap-2">
@@ -156,7 +156,12 @@ export default function TabbedCompare({
                   draggable={false}
                 />
               ) : (
-                <SyntheticFrame label={current?.label ?? ""} seriesIndex={idx} />
+                <SyntheticFrame
+                  label={current?.label ?? ""}
+                  seriesIndex={idx}
+                  tabs={safeTabs}
+                  activeIndex={idx}
+                />
               )}
 
               {/* Top scrim + index/metric pills (pills stay clickable-free) */}
@@ -170,10 +175,10 @@ export default function TabbedCompare({
                 }}
               >
                 <span
-                  className="rounded-md px-2 py-1 font-mono text-[10px] uppercase tracking-label backdrop-blur-sm"
+                  className="rounded-md px-2 py-1 font-mono text-[12px] uppercase tracking-label backdrop-blur-sm"
                   style={{
-                    backgroundColor: withAlpha(p.canvas, 0.62),
-                    color: p.inkMuted,
+                    backgroundColor: withAlpha(p.canvas, 0.82),
+                    color: p.ink,
                     border: `1px solid ${withAlpha(p.border, 0.9)}`,
                   }}
                 >
@@ -181,11 +186,11 @@ export default function TabbedCompare({
                 </span>
                 {current?.badge && (
                   <span
-                    className="rounded-md px-2 py-1 font-mono text-[10px] uppercase tracking-label backdrop-blur-sm"
+                    className="rounded-md px-2 py-1 font-mono text-[12px] uppercase tracking-label backdrop-blur-sm"
                     style={{
-                      backgroundColor: withAlpha(p.series[idx % p.series.length], 0.16),
+                      backgroundColor: withAlpha(p.canvas, 0.82),
                       color: p.series[idx % p.series.length],
-                      border: `1px solid ${withAlpha(p.series[idx % p.series.length], 0.4)}`,
+                      border: `1px solid ${withAlpha(p.series[idx % p.series.length], 0.5)}`,
                     }}
                   >
                     {current.badge}
@@ -216,7 +221,7 @@ export default function TabbedCompare({
                 animate={{ opacity: inView ? 1 : 0, y: 0 }}
                 exit={{ opacity: 0, y: reduced ? 0 : -4 }}
                 transition={{ duration: dur, ease: [0.22, 1, 0.36, 1] }}
-                className="font-serif text-[13px] italic leading-snug text-ink-muted"
+                className="font-serif text-[14px] italic leading-snug text-ink-muted"
               >
                 {current?.caption ?? ""}
               </motion.p>
@@ -229,23 +234,36 @@ export default function TabbedCompare({
   );
 }
 
+/** Pull the first numeric value out of a metric badge, e.g. "41% success" -> 41. */
+function parseMetric(badge?: string): number | null {
+  if (!badge) return null;
+  const m = badge.match(/-?\d+(?:\.\d+)?/);
+  return m ? Number(m[0]) : null;
+}
+
 /**
- * A themed synthetic "frame" used when a tab has no image src — a soft
- * gradient field with a faint scan grid and a centered placeholder mark, so
- * the component looks intentional and research-grade even without media.
+ * A themed synthetic "frame" used when a tab has no image src. When the tabs
+ * carry numeric metric badges it renders a real cross-condition comparison
+ * (one labelled bar per tab, active one highlighted) so the panel shows actual
+ * data; otherwise it falls back to a clean themed placeholder mark.
  */
-function SyntheticFrame({ label, seriesIndex }: { label: string; seriesIndex: number }) {
+function SyntheticFrame({
+  label,
+  seriesIndex,
+  tabs,
+  activeIndex,
+}: {
+  label: string;
+  seriesIndex: number;
+  tabs: Tab[];
+  activeIndex: number;
+}) {
   const p = usePalette();
   const accent = p.series[seriesIndex % p.series.length];
 
-  // Corner framing ticks (viewfinder corners) — clean, intentional, no scatter.
-  const corners = [
-    { x: 6, y: 6, dx: 1, dy: 1 },
-    { x: 94, y: 6, dx: -1, dy: 1 },
-    { x: 6, y: 94, dx: 1, dy: -1 },
-    { x: 94, y: 94, dx: -1, dy: -1 },
-  ];
-  const tick = 7;
+  const metrics = tabs.map((t) => parseMetric(t.badge));
+  const hasComparison = metrics.filter((m) => m != null).length >= 2;
+  const maxMetric = Math.max(100, ...metrics.map((m) => m ?? 0));
 
   return (
     <div className="absolute inset-0">
@@ -262,75 +280,63 @@ function SyntheticFrame({ label, seriesIndex }: { label: string; seriesIndex: nu
           )}, ${withAlpha(p.surfaceAlt, 0.92)})`,
         }}
       />
-      <svg
-        className="absolute inset-0 h-full w-full"
-        viewBox="0 0 100 100"
-        preserveAspectRatio="none"
-        aria-hidden
-      >
-        {/* Faint regular scan grid */}
-        {Array.from({ length: 9 }).map((_, i) => (
-          <line
-            key={`v${i}`}
-            x1={(i + 1) * 10}
-            x2={(i + 1) * 10}
-            y1={0}
-            y2={100}
-            stroke={withAlpha(p.grid, 0.5)}
-            strokeWidth={0.25}
-          />
-        ))}
-        {Array.from({ length: 9 }).map((_, i) => (
-          <line
-            key={`h${i}`}
-            y1={(i + 1) * 10}
-            y2={(i + 1) * 10}
-            x1={0}
-            x2={100}
-            stroke={withAlpha(p.grid, 0.5)}
-            strokeWidth={0.25}
-          />
-        ))}
-        {/* Center crosshair guides */}
-        <line
-          x1={50}
-          x2={50}
-          y1={42}
-          y2={58}
-          stroke={withAlpha(accent, 0.45)}
-          strokeWidth={0.4}
-        />
-        <line
-          x1={42}
-          x2={58}
-          y1={50}
-          y2={50}
-          stroke={withAlpha(accent, 0.45)}
-          strokeWidth={0.4}
-        />
-        {/* Viewfinder corner ticks */}
-        {corners.map((c, i) => (
-          <g key={i} stroke={withAlpha(accent, 0.55)} strokeWidth={0.6} fill="none">
-            <line x1={c.x} y1={c.y} x2={c.x + c.dx * tick} y2={c.y} />
-            <line x1={c.x} y1={c.y} x2={c.x} y2={c.y + c.dy * tick} />
-          </g>
-        ))}
-      </svg>
-      <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
-        <div
-          className="grid h-10 w-10 place-items-center rounded-full"
-          style={{
-            backgroundColor: withAlpha(accent, 0.14),
-            color: accent,
-            border: `1px solid ${withAlpha(accent, 0.4)}`,
-          }}
-        >
-          <ImageOff className="h-4 w-4" />
+
+      {hasComparison ? (
+        <div className="absolute inset-0 flex flex-col justify-center gap-2.5 px-[8%] py-[7%]">
+          {tabs.map((t, i) => {
+            const v = metrics[i];
+            const color = p.series[i % p.series.length];
+            const isActive = i === activeIndex;
+            const frac = v == null ? 0 : Math.max(0, Math.min(1, v / maxMetric));
+            return (
+              <div key={`${t.label}-${i}`} className="flex flex-col gap-1">
+                <div className="flex items-baseline justify-between gap-3">
+                  <span
+                    className="font-mono text-[12px] uppercase tracking-label"
+                    style={{ color: isActive ? p.ink : p.inkMuted }}
+                  >
+                    {t.label}
+                  </span>
+                  <span
+                    className="font-mono text-[12px] tabular-nums"
+                    style={{ color: isActive ? color : p.inkMuted, fontWeight: isActive ? 600 : 400 }}
+                  >
+                    {t.badge ?? (v != null ? String(v) : "")}
+                  </span>
+                </div>
+                <div
+                  className="h-2.5 w-full overflow-hidden rounded-full"
+                  style={{ backgroundColor: withAlpha(p.border, 0.6) }}
+                >
+                  <div
+                    className="h-full rounded-full transition-[width]"
+                    style={{
+                      width: `${frac * 100}%`,
+                      backgroundColor: isActive ? color : withAlpha(color, 0.5),
+                    }}
+                  />
+                </div>
+              </div>
+            );
+          })}
         </div>
-        <span className="max-w-[80%] text-center font-mono text-[10px] uppercase tracking-label text-ink-muted">
-          {label || "No media"}
-        </span>
-      </div>
+      ) : (
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
+          <div
+            className="grid h-10 w-10 place-items-center rounded-full"
+            style={{
+              backgroundColor: withAlpha(accent, 0.14),
+              color: accent,
+              border: `1px solid ${withAlpha(accent, 0.4)}`,
+            }}
+          >
+            <ImageOff className="h-4 w-4" />
+          </div>
+          <span className="max-w-[80%] text-center font-mono text-[12px] uppercase tracking-label text-ink-muted">
+            {label || "No media"}
+          </span>
+        </div>
+      )}
     </div>
   );
 }

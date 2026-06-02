@@ -257,8 +257,10 @@ export default function ChordDiagram({
           {({ inner, margin }) => {
             const cx = inner.width / 2;
             const cy = inner.height / 2;
-            // Reserve room around the ring for labels.
-            const labelPad = 30;
+            // Reserve room around the ring for labels (group name + value
+            // sit outside the arc, so leave generous breathing room or the
+            // ring/labels collide with the canvas edge).
+            const labelPad = 56;
             const outer = clamp(Math.min(inner.width, inner.height) / 2 - labelPad, 30, 1000);
             const aw = clamp(arcWidth, 4, outer * 0.4);
             const arcOuter = outer;
@@ -301,8 +303,10 @@ export default function ChordDiagram({
                     {layout.ribbons.map((rb) => {
                       const active = ribbonActive(rb);
                       const isHot = hover?.kind === "ribbon" && hover.key === rb.key;
-                      // Ribbon color blends its two endpoints.
-                      const fill = mix(colorFor(rb.source), colorFor(rb.target), 0.5);
+                      // Ribbon color leans toward its source endpoint (rather
+                      // than a 50/50 blend that desaturates to muddy grey-brown)
+                      // so individual flows keep a distinguishable hue.
+                      const fill = mix(colorFor(rb.source), colorFor(rb.target), 0.3);
                       const d = ribbonPath(ribbonR, rb.s, rb.t);
                       const op =
                         (isHot ? Math.min(1, ribbonOpacity + 0.28) : ribbonOpacity) *
@@ -400,7 +404,7 @@ export default function ChordDiagram({
                             className="font-mono uppercase"
                             fontSize={10.5}
                             letterSpacing={0.4}
-                            fill={active ? p.ink : p.inkFaint}
+                            fill={active ? p.ink : p.inkMuted}
                           >
                             {labels[i]}
                           </text>
@@ -411,7 +415,7 @@ export default function ChordDiagram({
                               textAnchor={onRight ? "start" : "end"}
                               className="font-mono tabular-nums"
                               fontSize={9}
-                              fill={p.inkFaint}
+                              fill={active ? p.inkMuted : p.inkFaint}
                             >
                               {formatCompact(groupTotal(i))}
                             </text>
@@ -421,8 +425,13 @@ export default function ChordDiagram({
                     })}
                   </g>
 
-                  {/* Center readout. */}
+                  {/* Center readout. A soft surface disc sits behind it so the
+                      value stays legible over the overlapping ribbons. */}
                   <g style={{ pointerEvents: "none" }}>
+                    <circle
+                      r={clamp(arcInner * 0.6, 26, 80)}
+                      fill={withAlpha(p.surface, 0.82)}
+                    />
                     <text
                       textAnchor="middle"
                       y={-5}

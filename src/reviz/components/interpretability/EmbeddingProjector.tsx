@@ -239,7 +239,9 @@ export default function EmbeddingProjector({
                 {showHulls &&
                   byCluster.map(({ cluster, pts }, ci) => {
                     if (pts.length < 3) return null;
-                    const hull = inflate(convexHull(pts), r + 14);
+                    // Hull math runs in *screen* space: map px/py into {x,y}
+                    // (the points still carry data-space x/y from the spread).
+                    const hull = inflate(convexHull(pts.map((q) => ({ x: q.px, y: q.py }))), r + 14);
                     const d = hullPath(hull);
                     if (!d) return null;
                     const c = colorFor(cluster);

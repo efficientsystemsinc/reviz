@@ -116,6 +116,29 @@ export default function SlopeChart({
             const drawDur = (duration / 1000) * 0.7;
             const labelDelay = drawDur * 0.55;
 
+            // Right end-labels stack a value + delta line (~26px tall). When two
+            // `after` endpoints sit close, those blocks collide. Compute a
+            // collision-free y for each right label by greedily pushing labels
+            // apart from top to bottom while keeping them near their endpoint.
+            const RIGHT_LABEL_GAP = 28;
+            const rightLabelY = (() => {
+              const order = rows
+                .map((d, i) => ({ i, yA: y(d.after) }))
+                .sort((a, b) => a.yA - b.yA);
+              const placed: number[] = [];
+              let prev = -Infinity;
+              for (const { yA } of order) {
+                const ly = Math.max(yA, prev + RIGHT_LABEL_GAP);
+                placed.push(ly);
+                prev = ly;
+              }
+              const out: number[] = new Array(rows.length);
+              order.forEach((o, k) => {
+                out[o.i] = placed[k];
+              });
+              return out;
+            })();
+
             return (
               <g transform={`translate(${margin.left}, ${margin.top})`}>
                 <defs>
@@ -154,6 +177,7 @@ export default function SlopeChart({
                   const stagger = reduced ? 0 : (i / Math.max(1, rows.length)) * drawDur * 0.45;
                   const delta = d.after - d.before;
                   const arrow = delta > 1e-9 ? "↑" : delta < -1e-9 ? "↓" : "→";
+                  const labelY = rightLabelY[i];
 
                   return (
                     <g
@@ -266,9 +290,18 @@ export default function SlopeChart({
                           delay: reduced ? 0 : labelDelay + stagger,
                         }}
                       >
+                        {/* Leader line when the label was nudged off its dot. */}
+                        {Math.abs(labelY - yA) > 1 && (
+                          <polyline
+                            points={`${xR + 3},${yA} ${xR + 8},${labelY} ${xR + 11},${labelY}`}
+                            fill="none"
+                            stroke={withAlpha(c, 0.4)}
+                            strokeWidth={1}
+                          />
+                        )}
                         <text
                           x={xR + 12}
-                          y={yA}
+                          y={labelY}
                           dy="0.32em"
                           textAnchor="start"
                           fill={c}
@@ -278,7 +311,7 @@ export default function SlopeChart({
                         </text>
                         <text
                           x={xR + 12}
-                          y={yA + 13}
+                          y={labelY + 13}
                           textAnchor="start"
                           fill={p.inkFaint}
                           style={LABEL_FONT}

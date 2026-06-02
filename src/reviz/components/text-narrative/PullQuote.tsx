@@ -196,14 +196,14 @@ export default function PullQuote({
                 <div className={cn(centered ? "text-center" : "text-left")}>
                   {author && (
                     <cite
-                      className="block font-mono text-[12px] not-italic uppercase tracking-label text-ink"
+                      className="block font-mono text-[13px] not-italic uppercase tracking-label text-ink"
                       style={{ color: fill }}
                     >
                       {author}
                     </cite>
                   )}
                   {role && (
-                    <span className="mt-1 block font-mono text-[10.5px] uppercase tracking-label text-ink-faint">
+                    <span className="mt-1 block font-mono text-[11.5px] uppercase tracking-label text-ink-muted">
                       {role}
                     </span>
                   )}

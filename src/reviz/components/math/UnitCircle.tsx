@@ -133,7 +133,7 @@ export default function UnitCircle({
           aspect={showWave ? 16 / 7 : 1}
           margin={{ top: 18, right: 18, bottom: 26, left: 18 }}
         >
-          {({ inner }) => {
+          {({ inner, margin }) => {
             // Layout: the circle occupies a square box on the left; if the
             // wave is shown, it takes the remaining width to the right.
             const gap = showWave ? 26 : 0;
@@ -178,6 +178,7 @@ export default function UnitCircle({
                 initial={false}
                 animate={{ opacity: entered ? 1 : 0 }}
                 transition={{ duration: entranceDur, ease: [0.22, 1, 0.36, 1] }}
+                transform={`translate(${margin.left},${margin.top})`}
               >
                 <defs>
                   <radialGradient id={`${gid}-disc`} cx="50%" cy="50%" r="50%">
@@ -222,11 +223,11 @@ export default function UnitCircle({
                     strokeWidth={1.5}
                   />
 
-                  {/* cardinal coordinate ticks (1, 0, -1) */}
+                  {/* cardinal coordinate ticks (±1 on each axis) */}
                   {cardinals.map((deg) => {
                     const pt = polarToCartesian(cx, cy, R, deg);
                     return (
-                      <circle key={deg} cx={pt.x} cy={pt.y} r={2} fill={p.inkFaint} />
+                      <circle key={deg} cx={pt.x} cy={pt.y} r={2} fill={p.inkMuted} />
                     );
                   })}
                   <text
@@ -234,19 +235,38 @@ export default function UnitCircle({
                     y={cy}
                     dy="0.32em"
                     textAnchor="start"
-                    fill={p.inkFaint}
+                    fill={p.inkMuted}
+                    style={TICK_FONT}
+                  >
+                    1
+                  </text>
+                  <text
+                    x={cx - R - 11}
+                    y={cy}
+                    dy="0.32em"
+                    textAnchor="end"
+                    fill={p.inkMuted}
+                    style={TICK_FONT}
+                  >
+                    -1
+                  </text>
+                  <text
+                    x={cx}
+                    y={cy - R - 9}
+                    textAnchor="middle"
+                    fill={p.inkMuted}
                     style={TICK_FONT}
                   >
                     1
                   </text>
                   <text
                     x={cx}
-                    y={cy - R - 11}
+                    y={cy + R + 17}
                     textAnchor="middle"
-                    fill={p.inkFaint}
+                    fill={p.inkMuted}
                     style={TICK_FONT}
                   >
-                    i
+                    -1
                   </text>
 
                   {/* angle sweep arc from 0 to θ */}
@@ -322,16 +342,32 @@ export default function UnitCircle({
                     color={p.ink}
                   />
 
-                  {/* (cos, sin) coordinate readout near the point */}
-                  <text
-                    x={px + (cosV >= 0 ? 12 : -12)}
-                    y={py + (sinV >= 0 ? -12 : 16)}
-                    textAnchor={cosV >= 0 ? "start" : "end"}
-                    fill={p.inkMuted}
-                    style={{ ...TICK_FONT, fontSize: 10.5 }}
-                  >
-                    ({cosV.toFixed(2)}, {sinV.toFixed(2)})
-                  </text>
+                  {/* (cos, sin) coordinate readout near the point, kept inside
+                      the circle panel so it never clips at the canvas edges */}
+                  {(() => {
+                    const coordText = `(${cosV.toFixed(2)}, ${sinV.toFixed(2)})`;
+                    const coordW = coordText.length * 6.3 + 2; // mono est. width
+                    const anchorStart = cosV >= 0;
+                    const rawX = px + (anchorStart ? 12 : -12);
+                    // For end-anchored text x is the right edge; clamp so the
+                    // left edge (x - coordW) stays >= 0. For start-anchored x is
+                    // the left edge; clamp so x + coordW stays within the panel.
+                    const x = anchorStart
+                      ? Math.min(rawX, circleBox - coordW)
+                      : Math.max(rawX, coordW);
+                    const y = clamp(py + (sinV >= 0 ? -12 : 16), 10, inner.height - 4);
+                    return (
+                      <text
+                        x={x}
+                        y={y}
+                        textAnchor={anchorStart ? "start" : "end"}
+                        fill={p.inkMuted}
+                        style={{ ...TICK_FONT, fontSize: 10.5 }}
+                      >
+                        {coordText}
+                      </text>
+                    );
+                  })()}
                 </g>
 
                 {/* ---------- Wave panel ---------- */}

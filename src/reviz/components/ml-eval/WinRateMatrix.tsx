@@ -113,7 +113,7 @@ export default function WinRateMatrix({
         <ResponsiveSvg
           aspect={aspect}
           margin={{
-            top: 30,
+            top: 38,
             right: showAverage ? 64 : 18,
             bottom: 44,
             left: Math.min(118, 30 + labelChars * 6.6),
@@ -143,7 +143,7 @@ export default function WinRateMatrix({
                 {/* Axis titles */}
                 <text
                   x={size / 2}
-                  y={-margin.top + 12}
+                  y={-margin.top + 4}
                   textAnchor="middle"
                   fill={p.inkMuted}
                   className="font-mono uppercase"

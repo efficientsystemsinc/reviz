@@ -294,9 +294,9 @@ export default function FrameStrip({
                 >
                   <FramePlate frame={f} index={i} total={n} palette={p} dim={!isActive} />
                   <span
-                    className="absolute left-1 top-1 rounded px-1 py-px font-mono text-[8.5px] tabular-nums leading-none"
+                    className="absolute left-1 top-1 rounded px-1 py-0.5 font-mono text-[10px] font-semibold tabular-nums leading-none"
                     style={{
-                      background: withAlpha(isActive ? p.accent : p.ink, isActive ? 1 : 0.55),
+                      background: isActive ? p.accent : withAlpha(p.ink, 0.82),
                       color: isActive ? p.accentContrast : p.canvas,
                     }}
                   >

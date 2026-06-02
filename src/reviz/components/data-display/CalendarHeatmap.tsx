@@ -318,15 +318,22 @@ function buildGrid(data: CalendarData, weeks: number) {
   const maxValue = Math.max(0, ...cells.filter((c) => !c.future).map((c) => c.value));
 
   // Month labels: emit at the first column whose first day starts a new month.
+  // A ~3-char label needs roughly 3 columns of width; skip any month whose
+  // start column is too close to the previous label so they never collide.
+  const MONTH_MIN_COLS = 3;
   const monthSpans: { label: string; col: number }[] = [];
   let lastMonth = -1;
+  let lastLabelCol = -Infinity;
   for (let col = 0; col < columns; col++) {
     const firstCell = cells[col * 7];
     if (!firstCell) continue;
     const month = new Date(firstCell.ms).getUTCMonth();
     if (month !== lastMonth) {
-      // Avoid crowding the very last partial column.
-      if (col < columns - 1 || lastMonth === -1) monthSpans.push({ label: MONTHS[month], col });
+      // Avoid crowding the very last partial column and overlapping the prior label.
+      if ((col < columns - 1 || lastMonth === -1) && col - lastLabelCol >= MONTH_MIN_COLS) {
+        monthSpans.push({ label: MONTHS[month], col });
+        lastLabelCol = col;
+      }
       lastMonth = month;
     }
   }

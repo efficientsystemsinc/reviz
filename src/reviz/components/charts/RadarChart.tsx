@@ -111,14 +111,15 @@ export default function RadarChart({
         }}
         className="relative"
       >
-        {series.length > 1 && <Legend items={legendItems} align="center" className="mb-3" />}
+        {series.length > 1 && <Legend items={legendItems} align="center" className="mb-5" />}
 
-        <ResponsiveSvg aspect={4 / 3} margin={{ top: 30, right: 30, bottom: 30, left: 30 }}>
+        <ResponsiveSvg aspect={4 / 3} margin={{ top: 42, right: 30, bottom: 30, left: 30 }}>
           {({ inner }) => {
             const cx = inner.width / 2;
             const cy = inner.height / 2;
-            // Leave headroom for the outermost labels.
-            const radius = Math.min(inner.width, inner.height) / 2 - 6;
+            // Leave headroom for the outermost labels (a little extra up top so the
+            // topmost rim label clears the legend row sitting above the SVG).
+            const radius = Math.min(inner.width, inner.height) / 2 - 14;
 
             // Cartesian point for a given axis index at a normalized value 0..1.
             const point = (i: number, t: number) =>

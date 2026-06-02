@@ -141,6 +141,7 @@ export default function Sparkline({
 
   return (
     <Figure variant="plain" align="center" title={title} caption={caption} source={source}>
+      <div className="flex w-full items-center justify-center">
       <div ref={ref} className="relative inline-flex items-center gap-3">
         <svg
           width={width}
@@ -317,6 +318,7 @@ export default function Sparkline({
           onClick={replay}
           className="absolute -right-1 -top-1 opacity-0 transition-opacity group-hover/figure:opacity-100"
         />
+      </div>
       </div>
     </Figure>
   );

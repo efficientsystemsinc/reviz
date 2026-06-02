@@ -142,7 +142,7 @@ export default function ROCCurve({
   return (
     <Figure variant="plain" align="center" title={title} caption={caption} source={source}>
       <div ref={ref} className="relative">
-        <ResponsiveSvg aspect={1} minHeight={300} margin={{ top: 18, right: 20, bottom: 46, left: 52 }}>
+        <ResponsiveSvg aspect={16 / 11} minHeight={300} margin={{ top: 18, right: 20, bottom: 46, left: 52 }}>
           {({ inner, margin }) => {
             const x = scaleLinear().domain([0, 1]).range([0, inner.width]);
             const y = scaleLinear().domain([0, 1]).range([inner.height, 0]);
@@ -197,7 +197,7 @@ export default function ROCCurve({
                 <text
                   x={x(0.74)}
                   y={y(0.74) - 8}
-                  transform={`rotate(-45, ${x(0.74)}, ${y(0.74) - 8})`}
+                  transform={`rotate(${-(Math.atan2(inner.height, inner.width) * 180) / Math.PI}, ${x(0.74)}, ${y(0.74) - 8})`}
                   textAnchor="middle"
                   fill={p.inkFaint}
                   style={{ fontFamily: "var(--font-mono)", fontSize: 9.5, letterSpacing: "0.08em" }}
@@ -339,7 +339,7 @@ export const meta: RevizMeta = {
   badges: ["animated", "interactive", "exportable", "themed", "responsive"],
   exportName: "ROCCurve",
   sourcePath: "statistical/ROCCurve",
-  aspect: 1,
+  aspect: 16 / 11,
   controls: [
     {
       key: "curves",
