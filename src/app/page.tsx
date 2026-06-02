@@ -94,10 +94,10 @@ export default function Landing() {
                 Browse the library <ArrowRight className="h-4 w-4" />
               </Link>
               <Link
-                href="/editor"
+                href="/c/search-tree"
                 className="inline-flex items-center gap-2 rounded-xl border border-border bg-surface px-5 py-3 text-[14px] font-semibold text-ink transition-colors hover:border-border-strong"
               >
-                <Code2 className="h-4 w-4" /> Open the editor
+                <Code2 className="h-4 w-4" /> Customize one live
               </Link>
             </motion.div>
           </div>

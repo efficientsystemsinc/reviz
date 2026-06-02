@@ -34,7 +34,7 @@ export function BrowseGallery() {
   }, [search, cat]);
 
   return (
-    <div className="px-6 py-7 lg:px-10">
+    <div className="h-full overflow-y-auto px-6 py-7 lg:px-10">
       <div className="mb-6">
         <h1 className="font-sans text-2xl font-semibold tracking-tight text-ink">The library</h1>
         <p className="mt-1 text-[14px] text-ink-muted">

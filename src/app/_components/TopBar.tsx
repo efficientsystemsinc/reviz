@@ -57,7 +57,6 @@ export function TopBar() {
 
       <nav className="ml-auto flex items-center gap-1">
         {navItem("/browse", "Library")}
-        {navItem("/editor", "Editor")}
         <GlobalThemeSwitcher />
         <a
           href="https://github.com/efficientsystemsinc/reviz"

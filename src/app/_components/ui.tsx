@@ -2,7 +2,7 @@
 
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
-import type { ReactNode } from "react";
+import { useId, type ReactNode } from "react";
 
 /** Small shared UI atoms for the showcase chrome. */
 
@@ -85,26 +85,36 @@ export function SectionLabel({ children, className }: { children: ReactNode; cla
   );
 }
 
-export function Toggle({ checked, onChange }: { checked: boolean; onChange: (v: boolean) => void }) {
+export function Toggle({
+  checked,
+  onChange,
+  disabled,
+}: {
+  checked: boolean;
+  onChange: (v: boolean) => void;
+  disabled?: boolean;
+}) {
+  // Vertical centering via flex (no framer `layout`, which would clobber the
+  // CSS transform and drop the knob off-center). Horizontal move is a plain
+  // CSS transition — rock-solid, no jitter.
   return (
     <button
       type="button"
-      onClick={() => onChange(!checked)}
-      className={cn(
-        "relative h-5 w-9 shrink-0 rounded-full border transition-colors",
-        checked ? "border-accent bg-accent" : "border-border bg-surface-alt",
-      )}
       role="switch"
       aria-checked={checked}
+      disabled={disabled}
+      onClick={() => onChange(!checked)}
+      className={cn(
+        "relative inline-flex h-5 w-9 shrink-0 items-center rounded-full border transition-colors duration-200",
+        checked ? "border-accent bg-accent" : "border-border bg-surface-alt",
+        disabled && "cursor-not-allowed opacity-50",
+      )}
     >
-      <motion.span
-        layout
-        transition={{ type: "spring", stiffness: 500, damping: 32 }}
+      <span
         className={cn(
-          "absolute top-1/2 h-3.5 w-3.5 -translate-y-1/2 rounded-full bg-canvas shadow",
-          checked ? "left-[18px]" : "left-[3px]",
+          "pointer-events-none block h-3.5 w-3.5 rounded-full bg-canvas shadow-sm ring-1 ring-black/5 transition-transform duration-200 ease-out",
+          checked ? "translate-x-[18px]" : "translate-x-[2px]",
         )}
-        style={{ background: checked ? "var(--reviz-knob, #fff)" : undefined }}
       />
     </button>
   );
@@ -121,6 +131,9 @@ export function Segmented<T extends string>({
   onChange: (v: T) => void;
   className?: string;
 }) {
+  // Unique layoutId per instance — a shared id makes the active pill fly across
+  // unrelated Segmented controls elsewhere on the page.
+  const uid = useId();
   return (
     <div className={cn("flex rounded-lg border border-border bg-surface-alt p-0.5", className)}>
       {options.map((o) => {
@@ -130,16 +143,16 @@ export function Segmented<T extends string>({
             key={o.value}
             type="button"
             onClick={() => onChange(o.value)}
-            className="relative flex-1 rounded-md px-2.5 py-1 text-[12px] font-medium"
+            className="relative flex flex-1 items-center justify-center rounded-md px-2.5 py-1.5 text-[12px] font-medium leading-none"
           >
             {active && (
               <motion.span
-                layoutId="seg-active"
-                transition={{ type: "spring", stiffness: 500, damping: 36 }}
+                layoutId={`seg-${uid}`}
+                transition={{ type: "spring", stiffness: 520, damping: 38 }}
                 className="absolute inset-0 rounded-md bg-surface shadow-float"
               />
             )}
-            <span className={cn("relative z-10", active ? "text-ink" : "text-ink-faint")}>
+            <span className={cn("relative z-10 inline-flex items-center justify-center gap-1.5", active ? "text-ink" : "text-ink-faint")}>
               {o.label}
             </span>
           </button>
