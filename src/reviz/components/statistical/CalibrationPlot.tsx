@@ -3,7 +3,7 @@
 import { scaleLinear } from "d3-scale";
 import { line as d3line, curveMonotoneX } from "d3-shape";
 import { motion } from "framer-motion";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import {
   AxisBottom,
   AxisLeft,
@@ -75,6 +75,18 @@ export default function CalibrationPlot({
   const [ref, inView] = useInView<HTMLDivElement>();
   const { token, replay } = useReplay();
   const [hover, setHover] = useState<{ i: number; x: number; y: number } | null>(null);
+
+  // When the component is already in view on its very first render (eager/headless
+  // QA, or anything mounted on-screen) or motion is reduced, skip the hidden
+  // `initial` state so framer-motion renders directly at the visible target. This
+  // guarantees the final static frame is correct even if the rAF-driven entrance
+  // animation never advances (e.g. under Chrome's virtual-time budget), while a
+  // normal scroll-in (inView starts false) still plays the full animation. Replay
+  // (token > 0) always re-animates.
+  const mountedInView = useRef(inView);
+  const skipEntrance = (mountedInView.current && token === 0) || reduced;
+  const enter = (hidden: Record<string, number>): false | Record<string, number> =>
+    skipEntrance ? false : hidden;
 
   const data = useMemo(
     () =>
@@ -174,7 +186,7 @@ export default function CalibrationPlot({
                   stroke={p.inkFaint}
                   strokeWidth={1.5}
                   strokeDasharray="4 4"
-                  initial={{ pathLength: 0, opacity: 0 }}
+                  initial={enter({ pathLength: 0, opacity: 0 })}
                   animate={{ pathLength: inView ? 1 : 0, opacity: inView ? 1 : 0 }}
                   transition={{ duration: reduced ? 0 : duration / 1600, ease: "easeOut" }}
                   key={`diag-${token}`}
@@ -186,7 +198,7 @@ export default function CalibrationPlot({
                     d={gapPath}
                     fill={`url(#${gradId})`}
                     stroke="none"
-                    initial={{ opacity: 0 }}
+                    initial={enter({ opacity: 0 })}
                     animate={{ opacity: inView ? 1 : 0 }}
                     transition={{
                       duration: reduced ? 0 : 0.5,
@@ -209,7 +221,7 @@ export default function CalibrationPlot({
                         y={histTop}
                         rx={1.5}
                         fill={withAlpha(fill, hover?.i === i ? 0.55 : 0.3)}
-                        initial={{ height: 0 }}
+                        initial={enter({ height: 0 })}
                         animate={{ height: inView ? bh : 0 }}
                         transition={{
                           duration: reduced ? 0 : 0.5,
@@ -229,7 +241,7 @@ export default function CalibrationPlot({
                     strokeWidth={2.5}
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    initial={{ pathLength: 0 }}
+                    initial={enter({ pathLength: 0 })}
                     animate={{ pathLength: inView ? 1 : 0 }}
                     transition={{ duration: reduced ? 0 : duration / 1000, ease: [0.22, 1, 0.36, 1] }}
                     key={`curve-${token}`}
@@ -248,7 +260,7 @@ export default function CalibrationPlot({
                       fill={p.surface}
                       stroke={fill}
                       strokeWidth={2.25}
-                      initial={{ opacity: 0, scale: 0 }}
+                      initial={enter({ opacity: 0, scale: 0 })}
                       animate={{ opacity: inView ? 1 : 0, scale: inView ? 1 : 0 }}
                       transition={{
                         duration: reduced ? 0 : 0.4,
@@ -314,7 +326,7 @@ export default function CalibrationPlot({
                 {/* ECE callout */}
                 {showEce && (
                   <motion.g
-                    initial={{ opacity: 0, y: -4 }}
+                    initial={enter({ opacity: 0, y: -4 })}
                     animate={{ opacity: inView ? 1 : 0, y: 0 }}
                     transition={{ duration: reduced ? 0 : 0.4, delay: reduced ? 0 : duration / 1100 }}
                     key={`ece-${token}`}

@@ -24,8 +24,17 @@ export function useInView<T extends Element = HTMLDivElement>(
 ) {
   const { once = true, margin = "0px 0px -10% 0px", amount = 0.15 } = options;
   const ref = useRef<T | null>(null);
-  const [inView, setInView] = useState(false);
+  // Eager mode: a global escape hatch (set via ?eager=1 on the embed route) that
+  // forces entrance state to "visible" immediately. Used for headless visual QA,
+  // where IntersectionObserver is unreliable under Chrome's virtual-time budget.
+  const eager =
+    typeof window !== "undefined" && (window as unknown as { __REVIZ_EAGER__?: boolean }).__REVIZ_EAGER__;
+  const [inView, setInView] = useState(Boolean(eager));
   useEffect(() => {
+    if (eager) {
+      setInView(true);
+      return;
+    }
     const el = ref.current;
     if (!el) return;
     const obs = new IntersectionObserver(
@@ -41,7 +50,7 @@ export function useInView<T extends Element = HTMLDivElement>(
     );
     obs.observe(el);
     return () => obs.disconnect();
-  }, [once, margin, amount]);
+  }, [once, margin, amount, eager]);
   return [ref, inView] as const;
 }
 

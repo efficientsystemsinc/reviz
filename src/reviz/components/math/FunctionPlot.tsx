@@ -317,34 +317,46 @@ export default function FunctionPlot({
                   )}
                 </g>
 
-                {/* The function curves: left-to-right draw via pathLength. */}
+                {/* The function curves. Paths are always rendered at their full,
+                    final geometry (so the static end-state is guaranteed correct);
+                    the left-to-right "draw" is a clip-rect wipe whose width animates
+                    from 0 → inner.width. This avoids relying on framer-motion's
+                    pathLength measurement, which can fail to reveal long SVG paths. */}
+                <defs>
+                  <clipPath id={`${gid}-wipe`}>
+                    <motion.rect
+                      key={`${gid}-wipe-${token}`}
+                      x={0}
+                      y={0}
+                      height={inner.height}
+                      initial={{ width: reduced ? inner.width : 0 }}
+                      animate={{ width: draw ? inner.width : 0 }}
+                      transition={{ duration: reduced ? 0 : drawDur, ease: [0.4, 0, 0.2, 1] }}
+                    />
+                  </clipPath>
+                </defs>
                 <g clipPath={`url(#${gid}-clip)`}>
-                  {samples.map((pts, i) => {
-                    const d = lineGen(pts);
-                    if (!d) return null;
-                    const stroke = colorOf(i);
-                    return (
-                      <motion.path
-                        key={`${gid}-fn-${i}-${token}`}
-                        d={d}
-                        fill="none"
-                        stroke={stroke}
-                        strokeWidth={2.25}
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        initial={{ pathLength: 0, opacity: 0 }}
-                        animate={{ pathLength: draw, opacity: draw ? 1 : 0 }}
-                        transition={{
-                          pathLength: {
-                            duration: reduced ? 0 : drawDur,
-                            delay: reduced ? 0 : i * 0.14,
-                            ease: [0.4, 0, 0.2, 1],
-                          },
-                          opacity: { duration: reduced ? 0 : 0.22, delay: reduced ? 0 : i * 0.14 },
-                        }}
-                      />
-                    );
-                  })}
+                  <g clipPath={`url(#${gid}-wipe)`}>
+                    {samples.map((pts, i) => {
+                      const d = lineGen(pts);
+                      if (!d) return null;
+                      const stroke = colorOf(i);
+                      return (
+                        <motion.path
+                          key={`${gid}-fn-${i}-${token}`}
+                          d={d}
+                          fill="none"
+                          stroke={stroke}
+                          strokeWidth={2.25}
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: draw ? 1 : 0 }}
+                          transition={{ duration: reduced ? 0 : 0.3, delay: reduced ? 0 : i * 0.08 }}
+                        />
+                      );
+                    })}
+                  </g>
                 </g>
 
                 {/* Hover crosshair + per-curve readout dots. */}

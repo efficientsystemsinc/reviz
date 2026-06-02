@@ -111,7 +111,7 @@ export default function EquationBlock({
             transition={{ duration: dur, ease: [0.22, 1, 0.36, 1], delay: dur * 0.12 }}
           >
             <div
-              className="reviz-katex leading-none"
+              className="reviz-katex"
               dangerouslySetInnerHTML={{ __html: html }}
             />
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { area as d3Area, curveBasis, line as d3Line } from "d3-shape";
-import { AnimatePresence, motion } from "framer-motion";
+import { motion } from "framer-motion";
 import { useMemo } from "react";
 import {
   Figure,
@@ -14,6 +14,7 @@ import {
   useMeasure,
   usePalette,
   usePrefersReducedMotion,
+  useProgress,
   useReplay,
   withAlpha,
   type RevizMeta,
@@ -118,6 +119,24 @@ export default function AnnotationCallout({
   const tx = (clamp(targetX, 0, 100) / 100) * W;
   const ty = (clamp(targetY, 0, 100) / 100) * H;
 
+  // Entrance progress (0→1), driven by the project's rAF state hook so the
+  // final, static frame is always fully drawn (no dependence on framer-motion
+  // tweening 'd'/pathLength completing under headless capture).
+  const progress = useProgress({
+    duration,
+    enabled: inView && !reduced,
+    trigger: `${token}-${inView}`,
+  });
+  // Hidden until the figure scrolls into view; snaps to fully drawn for
+  // reduced-motion. Once in view, `progress` tweens 0→1 on its own rAF clock.
+  const t = reduced ? 1 : inView ? progress : 0;
+
+  // Staged reveal: ridge first, then leader draws, then the card lands.
+  const ridgeReveal = clamp(t / 0.55, 0, 1);
+  const leaderReveal = clamp((t - 0.35) / 0.4, 0, 1);
+  const markerReveal = clamp((t - 0.55) / 0.3, 0, 1);
+  const cardReveal = clamp((t - 0.55) / 0.45, 0, 1);
+
   // A smooth scientific "ridge" backdrop so the callout has a peak to annotate.
   const backdrop = useMemo(() => {
     if (W === 0 || H === 0) return { line: "", fill: "" };
@@ -125,13 +144,13 @@ export default function AnnotationCallout({
     const peakAt = clamp(targetX, 8, 92) / 100;
     const pts: [number, number][] = [];
     for (let i = 0; i <= n; i++) {
-      const t = i / n;
+      const tt = i / n;
       // Two gaussian-ish bumps; the main one centered at the target X.
-      const main = Math.exp(-Math.pow((t - peakAt) / 0.16, 2));
-      const minor = 0.42 * Math.exp(-Math.pow((t - peakAt * 0.45 - 0.12) / 0.2, 2));
-      const base = 0.12 + 0.06 * Math.sin(t * 7.5);
+      const main = Math.exp(-Math.pow((tt - peakAt) / 0.16, 2));
+      const minor = 0.42 * Math.exp(-Math.pow((tt - peakAt * 0.45 - 0.12) / 0.2, 2));
+      const base = 0.12 + 0.06 * Math.sin(tt * 7.5);
       const v = clamp(base + main + minor, 0, 1.45) / 1.45;
-      pts.push([t * W, H - 18 - v * (H - 54)]);
+      pts.push([tt * W, H - 18 - v * (H - 54)]);
     }
     const lineGen = d3Line<[number, number]>().x((d) => d[0]).y((d) => d[1]).curve(curveBasis);
     const areaGen = d3Area<[number, number]>()
@@ -147,17 +166,26 @@ export default function AnnotationCallout({
     [direction, tx, ty, W, H],
   );
 
-  // Leader path: target -> elbow -> card connection point.
+  // Leader path: a gently bowed curve from the target to the card edge. The
+  // elbow bows perpendicular to the connection so even a near-horizontal or
+  // near-vertical run reads as a leader rather than a flat stub.
   const leaderPath = useMemo(() => {
     if (!layout) return "";
     const { connX, connY } = layout;
-    const midX = (tx + connX) / 2;
-    return `M ${tx} ${ty} Q ${midX} ${ty} ${(midX + connX) / 2} ${(ty + connY) / 2} T ${connX} ${connY}`;
+    const mx = (tx + connX) / 2;
+    const my = (ty + connY) / 2;
+    const len = Math.hypot(connX - tx, connY - ty) || 1;
+    // Perpendicular unit vector, used to bow the curve outward.
+    const nx = -(connY - ty) / len;
+    const ny = (connX - tx) / len;
+    const bow = clamp(len * 0.18, 10, 34);
+    const cx = mx + nx * bow;
+    const cy = my + ny * bow;
+    return `M ${tx} ${ty} Q ${cx} ${cy} ${connX} ${connY}`;
   }, [layout, tx, ty]);
 
-  const animate = inView && !reduced;
-  const dur = duration / 1000;
   const markerSize = clamp(W * 0.022, 7, 13);
+  const showCard = W > 0 && layout && (inView || reduced);
 
   return (
     <Figure variant="plain" align="center" title={title} caption={caption} source={source}>
@@ -205,40 +233,30 @@ export default function AnnotationCallout({
               })}
 
               {/* backdrop ridge — the thing being annotated */}
-              <motion.path
-                d={backdrop.fill}
-                fill={`url(#${ids.fade})`}
-                initial={{ opacity: reduced ? 1 : 0 }}
-                animate={{ opacity: animate || reduced ? 1 : 0 }}
-                transition={{ duration: dur * 0.5 }}
-              />
-              <motion.path
+              <path d={backdrop.fill} fill={`url(#${ids.fade})`} opacity={ridgeReveal} />
+              <path
                 d={backdrop.line}
                 fill="none"
                 stroke={withAlpha(p.inkMuted, 0.55)}
                 strokeWidth={1.5}
                 strokeLinecap="round"
-                initial={{ pathLength: reduced ? 1 : 0 }}
-                animate={{ pathLength: animate || reduced ? 1 : 0 }}
-                transition={{ duration: dur * 0.75, ease: [0.22, 1, 0.36, 1] }}
+                pathLength={1}
+                strokeDasharray={1}
+                strokeDashoffset={1 - ridgeReveal}
+                opacity={ridgeReveal > 0 ? 1 : 0}
               />
 
               {/* leader line drawing in */}
-              <motion.path
+              <path
                 d={leaderPath}
                 fill="none"
                 stroke={fill}
-                strokeWidth={1.4}
+                strokeWidth={1.5}
                 strokeLinecap="round"
-                initial={{ pathLength: reduced ? 1 : 0, opacity: reduced ? 1 : 0 }}
-                animate={{
-                  pathLength: animate || reduced ? 1 : 0,
-                  opacity: animate || reduced ? 1 : 0,
-                }}
-                transition={{
-                  pathLength: { duration: dur * 0.45, delay: dur * 0.35, ease: [0.4, 0, 0.2, 1] },
-                  opacity: { duration: 0.2, delay: dur * 0.35 },
-                }}
+                pathLength={1}
+                strokeDasharray={1}
+                strokeDashoffset={1 - leaderReveal}
+                opacity={leaderReveal > 0 ? 1 : 0}
               />
 
               {/* target marker */}
@@ -250,50 +268,41 @@ export default function AnnotationCallout({
                 fill={fill}
                 ink={p.surface}
                 glow={ids.glow}
-                animate={animate}
+                reveal={markerReveal}
                 reduced={reduced}
-                dur={dur}
-                delay={dur * 0.78}
               />
             </svg>
           )}
 
           {/* note card (HTML overlay) */}
-          <AnimatePresence>
-            {W > 0 && layout && (animate || reduced || inView) && (
-              <motion.div
-                key={`${token}-card`}
-                className="absolute rounded-lg border border-border bg-surface px-3 py-2.5 shadow-float"
-                style={{
-                  left: layout.cardLeft,
-                  top: layout.cardTop,
-                  width: layout.cardW,
-                  borderColor: withAlpha(fill, 0.35),
-                }}
-                initial={{ opacity: 0, y: layout.vert === "bottom" ? 8 : -8, scale: 0.97 }}
-                animate={{ opacity: inView ? 1 : 0, y: 0, scale: 1 }}
-                transition={{
-                  duration: reduced ? 0 : 0.4,
-                  delay: reduced ? 0 : dur * 0.55,
-                  ease: [0.22, 1, 0.36, 1],
-                }}
+          {showCard && layout && (
+            <div
+              key={`${token}-card`}
+              className="absolute rounded-lg border border-border bg-surface px-3 py-2.5 shadow-float"
+              style={{
+                left: layout.cardLeft,
+                top: layout.cardTop,
+                width: layout.cardW,
+                borderColor: withAlpha(fill, 0.35),
+                opacity: cardReveal,
+                transform: `translateY(${(layout.vert === "bottom" ? 8 : -8) * (1 - cardReveal)}px) scale(${0.97 + 0.03 * cardReveal})`,
+              }}
+            >
+              <div
+                className="mb-1 flex items-center gap-1.5 font-mono text-[10.5px] uppercase tracking-label"
+                style={{ color: fill }}
               >
-                <div
-                  className="mb-1 flex items-center gap-1.5 font-mono text-[10.5px] uppercase tracking-label"
-                  style={{ color: fill }}
-                >
-                  <span
-                    className="inline-block h-1.5 w-1.5 rounded-full"
-                    style={{ background: fill }}
-                  />
-                  {label}
-                </div>
-                <p className="font-serif text-[12.5px] italic leading-snug text-ink-muted">
-                  {note}
-                </p>
-              </motion.div>
-            )}
-          </AnimatePresence>
+                <span
+                  className="inline-block h-1.5 w-1.5 rounded-full"
+                  style={{ background: fill }}
+                />
+                {label}
+              </div>
+              <p className="font-serif text-[12.5px] italic leading-snug text-ink-muted">
+                {note}
+              </p>
+            </div>
+          )}
         </div>
 
         <div className="pointer-events-none absolute right-2 top-2 opacity-0 transition-opacity group-hover/ac:opacity-100">
@@ -314,10 +323,8 @@ function Target({
   fill,
   ink,
   glow,
-  animate,
+  reveal,
   reduced,
-  dur,
-  delay,
 }: {
   kind: Marker;
   x: number;
@@ -326,19 +333,19 @@ function Target({
   fill: string;
   ink: string;
   glow: string;
-  animate: boolean;
+  reveal: number;
   reduced: boolean;
-  dur: number;
-  delay: number;
 }) {
-  const spring = { type: "spring" as const, stiffness: 380, damping: 18, delay: reduced ? 0 : delay };
-  const visible = animate || reduced;
+  // Settle scale from the reveal progress so the static frame is always solid.
+  const scale = 0.3 + 0.7 * reveal;
+  const visible = reveal > 0;
+  const pulse = visible && !reduced;
 
   if (kind === "box") {
     const s = size * 1.6;
     return (
       <g>
-        {visible && !reduced && (
+        {pulse && (
           <motion.rect
             x={x - s}
             y={y - s}
@@ -350,11 +357,11 @@ function Target({
             strokeWidth={1.25}
             initial={{ opacity: 0.5, scale: 0.6 }}
             animate={{ opacity: 0, scale: 1.5 }}
-            transition={{ duration: 1.4, repeat: Infinity, delay, ease: "easeOut" }}
+            transition={{ duration: 1.4, repeat: Infinity, ease: "easeOut" }}
             style={{ transformOrigin: `${x}px ${y}px` }}
           />
         )}
-        <motion.rect
+        <rect
           x={x - s}
           y={y - s}
           width={s * 2}
@@ -363,10 +370,8 @@ function Target({
           fill="none"
           stroke={fill}
           strokeWidth={1.75}
-          initial={{ opacity: 0, scale: 0.4 }}
-          animate={{ opacity: visible ? 1 : 0, scale: 1 }}
-          transition={spring}
-          style={{ transformOrigin: `${x}px ${y}px` }}
+          opacity={reveal}
+          style={{ transform: `scale(${scale})`, transformOrigin: `${x}px ${y}px` }}
         />
       </g>
     );
@@ -375,7 +380,7 @@ function Target({
   if (kind === "ring") {
     return (
       <g>
-        {visible && !reduced && (
+        {pulse && (
           <motion.circle
             cx={x}
             cy={y}
@@ -385,32 +390,21 @@ function Target({
             strokeWidth={1.5}
             initial={{ opacity: 0.6, scale: 0.5 }}
             animate={{ opacity: 0, scale: 2.4 }}
-            transition={{ duration: 1.6, repeat: Infinity, delay, ease: "easeOut" }}
+            transition={{ duration: 1.6, repeat: Infinity, ease: "easeOut" }}
             style={{ transformOrigin: `${x}px ${y}px` }}
           />
         )}
-        <motion.circle
+        <circle
           cx={x}
           cy={y}
           r={size}
           fill="none"
           stroke={fill}
           strokeWidth={2}
-          initial={{ opacity: 0, scale: 0.3 }}
-          animate={{ opacity: visible ? 1 : 0, scale: 1 }}
-          transition={spring}
-          style={{ transformOrigin: `${x}px ${y}px` }}
+          opacity={reveal}
+          style={{ transform: `scale(${scale})`, transformOrigin: `${x}px ${y}px` }}
         />
-        <motion.circle
-          cx={x}
-          cy={y}
-          r={size * 0.36}
-          fill={fill}
-          initial={{ opacity: 0, scale: 0 }}
-          animate={{ opacity: visible ? 1 : 0, scale: 1 }}
-          transition={{ ...spring, delay: reduced ? 0 : delay + 0.08 }}
-          style={{ transformOrigin: `${x}px ${y}px` }}
-        />
+        <circle cx={x} cy={y} r={size * 0.36} fill={fill} opacity={reveal} />
       </g>
     );
   }
@@ -418,7 +412,7 @@ function Target({
   // dot
   return (
     <g filter={`url(#${glow})`}>
-      {visible && !reduced && (
+      {pulse && (
         <motion.circle
           cx={x}
           cy={y}
@@ -426,21 +420,19 @@ function Target({
           fill={withAlpha(fill, 0.4)}
           initial={{ opacity: 0.7, scale: 0.5 }}
           animate={{ opacity: 0, scale: 2.2 }}
-          transition={{ duration: 1.5, repeat: Infinity, delay, ease: "easeOut" }}
+          transition={{ duration: 1.5, repeat: Infinity, ease: "easeOut" }}
           style={{ transformOrigin: `${x}px ${y}px` }}
         />
       )}
-      <motion.circle
+      <circle
         cx={x}
         cy={y}
         r={size * 0.62}
         fill={fill}
         stroke={ink}
         strokeWidth={1.5}
-        initial={{ opacity: 0, scale: 0.2 }}
-        animate={{ opacity: visible ? 1 : 0, scale: 1 }}
-        transition={spring}
-        style={{ transformOrigin: `${x}px ${y}px` }}
+        opacity={reveal}
+        style={{ transform: `scale(${0.2 + 0.8 * reveal})`, transformOrigin: `${x}px ${y}px` }}
       />
     </g>
   );

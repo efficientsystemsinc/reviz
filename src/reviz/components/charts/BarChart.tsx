@@ -111,9 +111,10 @@ export default function BarChart({
 
                 {data.map((d, i) => {
                   const bw = band.bandwidth();
-                  const active = hover?.i === i || highlightIndex === i;
                   const dim = highlightIndex >= 0 && highlightIndex !== i;
-                  const barFill = active ? fill : dim ? p.accentSoft : fill;
+                  // Keep the accent hue on dimmed bars (lower opacity) rather than
+                  // washing them out to accentSoft — reads far cleaner.
+                  const barFill = fill;
 
                   if (horizontal) {
                     const w = value(d.value);
@@ -129,7 +130,7 @@ export default function BarChart({
                           initial={{ width: 0 }}
                           animate={{ width: inView ? w : 0 }}
                           transition={{ duration: duration / 1000, delay: i * 0.06, ease: [0.22, 1, 0.36, 1] }}
-                          style={{ opacity: dim ? 0.5 : 1 }}
+                          style={{ opacity: dim ? 0.35 : 1 }}
                           onMouseMove={(e) => {
                             const r = (e.currentTarget.ownerSVGElement as SVGSVGElement).getBoundingClientRect();
                             setHover({ i, x: e.clientX - r.left, y: e.clientY - r.top });
@@ -167,7 +168,7 @@ export default function BarChart({
                         initial={{ height: 0, y: inner.height }}
                         animate={{ height: inView ? h : 0, y: inView ? value(d.value) : inner.height }}
                         transition={{ duration: duration / 1000, delay: i * 0.06, ease: [0.22, 1, 0.36, 1] }}
-                        style={{ opacity: dim ? 0.5 : 1 }}
+                        style={{ opacity: dim ? 0.35 : 1 }}
                         onMouseMove={(e) => {
                           const r = (e.currentTarget.ownerSVGElement as SVGSVGElement).getBoundingClientRect();
                           setHover({ i, x: e.clientX - r.left, y: e.clientY - r.top });

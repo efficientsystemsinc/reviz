@@ -7,7 +7,6 @@ import {
   Figure,
   ReplayButton,
   cn,
-  seededRandom,
   uid,
   useInView,
   usePalette,
@@ -238,39 +237,38 @@ export default function TabbedCompare({
 function SyntheticFrame({ label, seriesIndex }: { label: string; seriesIndex: number }) {
   const p = usePalette();
   const accent = p.series[seriesIndex % p.series.length];
-  const rng = useMemo(() => seededRandom(seriesIndex * 97 + 13), [seriesIndex]);
 
-  // A handful of drifting "tracked points" to evoke a robot/vision rollout.
-  const dots = useMemo(
-    () =>
-      Array.from({ length: 7 }, () => ({
-        x: 12 + rng() * 76,
-        y: 16 + rng() * 68,
-        r: 0.7 + rng() * 1.6,
-      })),
-    [rng],
-  );
+  // Corner framing ticks (viewfinder corners) — clean, intentional, no scatter.
+  const corners = [
+    { x: 6, y: 6, dx: 1, dy: 1 },
+    { x: 94, y: 6, dx: -1, dy: 1 },
+    { x: 6, y: 94, dx: 1, dy: -1 },
+    { x: 94, y: 94, dx: -1, dy: -1 },
+  ];
+  const tick = 7;
 
   return (
     <div className="absolute inset-0">
+      {/* Soft themed gradient field */}
       <div
         className="absolute inset-0"
         style={{
           background: `radial-gradient(120% 90% at 70% 18%, ${withAlpha(
             accent,
-            0.22,
+            0.18,
           )}, ${withAlpha(p.canvas, 0)} 60%), linear-gradient(150deg, ${withAlpha(
             p.surface,
-            0.9,
-          )}, ${withAlpha(p.surfaceAlt, 0.9)})`,
+            0.92,
+          )}, ${withAlpha(p.surfaceAlt, 0.92)})`,
         }}
       />
       <svg
         className="absolute inset-0 h-full w-full"
         viewBox="0 0 100 100"
-        preserveAspectRatio="xMidYMid slice"
+        preserveAspectRatio="none"
         aria-hidden
       >
+        {/* Faint regular scan grid */}
         {Array.from({ length: 9 }).map((_, i) => (
           <line
             key={`v${i}`}
@@ -278,42 +276,49 @@ function SyntheticFrame({ label, seriesIndex }: { label: string; seriesIndex: nu
             x2={(i + 1) * 10}
             y1={0}
             y2={100}
-            stroke={withAlpha(p.grid, 0.6)}
-            strokeWidth={0.2}
+            stroke={withAlpha(p.grid, 0.5)}
+            strokeWidth={0.25}
           />
         ))}
-        {Array.from({ length: 6 }).map((_, i) => (
+        {Array.from({ length: 9 }).map((_, i) => (
           <line
             key={`h${i}`}
-            y1={(i + 1) * 14}
-            y2={(i + 1) * 14}
+            y1={(i + 1) * 10}
+            y2={(i + 1) * 10}
             x1={0}
             x2={100}
-            stroke={withAlpha(p.grid, 0.6)}
-            strokeWidth={0.2}
+            stroke={withAlpha(p.grid, 0.5)}
+            strokeWidth={0.25}
           />
         ))}
-        {dots.map((d, i) => (
-          <g key={i}>
-            <circle cx={d.x} cy={d.y} r={d.r * 2.4} fill={withAlpha(accent, 0.12)} />
-            <circle cx={d.x} cy={d.y} r={d.r} fill={accent} />
+        {/* Center crosshair guides */}
+        <line
+          x1={50}
+          x2={50}
+          y1={42}
+          y2={58}
+          stroke={withAlpha(accent, 0.45)}
+          strokeWidth={0.4}
+        />
+        <line
+          x1={42}
+          x2={58}
+          y1={50}
+          y2={50}
+          stroke={withAlpha(accent, 0.45)}
+          strokeWidth={0.4}
+        />
+        {/* Viewfinder corner ticks */}
+        {corners.map((c, i) => (
+          <g key={i} stroke={withAlpha(accent, 0.55)} strokeWidth={0.6} fill="none">
+            <line x1={c.x} y1={c.y} x2={c.x + c.dx * tick} y2={c.y} />
+            <line x1={c.x} y1={c.y} x2={c.x} y2={c.y + c.dy * tick} />
           </g>
         ))}
-        <rect
-          x={2}
-          y={2}
-          width={96}
-          height={96}
-          fill="none"
-          stroke={withAlpha(accent, 0.35)}
-          strokeWidth={0.3}
-          strokeDasharray="2 2.5"
-          rx={1.5}
-        />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
         <div
-          className="grid h-9 w-9 place-items-center rounded-full"
+          className="grid h-10 w-10 place-items-center rounded-full"
           style={{
             backgroundColor: withAlpha(accent, 0.14),
             color: accent,
@@ -322,7 +327,7 @@ function SyntheticFrame({ label, seriesIndex }: { label: string; seriesIndex: nu
         >
           <ImageOff className="h-4 w-4" />
         </div>
-        <span className="max-w-[80%] text-center font-mono text-[10px] uppercase tracking-label text-ink-faint">
+        <span className="max-w-[80%] text-center font-mono text-[10px] uppercase tracking-label text-ink-muted">
           {label || "No media"}
         </span>
       </div>
