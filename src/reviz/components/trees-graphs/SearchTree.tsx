@@ -11,6 +11,7 @@ import {
   TooltipRow,
   clamp,
   mapRange,
+  mix,
   uid,
   usePalette,
   useInView,
@@ -312,10 +313,12 @@ export default function SearchTree({
                     const rejected = d.rejected;
                     const active = hover?.i === i;
                     const stroke = rejected ? p.inkFaint : onPv ? fill : p.borderStrong;
+                    // Opaque fills so the (thick) edge behind a node never
+                    // shows through and crosses the visit-count number.
                     const nodeFill = rejected
-                      ? withAlpha(p.inkFaint, 0.1)
+                      ? mix(p.surface, p.inkFaint, 0.1)
                       : onPv
-                        ? withAlpha(fill, 0.16)
+                        ? mix(p.surface, fill, 0.16)
                         : p.surface;
                     const labelColor = rejected ? p.inkFaint : onPv ? fill : p.ink;
 
@@ -420,9 +423,9 @@ export default function SearchTree({
                             y={d.cy + (labelAlongRight ? 12 : labelDy - 12)}
                             dy={labelAlongRight ? "0.32em" : 0}
                             textAnchor={labelAnchor}
-                            fill={p.inkFaint}
+                            fill={rejected ? p.inkFaint : p.inkMuted}
                             className="font-mono tabular-nums"
-                            style={{ fontSize: 8.5, letterSpacing: "0.02em" }}
+                            style={{ fontSize: 9, letterSpacing: "0.02em", opacity: rejected ? 0.85 : 1 }}
                           >
                             {`Q ${d.node.q.toFixed(2)}  P ${d.node.p.toFixed(2)}`}
                           </text>
