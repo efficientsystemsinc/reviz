@@ -181,7 +181,7 @@ export default function EpisodeRollout({
 
         {/* ---- The step sequence ---- */}
         <div
-          className="flex gap-1.5 overflow-x-auto pb-1"
+          className="flex gap-1.5 overflow-x-auto px-0.5 pb-1 pt-1.5"
           style={{ scrollbarWidth: "thin" }}
           role="listbox"
           aria-label="Rollout steps"
@@ -208,7 +208,7 @@ export default function EpisodeRollout({
                 whileHover={{ y: -2 }}
                 whileTap={{ scale: 0.97 }}
                 className={cn(
-                  "group/step relative flex min-w-[64px] flex-1 shrink-0 flex-col items-stretch gap-1.5 rounded-md border p-1.5 outline-none transition-colors sm:min-w-[72px]",
+                  "group/step relative flex min-w-0 flex-1 basis-0 flex-col items-stretch gap-1.5 rounded-md border p-1.5 outline-none transition-colors",
                   isActive ? "border-accent bg-surface-alt" : "border-border bg-surface hover:border-border-strong",
                 )}
                 style={{

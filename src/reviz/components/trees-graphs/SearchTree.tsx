@@ -336,7 +336,7 @@ export default function SearchTree({
                         initial={{ opacity: 0, scale: 0.5 }}
                         animate={
                           inView
-                            ? { opacity: rejected ? 0.6 : 1, scale: 1 }
+                            ? { opacity: rejected ? 0.72 : 1, scale: 1 }
                             : { opacity: 0, scale: 0.5 }
                         }
                         transition={{
@@ -399,18 +399,22 @@ export default function SearchTree({
                           {compact(d.node.n)}
                         </text>
 
-                        {/* action label */}
+                        {/* action label — canvas halo so the edge never reads through the text */}
                         <text
                           x={d.cx + labelDx}
                           y={d.cy + labelDy}
                           dy={labelAlongRight ? "0.32em" : 0}
                           textAnchor={labelAnchor}
                           fill={labelColor}
+                          stroke={p.canvas}
+                          strokeWidth={3.5}
+                          strokeLinejoin="round"
                           className="font-mono"
                           style={{
                             fontSize: 10,
                             fontWeight: onPv ? 600 : 500,
-                            opacity: rejected ? 0.85 : 1,
+                            opacity: rejected ? 0.9 : 1,
+                            paintOrder: "stroke",
                           }}
                         >
                           {truncate(d.node.label, horizontal ? 22 : 18)}
@@ -423,9 +427,12 @@ export default function SearchTree({
                             y={d.cy + (labelAlongRight ? 12 : labelDy - 12)}
                             dy={labelAlongRight ? "0.32em" : 0}
                             textAnchor={labelAnchor}
-                            fill={rejected ? p.inkFaint : p.inkMuted}
+                            fill={rejected ? p.inkMuted : p.inkMuted}
+                            stroke={p.canvas}
+                            strokeWidth={3}
+                            strokeLinejoin="round"
                             className="font-mono tabular-nums"
-                            style={{ fontSize: 9, letterSpacing: "0.02em", opacity: rejected ? 0.85 : 1 }}
+                            style={{ fontSize: 9, letterSpacing: "0.02em", opacity: rejected ? 0.9 : 1, paintOrder: "stroke" }}
                           >
                             {`Q ${d.node.q.toFixed(2)}  P ${d.node.p.toFixed(2)}`}
                           </text>

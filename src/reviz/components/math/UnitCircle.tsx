@@ -170,6 +170,19 @@ export default function UnitCircle({
             const sinPath = "M" + sinPts.join("L");
             const cosPath = "M" + cosPts.join("L");
 
+            // Full-range (0..2π) ghost curves so the plotted area always spans
+            // the labeled axis; the bold traced paths above overlay these as θ
+            // sweeps, instead of leaving the π..2π region empty.
+            const sinFull: string[] = [];
+            const cosFull: string[] = [];
+            for (let i = 0; i <= SAMPLES; i++) {
+              const t = (TAU * i) / SAMPLES;
+              sinFull.push(`${waveX(t)},${waveMidY - Math.sin(t) * ampPx}`);
+              cosFull.push(`${waveX(t)},${waveMidY - Math.cos(t) * ampPx}`);
+            }
+            const sinFullPath = "M" + sinFull.join("L");
+            const cosFullPath = "M" + cosFull.join("L");
+
             // Tick marks for the circle's cardinal radii.
             const cardinals = [0, 90, 180, 270];
 
@@ -422,6 +435,26 @@ export default function UnitCircle({
                         </text>
                       </g>
                     ))}
+
+                    {/* faint full-range reference curves spanning 0..2π so the
+                        labeled axis is always filled; the bold traced paths
+                        overlay these up to the current θ */}
+                    <path
+                      d={cosFullPath}
+                      fill="none"
+                      stroke={withAlpha(cosColor, 0.18)}
+                      strokeWidth={1.5}
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    <path
+                      d={sinFullPath}
+                      fill="none"
+                      stroke={withAlpha(sinColor, 0.18)}
+                      strokeWidth={1.5}
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
 
                     {/* cosine trace */}
                     <path

@@ -1,7 +1,7 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { useMemo } from "react";
+import { animate as animateValue, motion, useMotionTemplate, useMotionValue } from "framer-motion";
+import { useEffect, useMemo } from "react";
 import {
   Figure,
   ResponsiveSvg,
@@ -202,7 +202,7 @@ export default function GaugeChart({
                       key={`zone-${i}`}
                       d={arcPath(cx, cy, r, a0, a1)}
                       fill="none"
-                      stroke={withAlpha(b.color, isActive ? 0.32 : 0.2)}
+                      stroke={withAlpha(b.color, isActive ? 0.45 : 0.32)}
                       strokeWidth={thickness}
                       strokeLinecap="butt"
                     />
@@ -363,33 +363,39 @@ function Needle({
   const hubR = clamp(r * 0.12, 8, 18);
   const target = inView || reduced ? toDeg : fromDeg;
 
+  // Animate the rotation as an SVG `transform` attribute pivoting explicitly
+  // about (cx, cy). A CSS `transform-origin` on an SVG <g> resolves against
+  // the element's bounding box / viewport rather than the gauge center, which
+  // detaches the needle from the hub and aims it wrongly; `rotate(deg cx cy)`
+  // always pivots about the supplied point.
+  const deg = useMotionValue(fromDeg);
+  const transform = useMotionTemplate`rotate(${deg} ${cx} ${cy})`;
+
+  useEffect(() => {
+    if (reduced) {
+      deg.set(target);
+      return;
+    }
+    deg.set(fromDeg);
+    const controls = animateValue(deg, target, {
+      duration: duration / 1000,
+      ease: [...EASE],
+      delay: 0.12,
+    });
+    return () => controls.stop();
+    // token re-triggers the sweep on replay; cx/cy/r recompute the pivot.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [target, reduced, duration, token, cx, cy]);
+
   return (
     <g>
-      {/* Translate to the hub so rotation pivots about (cx, cy): the CSS
-          transform-origin on an SVG <g> resolves against the needle's own
-          bounding box, not the gauge center, which would aim it wrongly.
-          The outer static group sets the pivot; the inner motion.g only
-          rotates, about its now-correct origin (0,0). */}
-      <g transform={`translate(${cx},${cy})`}>
-        <motion.g
-          style={{ transformOrigin: "0px 0px" }}
-          initial={{ rotate: fromDeg }}
-          animate={{ rotate: target }}
-          transition={{
-            duration: reduced ? 0 : duration / 1000,
-            ease: EASE,
-            delay: reduced ? 0 : 0.12,
-          }}
-          key={token}
-        >
-          {/* Needle points straight up at rotate=0; rotation maps to the value angle. */}
-          <path
-            d={`M 0 ${-len} L ${-hubR * 0.5} 0 L ${hubR * 0.5} 0 Z`}
-            fill={color}
-            filter={`url(#${shadowId})`}
-          />
-        </motion.g>
-      </g>
+      {/* Needle points straight up at rotate=0; rotation maps to the value angle. */}
+      <motion.path
+        d={`M ${cx} ${cy - len} L ${cx - hubR * 0.5} ${cy} L ${cx + hubR * 0.5} ${cy} Z`}
+        fill={color}
+        filter={`url(#${shadowId})`}
+        transform={transform}
+      />
       <circle cx={cx} cy={cy} r={hubR} fill={hubFill} stroke={hubStroke} strokeWidth={2.5} />
       <circle cx={cx} cy={cy} r={hubR * 0.4} fill={color} />
     </g>

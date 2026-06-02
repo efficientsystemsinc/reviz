@@ -169,13 +169,20 @@ function ribbonPath(r: number, s: SubGroup, t: SubGroup): string {
   const b0 = polarToCartesian(0, 0, r, deg(t.startAngle));
   const b1 = polarToCartesian(0, 0, r, deg(t.endAngle));
 
-  // Pull control points toward the centre for the classic chord curve.
+  // Pull control points toward (but not all the way to) the centre. Aiming
+  // each curve at the midpoint between the two bands rather than the exact
+  // origin keeps the chords from all funnelling through one point, which
+  // opens up the centre and stops the crossing zone reading as mud.
+  const c1x = (a1.x + b0.x) * 0.12;
+  const c1y = (a1.y + b0.y) * 0.12;
+  const c2x = (b1.x + a0.x) * 0.12;
+  const c2y = (b1.y + a0.y) * 0.12;
   return [
     `M${a0.x},${a0.y}`,
     `A${r},${r} 0 0,1 ${a1.x},${a1.y}`, // outer arc along source band
-    `Q0,0 ${b0.x},${b0.y}`, // curve through centre to target band start
+    `Q${c1x},${c1y} ${b0.x},${b0.y}`, // curve toward centre to target band start
     `A${r},${r} 0 0,1 ${b1.x},${b1.y}`, // outer arc along target band
-    `Q0,0 ${a0.x},${a0.y}`, // curve back through centre
+    `Q${c2x},${c2y} ${a0.x},${a0.y}`, // curve back toward centre
     "Z",
   ].join(" ");
 }
@@ -411,11 +418,11 @@ export default function ChordDiagram({
                           {showValues && (
                             <text
                               x={lp.x}
-                              y={lp.y + 11}
+                              y={lp.y + 12}
                               textAnchor={onRight ? "start" : "end"}
                               className="font-mono tabular-nums"
-                              fontSize={9}
-                              fill={active ? p.inkMuted : p.inkFaint}
+                              fontSize={10}
+                              fill={active ? p.inkMuted : withAlpha(p.inkMuted, 0.5)}
                             >
                               {formatCompact(groupTotal(i))}
                             </text>
@@ -429,22 +436,24 @@ export default function ChordDiagram({
                       value stays legible over the overlapping ribbons. */}
                   <g style={{ pointerEvents: "none" }}>
                     <circle
-                      r={clamp(arcInner * 0.6, 26, 80)}
-                      fill={withAlpha(p.surface, 0.82)}
+                      r={clamp(arcInner * 0.62, 28, 84)}
+                      fill={p.canvas}
+                      stroke={withAlpha(p.inkFaint, 0.25)}
+                      strokeWidth={1}
                     />
                     <text
                       textAnchor="middle"
-                      y={-5}
+                      y={-12}
                       className="font-mono uppercase"
                       fontSize={9}
                       letterSpacing={0.6}
-                      fill={p.inkFaint}
+                      fill={p.inkMuted}
                     >
                       Total flow
                     </text>
                     <text
                       textAnchor="middle"
-                      y={16}
+                      y={14}
                       className="font-sans tabular-nums"
                       fontSize={clamp(arcInner * 0.34, 16, 30)}
                       fontWeight={600}

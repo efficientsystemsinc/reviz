@@ -42,8 +42,8 @@ interface IntervalSpec {
 }
 
 const DEFAULT_POINTS: PointSpec[] = [
-  { x: -1, label: "−1", closed: true },
-  { x: 3, label: "3", closed: false },
+  { x: -1, closed: true },
+  { x: 3, closed: false },
 ];
 
 const DEFAULT_INTERVALS: IntervalSpec[] = [
@@ -522,8 +522,8 @@ export const meta: RevizMeta = {
         max: 5,
         step: 1,
         points: [
-          { x: -1, label: "−1", closed: true },
-          { x: 3, label: "3", closed: false },
+          { x: -1, closed: true },
+          { x: 3, closed: false },
         ],
         intervals: [{ from: -1, to: 3, closedLeft: true, closedRight: false, label: "[−1, 3)" }],
         caption: "Closed at −1, open at 3 — the half-open interval [−1, 3).",

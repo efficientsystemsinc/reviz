@@ -86,6 +86,14 @@ function fitPowerLaw(pts: Point[]): { a: number; b: number; r2: number } {
   return { a, b, r2 };
 }
 
+/** Compact scientific label for a power-of-10 axis tick, e.g. 1e18. */
+function fmtDecade(t: number): string {
+  if (!(t > 0) || !isFinite(t)) return "";
+  const e = Math.round(Math.log10(t));
+  if (e >= -3 && e <= 3) return formatCompact(t);
+  return `1e${e}`;
+}
+
 function fmtCoef(v: number): string {
   if (!isFinite(v)) return "—";
   const abs = Math.abs(v);
@@ -340,14 +348,14 @@ export default function ScalingLaw({
                       transition={{ duration: 0.5, delay: duration / 1000 * 0.7 }}
                     >
                       <foreignObject
-                        x={Math.min(annX + 8, inner.width - 168)}
-                        y={Math.max(2, annY - 52)}
-                        width={168}
+                        x={Math.min(annX + 28, inner.width - 200)}
+                        y={Math.max(2, annY - 56)}
+                        width={196}
                         height={48}
                         style={{ overflow: "visible" }}
                       >
-                        <div className="rounded-md border border-border bg-surface/90 px-2.5 py-1.5 shadow-float backdrop-blur-sm">
-                          <div className="font-mono text-[12px] tabular-nums text-ink">{equation}</div>
+                        <div className="inline-block rounded-md border border-border bg-surface/90 px-2.5 py-1.5 shadow-float backdrop-blur-sm">
+                          <div className="whitespace-nowrap font-mono text-[12px] tabular-nums text-ink">{equation}</div>
                           <div className="mt-0.5 font-mono text-[9.5px] uppercase tracking-label text-ink-faint">
                             {`R² = ${fit.r2.toFixed(3)}`}
                           </div>
@@ -377,7 +385,7 @@ export default function ScalingLaw({
                       className="font-mono"
                       style={{ fontSize: 10.5, letterSpacing: "0.04em" }}
                     >
-                      {formatCompact(t)}
+                      {fmtDecade(t)}
                     </text>
                   ))}
                   {xLabel && (

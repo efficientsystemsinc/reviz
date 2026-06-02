@@ -13,6 +13,7 @@ import {
   ResponsiveSvg,
   TooltipRow,
   formatCompact,
+  readableOn,
   useInView,
   usePalette,
   useReplay,
@@ -176,20 +177,30 @@ export default function BarChart({
                         onMouseLeave={() => setHover(null)}
                         key={`${token}-${i}`}
                       />
-                      {showValues && (
-                        <motion.text
-                          x={x + bw / 2}
-                          y={value(d.value) - 8}
-                          textAnchor="middle"
-                          fill={p.inkMuted}
-                          className="font-mono text-[10.5px] tabular-nums"
-                          initial={{ opacity: 0, y: value(d.value) - 8 }}
-                          animate={{ opacity: inView ? 1 : 0, y: value(d.value) - 8 }}
-                          transition={{ delay: i * 0.06 + duration / 1400 }}
-                        >
-                          {formatCompact(d.value)}
-                        </motion.text>
-                      )}
+                      {showValues &&
+                        (() => {
+                          // Place the value label cleanly ABOVE the bar on the
+                          // canvas; only if the bar tops out near the ceiling do
+                          // we drop it just inside, recoloured to read on the fill.
+                          const topY = value(d.value);
+                          const inside = topY < 20;
+                          const ly = inside ? topY + 15 : topY - 9;
+                          const lf = inside ? readableOn(dim ? p.surface : barFill) : p.inkMuted;
+                          return (
+                            <motion.text
+                              x={x + bw / 2}
+                              y={ly}
+                              textAnchor="middle"
+                              fill={lf}
+                              className="font-mono text-[10.5px] tabular-nums"
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: inView ? 1 : 0 }}
+                              transition={{ delay: i * 0.06 + duration / 1400 }}
+                            >
+                              {formatCompact(d.value)}
+                            </motion.text>
+                          );
+                        })()}
                     </g>
                   );
                 })}

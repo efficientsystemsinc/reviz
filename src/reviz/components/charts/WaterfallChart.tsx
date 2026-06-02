@@ -189,11 +189,11 @@ export default function WaterfallChart({
                         x2={x2}
                         y1={cy}
                         y2={cy}
-                        stroke={p.inkFaint}
+                        stroke={p.inkMuted}
                         strokeWidth={1}
                         strokeDasharray="3 3"
                         initial={{ opacity: 0 }}
-                        animate={{ opacity: inView ? 0.7 : 0 }}
+                        animate={{ opacity: inView ? 0.85 : 0 }}
                         transition={{
                           delay: reduced ? 0 : (i + 1) * (duration / 1000) * 0.55,
                           duration: reduced ? 0 : 0.28,
@@ -242,7 +242,8 @@ export default function WaterfallChart({
                         }}
                         onMouseLeave={() => setHover(null)}
                       />
-                      {/* Thin accent cap to echo the sign on totals/floats. */}
+                      {/* Thin accent cap to echo the sign on floats — glued to the
+                          bar's leading edge so it tracks the bar instead of floating. */}
                       {!s.isTotal && (
                         <motion.rect
                           x={x}
@@ -250,14 +251,15 @@ export default function WaterfallChart({
                           height={2}
                           rx={1}
                           fill={fill}
-                          initial={{ opacity: 0 }}
+                          initial={{ opacity: 0, y: zeroY }}
                           animate={{
                             opacity: inView ? 1 : 0,
                             y: inView ? (s.delta >= 0 ? yTop : yBot - 2) : zeroY,
                           }}
                           transition={{
-                            duration: reduced ? 0 : 0.3,
-                            delay: reduced ? 0 : i * (duration / 1000) * 0.55 + (duration / 1000) * 0.4,
+                            duration: reduced ? 0 : (duration / 1000) * 0.5,
+                            delay: reduced ? 0 : i * (duration / 1000) * 0.55,
+                            ease: [0.22, 1, 0.36, 1],
                           }}
                           style={{ filter: "brightness(0.82)" }}
                         />

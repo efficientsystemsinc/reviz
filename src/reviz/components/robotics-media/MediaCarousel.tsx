@@ -228,8 +228,12 @@ export default function MediaCarousel({
                   animate={{ opacity: inView ? 1 : 0, y: 0 }}
                   exit={{ opacity: 0, y: reduced ? 0 : -6 }}
                   transition={{ duration: dur, ease: [0.22, 1, 0.36, 1] }}
-                  className="max-w-[44ch] font-serif text-[14.5px] italic leading-snug"
-                  style={{ color: withAlpha(p.ink, 0.92) }}
+                  className="inline-block max-w-[44ch] rounded-md px-2 py-1 font-serif text-[14.5px] italic leading-snug"
+                  style={{
+                    color: withAlpha(p.ink, 0.92),
+                    backgroundColor: withAlpha(p.canvas, 0.82),
+                    backdropFilter: "blur(2px)",
+                  }}
                 >
                   {current.caption}
                 </motion.p>
@@ -314,7 +318,7 @@ export default function MediaCarousel({
                   type="button"
                   onClick={() => select(i, idx)}
                   className={cn(
-                    "inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-label outline-none transition-colors",
+                    "inline-flex items-center gap-1.5 font-mono text-[12px] uppercase tracking-label outline-none transition-colors",
                     isActive ? "text-ink" : "text-ink-muted hover:text-ink",
                   )}
                 >
@@ -324,7 +328,7 @@ export default function MediaCarousel({
                     style={{
                       backgroundColor: isActive
                         ? p.series[i % p.series.length]
-                        : withAlpha(p.inkFaint, 0.5),
+                        : p.inkMuted,
                     }}
                   />
                   {s.title || `Slide ${i + 1}`}

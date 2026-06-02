@@ -162,7 +162,7 @@ export default function Histogram({
   return (
     <Figure variant="plain" align="center" title={title} caption={caption} source={source}>
       <div ref={ref} className="relative">
-        <ResponsiveSvg aspect={16 / 10} margin={{ top: 22, right: 18, bottom: 46, left: 48 }}>
+        <ResponsiveSvg aspect={16 / 10} margin={{ top: 34, right: 18, bottom: 46, left: 48 }}>
           {({ inner, margin }) => {
             const x = scaleLinear().domain(domain).range([0, inner.width]);
             const y = scaleLinear().domain([0, yMax]).range([inner.height, 0]).nice();
@@ -251,7 +251,7 @@ export default function Histogram({
                     />
                     <text
                       x={medX - 6}
-                      y={-10}
+                      y={-22}
                       textAnchor="end"
                       fill={p.inkMuted}
                       className="font-mono"

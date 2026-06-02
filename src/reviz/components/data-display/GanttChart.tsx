@@ -537,21 +537,25 @@ function Inner({
                 style={{ pointerEvents: "none" }}
               />
             )}
-            {/* Label inside (only when the full name fits) or after the bar */}
-            <motion.text
-              x={fitsInside ? bx + 9 : bx + bw + 8}
-              y={cy}
-              dy="0.32em"
-              textAnchor="start"
-              fill={fitsInside ? readableOn(mix(fill, p.canvas, 0.12)) : p.inkMuted}
-              style={{ fontFamily: "var(--font-mono)", fontSize: 10, pointerEvents: "none" }}
-              initial={reduced ? false : { opacity: 0 }}
-              animate={{ opacity: inView ? 1 : reduced ? 1 : 0 }}
-              transition={{ duration: 0.4, delay: delay + baseDur * 0.55 }}
-            >
-              {checkPrefix}
-              {fitsInside ? r.name : truncate(r.name, 22)}
-            </motion.text>
+            {/* Label inside the bar (only when the full name fits).
+                When it doesn't fit we rely on the left-hand row label rather
+                than printing a redundant duplicate that crowds the connector. */}
+            {fitsInside && (
+              <motion.text
+                x={bx + 9}
+                y={cy}
+                dy="0.32em"
+                textAnchor="start"
+                fill={readableOn(mix(fill, p.canvas, 0.12))}
+                style={{ fontFamily: "var(--font-mono)", fontSize: 10, pointerEvents: "none" }}
+                initial={reduced ? false : { opacity: 0 }}
+                animate={{ opacity: inView ? 1 : reduced ? 1 : 0 }}
+                transition={{ duration: 0.4, delay: delay + baseDur * 0.55 }}
+              >
+                {checkPrefix}
+                {r.name}
+              </motion.text>
+            )}
           </g>
         );
       })}

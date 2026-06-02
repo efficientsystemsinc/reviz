@@ -145,7 +145,10 @@ export default function AnnotationBracket({
   const horiz = orientation === "horizontal";
   const W = rect.width;
   // The strip occupies the cross-axis lane; the bracket lives in the gutter.
-  const H = W > 0 ? (horiz ? Math.max(W / (16 / 7), 150) : Math.max(W / (16 / 11), 230)) : 0;
+  // Horizontal content (strip + bracket + label) needs a fixed cross-axis band,
+  // so the card height is content-fitted rather than scaled with width — a wide
+  // 16/7 box would leave the lower half empty. Vertical still scales with width.
+  const H = W > 0 ? (horiz ? Math.min(Math.max(W / (16 / 7), 150), 168) : Math.max(W / (16 / 11), 230)) : 0;
 
   // Normalize the span to fractions of the strip's primary axis.
   const lo = clamp(Math.min(from, to), 0, 100) / 100;
@@ -360,7 +363,7 @@ export const meta: RevizMeta = {
   badges: ["animated", "themed", "responsive"],
   exportName: "AnnotationBracket",
   sourcePath: "layout-annotation/AnnotationBracket",
-  aspect: 16 / 7,
+  aspect: 16 / 3.4,
   controls: [
     {
       key: "orientation",

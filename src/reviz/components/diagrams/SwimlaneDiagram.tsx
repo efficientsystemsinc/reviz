@@ -141,7 +141,7 @@ export default function SwimlaneDiagram({
   return (
     <Figure variant="plain" align="center" title={title} caption={caption} source={source}>
       <div ref={ref} className="relative">
-        <ResponsiveSvg aspect={aspect} margin={{ top: 16, right: 22, bottom: 16, left: 116 }}>
+        <ResponsiveSvg aspect={aspect} margin={{ top: 16, right: 16, bottom: 16, left: 108 }}>
           {({ inner, margin }) => {
             const W = inner.width;
             const H = inner.height;
@@ -149,8 +149,9 @@ export default function SwimlaneDiagram({
             const laneH = H / laneCount;
             const colW = W / colCount;
 
-            // Box footprint inside each (lane, column) cell.
-            const boxW = Math.max(64, Math.min(colW - 22, 150));
+            // Box footprint inside each (lane, column) cell. Boxes nearly fill
+            // their column (small gap) so step labels fit without truncation.
+            const boxW = Math.max(76, Math.min(colW - 6, 176));
             const boxH = Math.max(38, Math.min(laneH - 18, 58));
 
             const laneY = (li: number) => li * laneH;
@@ -164,10 +165,10 @@ export default function SwimlaneDiagram({
             const hw = boxW / 2;
             const hh = boxH / 2;
 
-            // Character budgets so labels stay inside the box (left pad 15 + right pad ~10).
-            const textW = Math.max(0, boxW - 25);
-            const labelMax = Math.max(4, Math.floor(textW / 7)); // font-sans 12
-            const detailMax = Math.max(4, Math.floor(textW / 5.1)); // font-mono 8.5
+            // Character budgets so labels stay inside the box (left pad 11 + right pad ~3).
+            const textW = Math.max(0, boxW - 14);
+            const labelMax = Math.max(4, Math.floor(textW / 5.2)); // font-sans 10.5
+            const detailMax = Math.max(4, Math.floor(textW / 4.4)); // font-mono 8
 
             return (
               <g transform={`translate(${margin.left},${margin.top})`}>
@@ -434,12 +435,12 @@ export default function SwimlaneDiagram({
                         </text>
                         {/* Label */}
                         <text
-                          x={x + 15}
+                          x={x + 11}
                           y={pos.cy - (s.detail ? 6 : 0)}
                           dy={s.detail ? 0 : "0.32em"}
                           textAnchor="start"
                           className="font-sans"
-                          fontSize={12}
+                          fontSize={10.5}
                           fontWeight={600}
                           fill={p.ink}
                         >
@@ -447,13 +448,13 @@ export default function SwimlaneDiagram({
                         </text>
                         {s.detail && (
                           <text
-                            x={x + 15}
+                            x={x + 11}
                             y={pos.cy + 10}
                             textAnchor="start"
                             className="font-mono"
-                            fontSize={8.5}
+                            fontSize={8}
                             letterSpacing="0.02em"
-                            fill={p.inkFaint}
+                            fill={p.inkMuted}
                           >
                             {truncate(s.detail, detailMax)}
                           </text>

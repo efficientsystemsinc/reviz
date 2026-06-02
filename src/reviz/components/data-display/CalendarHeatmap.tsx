@@ -317,23 +317,30 @@ function buildGrid(data: CalendarData, weeks: number) {
   const columns = w;
   const maxValue = Math.max(0, ...cells.filter((c) => !c.future).map((c) => c.value));
 
-  // Month labels: emit at the first column whose first day starts a new month.
-  // A ~3-char label needs roughly 3 columns of width; skip any month whose
-  // start column is too close to the previous label so they never collide.
-  const MONTH_MIN_COLS = 3;
+  // Month labels: anchor each label to the first column the month *dominates*
+  // (>=4 of its 7 days), not merely the column its 1st falls in. This keeps the
+  // label aligned to the visual block of the month and never skips a month that
+  // owns a full set of columns (e.g. December between Nov and Jan).
+  const colMonth = (col: number): number => {
+    const counts = new Array(12).fill(0);
+    for (let k = 0; k < 7; k++) {
+      const cell = cells[col * 7 + k];
+      if (cell) counts[new Date(cell.ms).getUTCMonth()] += 1;
+    }
+    let best = 0;
+    for (let m = 1; m < 12; m++) if (counts[m] > counts[best]) best = m;
+    return best;
+  };
   const monthSpans: { label: string; col: number }[] = [];
   let lastMonth = -1;
-  let lastLabelCol = -Infinity;
   for (let col = 0; col < columns; col++) {
-    const firstCell = cells[col * 7];
-    if (!firstCell) continue;
-    const month = new Date(firstCell.ms).getUTCMonth();
+    if (!cells[col * 7]) continue;
+    const month = colMonth(col);
     if (month !== lastMonth) {
-      // Avoid crowding the very last partial column and overlapping the prior label.
-      if ((col < columns - 1 || lastMonth === -1) && col - lastLabelCol >= MONTH_MIN_COLS) {
-        monthSpans.push({ label: MONTHS[month], col });
-        lastLabelCol = col;
-      }
+      // Suppress a single-column partial remnant at the very start so the first
+      // label isn't crowded against the left edge.
+      const partialStart = col === 0 && columns > 1 && colMonth(1) !== month;
+      if (!partialStart) monthSpans.push({ label: MONTHS[month], col });
       lastMonth = month;
     }
   }

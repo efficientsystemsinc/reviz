@@ -298,7 +298,7 @@ export default function ScatterPlot({
                 {/* R² badge for the trend */}
                 {fit && (
                   <motion.text
-                    x={inner.width}
+                    x={inner.width - 4}
                     y={6}
                     textAnchor="end"
                     fill={p.inkMuted}

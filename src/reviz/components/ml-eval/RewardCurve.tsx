@@ -319,8 +319,8 @@ export default function RewardCurve({
                       key={`cf-${i}`}
                       id={`${baseId}-stack-${i}`}
                       color={c.color}
-                      from={0.22}
-                      to={0.08}
+                      from={0.42}
+                      to={0.2}
                     />
                   ))}
                   <VerticalFade id={`${baseId}-band`} color={totalColor} from={0.16} to={0.03} />
@@ -362,8 +362,8 @@ export default function RewardCurve({
                           key={`stack-${comps[i].name}`}
                           d={stackArea(segs) ?? ""}
                           fill={`url(#${baseId}-stack-${i})`}
-                          stroke={withAlpha(comps[i].color, 0.4)}
-                          strokeWidth={0.75}
+                          stroke={withAlpha(comps[i].color, 0.8)}
+                          strokeWidth={1.25}
                           strokeLinejoin="round"
                         />
                       );

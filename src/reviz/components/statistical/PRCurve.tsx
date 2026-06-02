@@ -232,6 +232,12 @@ export default function PRCurve({
                     if (!d) return null;
                     // label sits where the contour passes recall = precision (its apex)
                     const apex = f / (2 - f);
+                    const labelText = `f1 ${f.toFixed(1)}`;
+                    const lx = x(apex) + 4;
+                    const ly = y(apex) - 4;
+                    // background plate so the label reads on top of the dashed iso-lines
+                    const plateW = labelText.length * 5.4 + 6;
+                    const plateH = 12;
                     return (
                       <g key={`iso-${f}`}>
                         <motion.path
@@ -245,18 +251,29 @@ export default function PRCurve({
                           transition={{ duration: reduced ? 0 : 0.5, delay: reduced ? 0 : 0.1 + i * 0.06 }}
                           key={`iso-${f}-${token}`}
                         />
-                        <motion.text
-                          x={x(apex) + 4}
-                          y={y(apex) - 4}
-                          fill={p.inkMuted}
-                          style={{ fontFamily: "var(--font-mono)", fontSize: 8.5, letterSpacing: "0.04em" }}
+                        <motion.g
                           initial={{ opacity: 0 }}
                           animate={{ opacity: inView ? 1 : 0 }}
                           transition={{ duration: reduced ? 0 : 0.5, delay: reduced ? 0 : 0.1 + i * 0.06 }}
                           key={`isolab-${f}-${token}`}
                         >
-                          {`f1 ${f.toFixed(1)}`}
-                        </motion.text>
+                          <rect
+                            x={lx - 3}
+                            y={ly - plateH + 2}
+                            width={plateW}
+                            height={plateH}
+                            rx={2}
+                            fill={withAlpha(p.surface, 0.85)}
+                          />
+                          <text
+                            x={lx}
+                            y={ly}
+                            fill={p.inkMuted}
+                            style={{ fontFamily: "var(--font-mono)", fontSize: 8.5, letterSpacing: "0.04em" }}
+                          >
+                            {labelText}
+                          </text>
+                        </motion.g>
                       </g>
                     );
                   })}

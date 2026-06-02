@@ -262,12 +262,13 @@ export default function DAGFlow({
             // Box footprint, clamped to leave breathing room between layers/lanes.
             const bw = horizontal ? W / layers - 22 : W / maxLane - 16;
             const bh = horizontal ? H / maxLane - 16 : H / layers - 20;
-            const boxW = Math.max(86, Math.min(168, bw));
+            const boxW = Math.max(86, Math.min(150, bw));
             const boxH = Math.max(46, Math.min(64, bh));
 
-            // Inset the primary (layer) axis so end layers sit fully inside.
+            // Inset the primary (layer) axis so end layers sit fully inside,
+            // with extra clearance so the first/last columns never crowd the frame.
             const primaryExtent = horizontal ? boxW : boxH;
-            const pad = primaryExtent / 2 + 6;
+            const pad = primaryExtent / 2 + 12;
             const primaryLen = (horizontal ? W : H) - pad * 2;
 
             const center = (n: LaidNode) => {
@@ -392,10 +393,6 @@ export default function DAGFlow({
                     const srcNode = laid.find((n) => n.id === e.source);
                     const delay = edgeDelay(srcNode ? srcNode.layer : 0);
 
-                    const mx = (x1 + x2) / 2;
-                    const my = (y1 + y2) / 2;
-                    const labelW = e.label ? e.label.length * 6.2 + 12 : 0;
-
                     return (
                       <g key={`${token}-edge-${i}`}>
                         <motion.path
@@ -431,38 +428,6 @@ export default function DAGFlow({
                             opacity: { duration: 0.2, delay },
                           }}
                         />
-                        {e.label && (
-                          <motion.g
-                            initial={{ opacity: reduced ? 1 : 0 }}
-                            animate={{
-                              opacity: inView ? (dim ? 0.25 : 1) : reduced ? 1 : 0,
-                            }}
-                            transition={{ duration: 0.3, delay: delay + layerStep * 0.45 }}
-                          >
-                            <rect
-                              x={mx - labelW / 2}
-                              y={my - 8}
-                              width={labelW}
-                              height={16}
-                              rx={4}
-                              fill={p.canvas}
-                              stroke={active ? withAlpha(fill, 0.4) : p.border}
-                              strokeWidth={1}
-                            />
-                            <text
-                              x={mx}
-                              y={my}
-                              dy="0.32em"
-                              textAnchor="middle"
-                              className="font-mono"
-                              fontSize={9}
-                              letterSpacing="0.03em"
-                              fill={active ? fill : p.inkMuted}
-                            >
-                              {e.label}
-                            </text>
-                          </motion.g>
-                        )}
                       </g>
                     );
                   })}
@@ -575,6 +540,73 @@ export default function DAGFlow({
                             {truncate(n.sublabel, horizontal ? 16 : 20)}
                           </text>
                         )}
+                      </motion.g>
+                    );
+                  })}
+                </g>
+
+                {/* Edge labels — drawn last so their plates sit above the
+                    node boxes and never get clipped by an adjacent column. */}
+                <g>
+                  {cleanEdges.map((e, i) => {
+                    if (!e.label) return null;
+                    const a = posById.get(e.source);
+                    const b = posById.get(e.target);
+                    if (!a || !b) return null;
+
+                    let x1 = a.cx;
+                    let y1 = a.cy;
+                    let x2 = b.cx;
+                    let y2 = b.cy;
+                    if (horizontal) {
+                      x1 = a.cx + hw;
+                      x2 = b.cx - hw;
+                    } else {
+                      y1 = a.cy + hh;
+                      y2 = b.cy - hh;
+                    }
+
+                    const active =
+                      hover != null && (e.source === hover || e.target === hover);
+                    const dim = hover != null && !active;
+                    const srcNode = laid.find((n) => n.id === e.source);
+                    const delay = edgeDelay(srcNode ? srcNode.layer : 0);
+
+                    const mx = (x1 + x2) / 2;
+                    const my = (y1 + y2) / 2;
+                    const labelW = e.label.length * 6.2 + 12;
+
+                    return (
+                      <motion.g
+                        key={`${token}-edge-label-${i}`}
+                        initial={{ opacity: reduced ? 1 : 0 }}
+                        animate={{
+                          opacity: inView ? (dim ? 0.25 : 1) : reduced ? 1 : 0,
+                        }}
+                        transition={{ duration: 0.3, delay: delay + layerStep * 0.45 }}
+                      >
+                        <rect
+                          x={mx - labelW / 2}
+                          y={my - 8}
+                          width={labelW}
+                          height={16}
+                          rx={4}
+                          fill={p.canvas}
+                          stroke={active ? withAlpha(fill, 0.4) : p.border}
+                          strokeWidth={1}
+                        />
+                        <text
+                          x={mx}
+                          y={my}
+                          dy="0.32em"
+                          textAnchor="middle"
+                          className="font-mono"
+                          fontSize={9}
+                          letterSpacing="0.03em"
+                          fill={active ? fill : p.inkMuted}
+                        >
+                          {e.label}
+                        </text>
                       </motion.g>
                     );
                   })}

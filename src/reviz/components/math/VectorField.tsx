@@ -255,7 +255,7 @@ export default function VectorField({
                         x={x(t)}
                         y={side + 15}
                         textAnchor="middle"
-                        fill={p.inkFaint}
+                        fill={p.inkMuted}
                         style={{
                           fontFamily: "var(--font-mono)",
                           fontSize: 10,
@@ -274,7 +274,7 @@ export default function VectorField({
                         y={y(t)}
                         dy="0.32em"
                         textAnchor="end"
-                        fill={p.inkFaint}
+                        fill={p.inkMuted}
                         style={{
                           fontFamily: "var(--font-mono)",
                           fontSize: 10,
@@ -373,21 +373,33 @@ export default function VectorField({
                   />
                 )}
 
-                {/* Axis labels. */}
-                <text
-                  x={side}
-                  y={(hasZeroY ? originY : side) - 7}
-                  textAnchor="end"
-                  fill={p.inkMuted}
-                  style={{
-                    fontFamily: "var(--font-mono)",
-                    fontSize: 10.5,
-                    letterSpacing: "0.14em",
-                    textTransform: "uppercase",
-                  }}
-                >
-                  x
-                </text>
+                {/* Axis labels — anchored to the frame edges (not the origin
+                    axis) so they stay clear of the dense central arrows, each
+                    on a small canvas plate to lift them off the quiver. */}
+                <g>
+                  <rect
+                    x={side - 15}
+                    y={side - 15}
+                    width={14}
+                    height={13}
+                    fill={p.surface}
+                    rx={2}
+                  />
+                  <text
+                    x={side - 4}
+                    y={side - 4}
+                    textAnchor="end"
+                    fill={p.inkMuted}
+                    style={{
+                      fontFamily: "var(--font-mono)",
+                      fontSize: 10.5,
+                      letterSpacing: "0.14em",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    x
+                  </text>
+                </g>
                 <text
                   transform={`translate(${-34}, ${side / 2}) rotate(-90)`}
                   textAnchor="middle"
@@ -449,7 +461,7 @@ export default function VectorField({
             F(x, y) = {FIELD_FORMULA[field]}
           </span>
           <span className="inline-flex items-center gap-1.5">
-            <span className="font-mono text-[9px] uppercase tracking-label text-ink-faint">
+            <span className="font-mono text-[10px] uppercase tracking-label text-ink-muted">
               low
             </span>
             <span
@@ -458,7 +470,7 @@ export default function VectorField({
                 background: `linear-gradient(90deg, ${lowColor}, ${highColor})`,
               }}
             />
-            <span className="font-mono text-[9px] uppercase tracking-label text-ink-faint">
+            <span className="font-mono text-[10px] uppercase tracking-label text-ink-muted">
               ‖F‖ high
             </span>
           </span>

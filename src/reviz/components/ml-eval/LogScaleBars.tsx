@@ -225,16 +225,36 @@ export default function LogScaleBars({
                       strokeWidth={1.5}
                       strokeDasharray="6 4"
                     />
-                    <text
-                      x={inner.width}
-                      y={baseY - 6}
-                      textAnchor="end"
-                      fill={p.accent}
-                      className="font-mono uppercase"
-                      style={{ fontSize: 9.5, letterSpacing: "0.1em" }}
-                    >
-                      {baselineLabel} · {fmtValue(baseline, unit)}
-                    </text>
+                    {(() => {
+                      const label = `${baselineLabel} · ${fmtValue(baseline, unit)}`;
+                      // Estimate label width (mono ~5.7px/char at 9.5px incl. tracking).
+                      const labelW = label.length * 5.7 + 8;
+                      const labelY = baseY - 6;
+                      return (
+                        <>
+                          {/* canvas plate so the label reads over any crossing bars */}
+                          <rect
+                            x={inner.width - labelW}
+                            y={labelY - 9}
+                            width={labelW}
+                            height={13}
+                            rx={2}
+                            fill={p.canvas}
+                            opacity={0.92}
+                          />
+                          <text
+                            x={inner.width}
+                            y={labelY}
+                            textAnchor="end"
+                            fill={p.accent}
+                            className="font-mono uppercase"
+                            style={{ fontSize: 9.5, letterSpacing: "0.1em" }}
+                          >
+                            {label}
+                          </text>
+                        </>
+                      );
+                    })()}
                   </motion.g>
                 )}
 

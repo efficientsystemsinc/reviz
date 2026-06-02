@@ -12,7 +12,6 @@ import {
   clamp,
   mix,
   round,
-  seededRandom,
   useInView,
   usePalette,
   usePrefersReducedMotion,
@@ -85,17 +84,7 @@ export default function HeatmapOverlay({
 
   // Heat color ramp: dim accent tint -> saturated accent, eased so the hottest
   // regions read instantly while faint attention stays legible.
-  const heatColor = (t: number) => mix(mix(p.surfaceAlt, accent, 0.55), accent, Math.pow(t, 0.45));
-
-  // A synthetic "scene" backdrop (used when no bgSrc is given): soft horizon
-  // bands plus a few schematic objects, deterministic via seeded noise.
-  const sceneBands = useMemo(() => {
-    const rng = seededRandom(7);
-    return Array.from({ length: 5 }, (_, i) => ({
-      t: i / 4,
-      jitter: rng() * 0.04,
-    }));
-  }, []);
+  const heatColor = (t: number) => mix(mix(p.surfaceAlt, accent, 0.78), accent, Math.pow(t, 0.55));
 
   const aspect = 1.32;
   const stepDelay = (r: number, c: number) => {
@@ -167,17 +156,6 @@ export default function HeatmapOverlay({
                   ) : (
                     <g>
                       <rect x={0} y={0} width={W} height={H} fill={`url(#${sceneId})`} />
-                      {/* horizon + soft scene bands */}
-                      {sceneBands.map((b, i) => (
-                        <rect
-                          key={`band-${i}`}
-                          x={0}
-                          y={H * (b.t * 0.7 + 0.1 + b.jitter)}
-                          width={W}
-                          height={Math.max(1, H * 0.012)}
-                          fill={withAlpha(p.borderStrong, 0.28)}
-                        />
-                      ))}
                       {/* schematic objects the policy might attend to */}
                       <rect
                         x={W * 0.16}
@@ -217,7 +195,7 @@ export default function HeatmapOverlay({
                       row.map((v, c) => {
                         const t = tOf(v);
                         if (t <= 0.001) return null;
-                        const cellOpacity = opacity * Math.pow(t, 0.6);
+                        const cellOpacity = opacity * Math.pow(t, 0.42);
                         return (
                           <motion.rect
                             key={`heat-${token}-${r}-${c}`}
@@ -302,9 +280,9 @@ export default function HeatmapOverlay({
                   <text
                     x={0}
                     y={-2}
-                    fill={p.inkMuted}
+                    fill={p.ink}
                     className="font-mono uppercase"
-                    style={{ fontSize: 12, letterSpacing: "0.12em" }}
+                    style={{ fontSize: 13, letterSpacing: "0.12em" }}
                   >
                     {legendLabel}
                   </text>
@@ -323,9 +301,9 @@ export default function HeatmapOverlay({
                   <text
                     x={W * 0.42}
                     y={12}
-                    fill={p.inkMuted}
+                    fill={p.ink}
                     className="font-mono tabular-nums"
-                    style={{ fontSize: 10.5 }}
+                    style={{ fontSize: 11.5 }}
                   >
                     {round(lo, 2)}
                   </text>
@@ -333,9 +311,9 @@ export default function HeatmapOverlay({
                     x={W}
                     y={12}
                     textAnchor="end"
-                    fill={p.inkMuted}
+                    fill={p.ink}
                     className="font-mono tabular-nums"
-                    style={{ fontSize: 10.5 }}
+                    style={{ fontSize: 11.5 }}
                   >
                     {round(hi, 2)}
                   </text>

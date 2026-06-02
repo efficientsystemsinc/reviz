@@ -405,29 +405,44 @@ export default function RadialTree({
                           filter={active ? `url(#${glowId})` : undefined}
                         />
 
-                        {/* root label sits centered */}
+                        {/* root label sits centered, lifted clear of the hub with
+                            a surface halo so it reads over the converging edges */}
                         {isRoot && (
                           <text
                             x={d.cx}
-                            y={d.cy - r - 8}
+                            y={d.cy - r - 11}
                             textAnchor="middle"
                             fill={p.ink}
+                            stroke={p.surface}
+                            strokeWidth={3.5}
                             className="font-mono uppercase tracking-label"
-                            style={{ fontSize: 10, fontWeight: 600 }}
+                            style={{
+                              fontSize: 11,
+                              fontWeight: 600,
+                              paintOrder: "stroke",
+                              strokeLinejoin: "round",
+                            }}
                           >
                             {truncate(d.node.name, 22)}
                           </text>
                         )}
 
-                        {/* leaf rim labels */}
+                        {/* leaf rim labels — surface halo keeps them legible over edges */}
                         {d.leaf && (
                           <text
                             transform={`translate(${lp.x},${lp.y}) rotate(${rot})`}
                             textAnchor={anchor}
                             dy="0.32em"
                             fill={active ? col : p.ink}
+                            stroke={p.surface}
+                            strokeWidth={2.5}
                             className="font-mono"
-                            style={{ fontSize: 9.5, fontWeight: active ? 600 : 500 }}
+                            style={{
+                              fontSize: 11,
+                              fontWeight: active ? 600 : 500,
+                              paintOrder: "stroke",
+                              strokeLinejoin: "round",
+                            }}
                           >
                             {truncate(d.node.name, 16)}
                           </text>
@@ -444,7 +459,7 @@ export default function RadialTree({
                             strokeWidth={3}
                             className="font-mono uppercase tracking-label"
                             style={{
-                              fontSize: 8.5,
+                              fontSize: 10,
                               fontWeight: 600,
                               letterSpacing: "0.04em",
                               paintOrder: "stroke",
@@ -486,7 +501,7 @@ export default function RadialTree({
         </FloatingTooltip>
 
         {/* legend */}
-        <div className="mt-1 flex flex-wrap items-center justify-center gap-x-5 gap-y-1.5 font-mono text-[10px] uppercase tracking-label text-ink-faint">
+        <div className="mt-1 flex flex-wrap items-center justify-center gap-x-5 gap-y-1.5 font-mono text-[10px] uppercase tracking-label text-ink-muted">
           <span className="inline-flex items-center gap-1.5">
             <span className="h-2 w-2 rounded-full" style={{ background: fill }} />
             root
@@ -502,7 +517,6 @@ export default function RadialTree({
             />
             leaf
           </span>
-          <span className="text-ink-faint/80">depth = radius · width = weight</span>
         </div>
 
         <div className="absolute right-0 top-0 opacity-0 transition-opacity group-hover/figure:opacity-100">

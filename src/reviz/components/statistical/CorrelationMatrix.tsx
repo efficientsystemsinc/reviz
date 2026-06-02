@@ -103,7 +103,7 @@ export default function CorrelationMatrix({
         <ResponsiveSvg
           aspect={aspect}
           margin={{
-            top: 20,
+            top: Math.min(72, 28 + labelChars * 4.6),
             right: 64,
             bottom: 24,
             left: Math.min(112, 26 + labelChars * 6.6),

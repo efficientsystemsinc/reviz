@@ -253,9 +253,9 @@ export default function LatencyPercentiles({
                       {gi === safeGroups.length - 1 && (
                         <text
                           x={inner.width}
-                          y={axisY + 13}
+                          y={axisY + 20}
                           textAnchor="end"
-                          fill={p.inkFaint}
+                          fill={p.inkMuted}
                           className="font-mono uppercase"
                           style={{ fontSize: 9, letterSpacing: "0.14em" }}
                         >
@@ -349,9 +349,19 @@ export default function LatencyPercentiles({
                               stroke={p.surface}
                               strokeWidth={1}
                             />
+                            {/* background plate so the label stays legible over
+                                gridlines and the row's own x-axis tick labels */}
+                            <rect
+                              x={px + labelDx - pc.label.length * 3 - 2}
+                              y={(labelAbove ? cy - half - 5 : cy + half - 4) - 8}
+                              width={pc.label.length * 6 + 4}
+                              height={12}
+                              fill={p.surface}
+                              rx={2}
+                            />
                             <text
                               x={px + labelDx}
-                              y={labelAbove ? cy - half - 5 : cy + half + 13}
+                              y={labelAbove ? cy - half - 5 : cy + half - 4}
                               textAnchor="middle"
                               fill={active ? p.ink : p.inkMuted}
                               className="font-mono"

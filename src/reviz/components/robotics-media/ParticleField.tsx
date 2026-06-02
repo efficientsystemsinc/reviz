@@ -290,6 +290,11 @@ export default function ParticleField({
                   const labelReveal = clamp((reveal - 0.55) / 0.4, 0, 1);
                   const active = hover === -1 - i;
 
+                  // Background plate so the callout reads against the busy field.
+                  const plateW = l.text.length * 7.4 + 12;
+                  const plateH = 18;
+                  const plateX = onLeft ? textX - plateW + 6 : textX - 6;
+
                   return (
                     <motion.g
                       key={`${token}-label-${i}`}
@@ -318,6 +323,14 @@ export default function ParticleField({
                         filter={`url(#${ids.glow})`}
                       />
                       <circle cx={axisX} cy={cy} r={1.4} fill={tint} />
+                      <rect
+                        x={plateX}
+                        y={cy - plateH / 2}
+                        width={plateW}
+                        height={plateH}
+                        rx={3}
+                        fill={withAlpha(p.canvas, 0.82)}
+                      />
                       <text
                         x={textX}
                         y={cy}

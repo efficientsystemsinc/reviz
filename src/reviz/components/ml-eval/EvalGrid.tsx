@@ -133,7 +133,7 @@ export default function EvalGrid({
           aspect={aspect}
           margin={{
             top: 38,
-            right: showSummaries ? 58 : 16,
+            right: showSummaries ? 64 : 16,
             bottom: showSummaries ? 40 : 18,
             left: Math.min(150, 22 + rowLabelChars * 6.6),
           }}
@@ -148,7 +148,7 @@ export default function EvalGrid({
             const fontSize = clamp(Math.min(cw, chh) * 0.26, 9, 14);
             const tickFont = clamp(Math.min(cw, 70) * 0.2, 8.5, 11.5);
             const summaryGap = 12;
-            const sw = 16; // width of the right summary strip cells
+            const sw = 24; // width of the right summary strip cells (holds a 2-digit avg)
 
             // Wave reveal: top-left fires first, sweeping to bottom-right.
             const orderDelay = (r: number, c: number) => {
@@ -338,6 +338,25 @@ export default function EvalGrid({
                             ease: [0.22, 1, 0.36, 1],
                           }}
                         />
+                        {chh - gap > 16 && (
+                          <motion.text
+                            x={sx + sw / 2}
+                            y={y + chh / 2}
+                            dy="0.34em"
+                            textAnchor="middle"
+                            fill={textOn(m)}
+                            className="font-mono tabular-nums"
+                            style={{ fontSize: Math.min(9.5, tickFont) }}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: inView ? (active ? 1 : 0.92) : 0 }}
+                            transition={{
+                              duration: reduced ? 0 : 0.45,
+                              delay: reduced ? 0 : (r / Math.max(1, nRows)) * (duration / 1000) * 0.6 + 0.34,
+                            }}
+                          >
+                            {round(m * 100, 0)}
+                          </motion.text>
+                        )}
                       </g>
                     );
                   })}
@@ -355,6 +374,19 @@ export default function EvalGrid({
                 )}
 
                 {/* Per-model (column) summary strip along the bottom */}
+                {showSummaries && (
+                  <text
+                    x={-10}
+                    y={gridH + summaryGap + sw / 2}
+                    dy="0.34em"
+                    textAnchor="end"
+                    fill={p.inkFaint}
+                    className="font-mono uppercase"
+                    style={{ fontSize: 8.5, letterSpacing: "0.1em" }}
+                  >
+                    avg
+                  </text>
+                )}
                 {showSummaries &&
                   colMean.map((m, c) => {
                     const x = c * cw;

@@ -291,6 +291,7 @@ export default function SystemTopology({
             const labelH = 15;
             const labelW = (s?: string) => (s ? s.length * 6.1 + 10 : 0);
             const labelPos = new Map<number, { mx: number; my: number }>();
+            const labelPad = 8;
             validLinks.forEach((l, i) => {
               if (!l.label) return;
               const a = posById.get(l.source);
@@ -298,7 +299,18 @@ export default function SystemTopology({
               if (!a || !b) return;
               const sameCol = Math.abs(a.cx - b.cx) < 1;
               const hw = boxW / 2;
-              const mx = sameCol ? a.cx + hw + 24 : (a.cx + b.cx) / 2;
+              let mx: number;
+              if (sameCol) {
+                mx = a.cx + hw + 24;
+              } else {
+                // Keep the pill inside the gap between the facing card edges so
+                // it never crosses a card; if the gap is too tight, center it.
+                const halfW = labelW(l.label) / 2;
+                const gapL = Math.min(a.cx, b.cx) + hw + labelPad + halfW;
+                const gapR = Math.max(a.cx, b.cx) - hw - labelPad - halfW;
+                const center = (a.cx + b.cx) / 2;
+                mx = gapL <= gapR ? Math.max(gapL, Math.min(center, gapR)) : center;
+              }
               const my = (a.cy + b.cy) / 2;
               labelPos.set(i, { mx, my });
             });

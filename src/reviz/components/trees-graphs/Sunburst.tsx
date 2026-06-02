@@ -293,10 +293,29 @@ export default function Sunburst({
                     // Curved label for wide-enough segments once revealed.
                     const reveal = (end - s.x0) / Math.max(1e-4, span);
                     const frac = span / TAU;
-                    const showLabel = frac > 0.05 && reveal > 0.85 && r.outer - r.inner > 13;
                     const lr = (r.inner + r.outer) / 2;
                     const lp = polarToCartesian(0, 0, lr, deg);
+                    const labelSize = clamp(band * 0.26, 7.5, 11);
                     const ink = readableOn(tint);
+
+                    // Outer-ring (leaf) segments label radially so even thin
+                    // wedges fit their full name along the band's depth rather
+                    // than its narrow arc — no truncation, no missing labels.
+                    const isLeaf = s.depth === maxDepth;
+                    const radialRoom = r.outer - r.inner - 8;
+                    const showRadial =
+                      isLeaf &&
+                      reveal > 0.85 &&
+                      span * lr > labelSize * 1.4 &&
+                      radialRoom > 16;
+                    const showLabel =
+                      !isLeaf && frac > 0.05 && reveal > 0.85 && r.outer - r.inner > 13;
+                    // Run text outward from the inner edge; flip on the left
+                    // half so it always reads upright.
+                    const onLeft = deg > 180;
+                    const radStart = polarToCartesian(0, 0, r.inner + 4, deg);
+                    const radRot = deg - 90 + (onLeft ? 180 : 0);
+                    const radAnchor = onLeft ? "end" : "start";
 
                     return (
                       <g
@@ -326,13 +345,28 @@ export default function Sunburst({
                             dy="0.32em"
                             textAnchor="middle"
                             className="font-mono uppercase"
-                            fontSize={clamp(band * 0.26, 7.5, 11)}
+                            fontSize={labelSize}
                             letterSpacing={0.4}
                             fill={dim ? p.inkFaint : ink}
                             opacity={dim ? 0.5 : 0.95}
                             style={{ pointerEvents: "none" }}
                           >
                             {clipLabel(s.label, span * lr)}
+                          </text>
+                        )}
+                        {showRadial && (
+                          <text
+                            transform={`translate(${radStart.x}, ${radStart.y}) rotate(${radRot})`}
+                            dy="0.32em"
+                            textAnchor={radAnchor}
+                            className="font-mono uppercase"
+                            fontSize={labelSize}
+                            letterSpacing={0.4}
+                            fill={dim ? p.inkFaint : ink}
+                            opacity={dim ? 0.5 : 0.95}
+                            style={{ pointerEvents: "none" }}
+                          >
+                            {clipLabel(s.label, radialRoom)}
                           </text>
                         )}
                       </g>

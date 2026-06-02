@@ -133,7 +133,7 @@ export default function MatrixDisplay({
               >
                 {hasRowLabels ? <span /> : null}
                 {Array.from({ length: cols }).map((_, c) => (
-                  <MonoLabel key={c} className="px-2 pb-1.5 text-center text-[10px]">
+                  <MonoLabel key={c} className="px-2.5 pb-1.5 text-right text-[10px]">
                     {colLabels[c] ?? ""}
                   </MonoLabel>
                 ))}
@@ -189,7 +189,7 @@ export default function MatrixDisplay({
                     return (
                       <motion.div
                         key={`${token}-${r}-${c}`}
-                        className="relative grid place-items-center rounded-[5px] tabular-nums"
+                        className="relative grid items-center justify-end rounded-[5px] px-2.5 tabular-nums"
                         style={{
                           minHeight: "2.1rem",
                           backgroundColor: bg,

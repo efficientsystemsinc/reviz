@@ -353,25 +353,44 @@ export default function ParametricCurve({
                 {/* Origin marker. */}
                 <circle cx={cx} cy={cy} r={2} fill={p.inkFaint} />
 
-                {/* Axis end labels. */}
-                <text
-                  x={x(1) + 4}
-                  y={cy - 5}
-                  textAnchor="end"
-                  fill={p.inkFaint}
-                  style={{ fontFamily: "var(--font-mono)", fontSize: 9.5, letterSpacing: "0.12em" }}
-                >
-                  x
-                </text>
-                <text
-                  x={cx + 5}
-                  y={y(1) + 9}
-                  textAnchor="start"
-                  fill={p.inkFaint}
-                  style={{ fontFamily: "var(--font-mono)", fontSize: 9.5, letterSpacing: "0.12em" }}
-                >
-                  y
-                </text>
+                {/* Axis end labels, kept inside the frame with a small plate so
+                    they read clearly against the curve. */}
+                <g aria-hidden>
+                  <rect
+                    x={x(1) - 17}
+                    y={cy - 16}
+                    width={13}
+                    height={12}
+                    rx={2}
+                    fill={p.surface}
+                  />
+                  <text
+                    x={x(1) - 6}
+                    y={cy - 6}
+                    textAnchor="end"
+                    fill={p.inkMuted}
+                    style={{ fontFamily: "var(--font-mono)", fontSize: 9.5, letterSpacing: "0.12em" }}
+                  >
+                    x
+                  </text>
+                  <rect
+                    x={cx + 4}
+                    y={y(1) + 1}
+                    width={13}
+                    height={12}
+                    rx={2}
+                    fill={p.surface}
+                  />
+                  <text
+                    x={cx + 9}
+                    y={y(1) + 10}
+                    textAnchor="start"
+                    fill={p.inkMuted}
+                    style={{ fontFamily: "var(--font-mono)", fontSize: 9.5, letterSpacing: "0.12em" }}
+                  >
+                    y
+                  </text>
+                </g>
               </g>
             );
           }}

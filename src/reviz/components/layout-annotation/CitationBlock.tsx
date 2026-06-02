@@ -183,12 +183,12 @@ export default function CitationBlock({
           transition={{ duration: reduced ? 0 : Math.min(0.7, dur), ease: [0.16, 1, 0.3, 1] }}
         />
 
-        {/* Decorative oversized quote glyph */}
+        {/* Decorative oversized quote glyph — kept tight in the corner so it sits clear of the text */}
         <Quote
           aria-hidden
-          className="pointer-events-none absolute -right-3 -top-3 h-20 w-20 -z-10"
+          className="pointer-events-none absolute -right-5 -top-5 h-16 w-16 -z-10"
           strokeWidth={1.25}
-          style={{ color: withAlpha(fill, 0.1) }}
+          style={{ color: withAlpha(fill, 0.07) }}
         />
 
         {inline ? (
@@ -220,9 +220,9 @@ export default function CitationBlock({
         ) : (
           /* ----- APA / block style: structured stacked fields ----- */
           <div className="flex flex-col gap-2">
-            {/* Authors · Year */}
+            {/* Authors · Year — pad the right so the line clears the corner quote glyph */}
             <motion.div
-              className="flex flex-wrap items-baseline gap-x-2 gap-y-1"
+              className="flex flex-wrap items-baseline gap-x-2 gap-y-1 pr-10"
               {...reveal(0)}
             >
               <span className="font-serif text-[14px] leading-snug text-ink">{authors}</span>
