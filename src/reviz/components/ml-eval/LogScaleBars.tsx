@@ -208,57 +208,8 @@ export default function LogScaleBars({
                   </text>
                 )}
 
-                {/* baseline annotation (dashed horizontal) */}
-                {showBaseline && (
-                  <motion.g
-                    initial={reduced ? false : { opacity: 0 }}
-                    animate={inView || reduced ? { opacity: 1 } : { opacity: 0 }}
-                    transition={{ duration: 0.4, delay: reduced ? 0 : duration / 1000 + 0.1 }}
-                    key={`base-${token}`}
-                  >
-                    <line
-                      x1={0}
-                      x2={inner.width}
-                      y1={baseY}
-                      y2={baseY}
-                      stroke={p.accent}
-                      strokeWidth={1.5}
-                      strokeDasharray="6 4"
-                    />
-                    {(() => {
-                      const label = `${baselineLabel} · ${fmtValue(baseline, unit)}`;
-                      // Estimate label width (mono ~5.7px/char at 9.5px incl. tracking).
-                      const labelW = label.length * 5.7 + 10;
-                      // Sit the label clearly ABOVE the dashed line so it never
-                      // crosses it; opaque plate guards against any bars behind.
-                      const labelY = baseY - 13;
-                      return (
-                        <>
-                          {/* opaque canvas plate so the label never reads through
-                              the dashed line or any crossing bars */}
-                          <rect
-                            x={inner.width - labelW}
-                            y={labelY - 10}
-                            width={labelW}
-                            height={15}
-                            rx={2}
-                            fill={p.canvas}
-                          />
-                          <text
-                            x={inner.width - 4}
-                            y={labelY}
-                            textAnchor="end"
-                            fill={p.accent}
-                            className="font-mono uppercase"
-                            style={{ fontSize: 9.5, letterSpacing: "0.1em" }}
-                          >
-                            {label}
-                          </text>
-                        </>
-                      );
-                    })()}
-                  </motion.g>
-                )}
+                {/* baseline annotation is rendered AFTER the bars (below) so it
+                    sits on top and the dashed line/label is never covered. */}
 
                 {/* grouped bars */}
                 {rows.map((r, gi) => {
@@ -351,6 +302,53 @@ export default function LogScaleBars({
                   strokeWidth={1}
                   shapeRendering="crispEdges"
                 />
+
+                {/* baseline annotation (dashed horizontal) — on top of the bars */}
+                {showBaseline && (
+                  <motion.g
+                    initial={reduced ? false : { opacity: 0 }}
+                    animate={inView || reduced ? { opacity: 1 } : { opacity: 0 }}
+                    transition={{ duration: 0.4, delay: reduced ? 0 : duration / 1000 + 0.1 }}
+                    key={`base-${token}`}
+                  >
+                    <line
+                      x1={0}
+                      x2={inner.width}
+                      y1={baseY}
+                      y2={baseY}
+                      stroke={p.accent}
+                      strokeWidth={1.5}
+                      strokeDasharray="6 4"
+                    />
+                    {(() => {
+                      const label = `${baselineLabel} · ${fmtValue(baseline, unit)}`;
+                      const labelW = label.length * 5.7 + 10;
+                      const labelY = baseY - 13;
+                      return (
+                        <>
+                          <rect
+                            x={inner.width - labelW}
+                            y={labelY - 10}
+                            width={labelW}
+                            height={15}
+                            rx={2}
+                            fill={p.canvas}
+                          />
+                          <text
+                            x={inner.width - 4}
+                            y={labelY}
+                            textAnchor="end"
+                            fill={p.accent}
+                            className="font-mono uppercase"
+                            style={{ fontSize: 9.5, letterSpacing: "0.1em" }}
+                          >
+                            {label}
+                          </text>
+                        </>
+                      );
+                    })()}
+                  </motion.g>
+                )}
 
                 {/* x-axis group labels */}
                 <g transform={`translate(0, ${inner.height})`}>
