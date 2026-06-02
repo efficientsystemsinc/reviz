@@ -24,13 +24,15 @@ export function useInView<T extends Element = HTMLDivElement>(
 ) {
   const { once = true, margin = "0px 0px -10% 0px", amount = 0.15 } = options;
   const ref = useRef<T | null>(null);
-  // Eager mode: a global escape hatch (set via ?eager=1 on the embed route) that
-  // forces entrance state to "visible" immediately. Used for headless visual QA,
-  // where IntersectionObserver is unreliable under Chrome's virtual-time budget.
-  const eager =
-    typeof window !== "undefined" && (window as unknown as { __REVIZ_EAGER__?: boolean }).__REVIZ_EAGER__;
-  const [inView, setInView] = useState(Boolean(eager));
+  // Initial state is ALWAYS false so server and client first render match (no
+  // hydration mismatch). The eager escape hatch (?eager=1 on the embed route,
+  // for headless visual QA) is read inside the effect — client-only — and flips
+  // the state immediately after mount, so the entrance still plays but SSR stays
+  // consistent.
+  const [inView, setInView] = useState(false);
   useEffect(() => {
+    const eager =
+      typeof window !== "undefined" && (window as unknown as { __REVIZ_EAGER__?: boolean }).__REVIZ_EAGER__;
     if (eager) {
       setInView(true);
       return;
@@ -50,7 +52,7 @@ export function useInView<T extends Element = HTMLDivElement>(
     );
     obs.observe(el);
     return () => obs.disconnect();
-  }, [once, margin, amount, eager]);
+  }, [once, margin, amount]);
   return [ref, inView] as const;
 }
 
